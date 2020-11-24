@@ -23,10 +23,11 @@ pip install -r requirements.txt
 ```
 Run the wiki
 ```
+export FLASK_APP=wiki.py
 flask run --host=0.0.0.0
 ```
 
-Now visit localhost:5000 and you will see the wiki.
+Now visit localhost:5000 and you will see the wiki. With the 0.0.0.0. option it will show up everywhere on the network.
 
 
 
