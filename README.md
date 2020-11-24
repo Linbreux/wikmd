@@ -2,7 +2,7 @@
 ![preview](static/images/wiki.png)
 
 ## Installation
-! It's only tested on linux based systems.
+! It's tested on windows and linux based systems.
 ! Only for personal use, can have security issues.
 
 Clone te repository
