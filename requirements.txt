@@ -1,0 +1,8 @@
+click==7.1.2
+Flask==1.1.2
+itsdangerous==1.1.0
+Jinja2==2.11.2
+Markdown==3.3.3
+MarkupSafe==1.1.1
+pypandoc==1.5
+Werkzeug==1.0.1
