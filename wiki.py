@@ -22,7 +22,7 @@ def search():
             continue
         if fil == "wiki/images":
             continue
-        with open('wiki/' + fil) as f:
+        with open('wiki/' + fil, encoding="utf8") as f:
             fin = f.read()
             try:
                 if re.search(search_term,fil, re.IGNORECASE) or re.search(search_term,fin, re.IGNORECASE) != None:
