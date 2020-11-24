@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Wiki</title>
+        <!-- CSS -->
+         <!-- Required meta tags -->
+         <meta charset="utf-8">
+         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <style>
+
+        blockquote {  padding: 0 50px;  margin-left: 0;  border-left: 4px solid orange;  } 
+
+        pre { background-color: #f6f8fa; padding: 16px; border-radius:6px;}
+
+        code, pre{ font-family: monospace; font-size:14px}
+
+        img {max-width: 100%}
+
+        .container-fluid{padding-right:0px; padding-left:0px}
+
+        </style>
+        </head>
+    <body>
+        <div class="container-fluid">
+              <nav class="navbar navbar-dark bg-dark navbar-expand-lg">
+                  <a class="navbar-brand" href="/">Wiki</a> 
+                  <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item ">
+                        <a class="nav-link" href="/add_new">Add new page</a>
+                    </li>
+                    
+                  </ul>
+                  <form class="form-inline" method="POST">
+                      <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name="ss">
+                      <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                  </form>
+              </nav>
+              <div class="mt-3 container">
+              {%block content%}
+
+              {%endblock%}
+              </div>
+        </div>
+        <!-- Footer -->
+        <footer class="page-footer font-small blue">
+        <!-- Copyright -->
+        <div class="footer-copyright text-center py-3" 2020 Copyright:
+        <a href="#">Wiki</a>
+        </div>
+        <!-- Copyright -->
+
+        </footer>
+        <!-- Footer -->
+    </body>
+</html>

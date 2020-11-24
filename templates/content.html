@@ -1,0 +1,8 @@
+{% extends 'base.html'%}
+
+{%block content%}
+<h1>{{title}}</h1><hr>
+{{info|safe}}
+
+<a href="edit/{{title}}">Edit page</a>
+{%endblock%}
