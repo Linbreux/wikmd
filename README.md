@@ -63,7 +63,7 @@ Open the wiki folder of your instance.
 
 |- static  
 |- templates  
-|- **wiki** $\leftarrow$ This folder  
+|- **wiki** <--This folder  
 |- wiki.py  
 
 In this folder all the markdownfiles are listed. Editing the files will be visible in the web-version.  
