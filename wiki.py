@@ -79,7 +79,7 @@ def edit_homepage():
 
         return redirect(url_for("file_page",file_page = request.form['PN']))
     else:
-        with open('wiki/homepage.md', 'r') as f:
+        with open('wiki/homepage.md', 'r', encoding="utf-8") as f:
             content = f.read()
         return render_template("new.html", content = content, title = "homepage")
 
@@ -93,7 +93,7 @@ def edit(page):
         save()
         return redirect(url_for("file_page",file_page = name))
     else:
-        with open('wiki/'+page+'.md', 'r') as f:
+        with open('wiki/'+page+'.md', 'r', encoding="utf-8") as f:
             content = f.read()
         return render_template("new.html", content = content, title = page)
 
