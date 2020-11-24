@@ -1,5 +1,4 @@
 # wikmd
-A filebased wiki that uses markdown
 ![preview](static/images/wiki.png)
 
 # What is it?
