@@ -26,6 +26,10 @@ Run the wiki
 export FLASK_APP=wiki.py
 flask run --host=0.0.0.0
 ```
+Maybe you need to install pandoc on your system before this works.
+```
+sudo apt-get update && sudo apt-get install pandoc
+```
 
 Now visit localhost:5000 and you will see the wiki. With the 0.0.0.0. option it will show up everywhere on the network.
 
