@@ -10,7 +10,9 @@ Clone te repository
 git clone https://github.com/brechtgijsens/wikmd.git
 ```
 cd in wikimd
-```cd wikimd```
+```
+cd wikimd
+```
 
 Create a virtual env and activate it(optional)
 ```
@@ -29,7 +31,24 @@ flask run --host=0.0.0.0
 
 Now visit localhost:5000 and you will see the wiki. With the 0.0.0.0. option it will show up everywhere on the network.
 
+## Docker install
 
+### Build docker
+```
+docker build -t wiki-md:latest .
+```
+### Run Docker
+
+You may need to create wiki/data in your homefolder or you can change it if you want another place.
+
+```
+sudo docker run -d -p 5000:5000 -v ~/wiki/data:/app/wiki wiki-md
+```
+If you would like to have the default files inside your instance, you should copy the wiki files to ~/wiki/data in this case.
+
+```
+cp wikmd/wiki/* ~/wiki/data/
+```
 
 ## What is it?
 It’s a file-based wiki that aims to simplicity. The documents are completely written in Markdown which is an easy markup language that you can learn in 60 sec.
