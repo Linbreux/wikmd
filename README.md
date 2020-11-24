@@ -34,7 +34,6 @@ It's possible to use latex syntax inside your markdown because the markdown is f
 ```
 ![](https://i.ibb.co/Dzp0SfC/download.jpg){width="50%"}
 ```
-![](https://i.ibb.co/Dzp0SfC/download.jpg){width="50%"}
 
 ## Image references
 ```
@@ -43,9 +42,6 @@ It's possible to use latex syntax inside your markdown because the markdown is f
 Inside picture \ref{landscape picture} you can see a nice mountain.
 
 ```
-![picture \label{landscape picture}](https://i.ibb.co/Dzp0SfC/download.jpg){width="50%"}
-
-Clickable reference in picture \ref{landscape picture}.
 
 ## Math
 ```
@@ -56,19 +52,10 @@ y(x) &= \int_0^\infty x^{2n} e^{-a x^2}\,dx\\
 &= \frac{(2n)!}{n! 2^{2n+1}} \sqrt{\frac{\pi}{a^{2n+1}}}
 \end{align}
 ```
-\begin{align}
-y(x) &= \int_0^\infty x^{2n} e^{-a x^2}\,dx\\
-&= \frac{2n-1}{2a} \int_0^\infty x^{2(n-1)} e^{-a x^2}\,dx\\
-&= \frac{(2n-1)!!}{2^{n+1}} \sqrt{\frac{\pi}{a^{2n+1}}}\\
-&= \frac{(2n)!}{n! 2^{2n+1}} \sqrt{\frac{\pi}{a^{2n+1}}}
-\end{align}
 
 ```
 You can also use $inline$ math to show $a=2$ and $b=8$
 ```
-You can also use $inline$ math to show $a=2$ and $b=8$
-
-And many other latex functions.
 
 # Converting the files
 
