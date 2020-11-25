@@ -76,7 +76,7 @@ def index():
     else:
         html = ""
         try:
-            html = pypandoc.convert_file("wiki/"+ file_page +".md","html5",format='md', extra_args=["--mathjax"], filters=['pandoc-xnos'])
+            html = pypandoc.convert_file("wiki/homepage.md","html5",format='md', extra_args=["--mathjax"], filters=['pandoc-xnos'])
 
         except:
             None
