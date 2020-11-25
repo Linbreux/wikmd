@@ -60,9 +60,9 @@ def file_page(file_page):
         html =""
         mod = ""
         try:
-            latex = pypandoc.convert_file("wiki/" + file_page + ".md", "tex", format="md")
-            html = pypandoc.convert_text(latex,"html5",format='tex', extra_args=["--mathjax"])
-            #html = pypandoc.convert_file("wiki/"+ file_page +".md","html5",format='md', extra_args=["--mathjax"])
+            #latex = pypandoc.convert_file("wiki/" + file_page + ".md", "tex", format="md")
+            #html = pypandoc.convert_text(latex,"html5",format='tex', extra_args=["--mathjax"])
+            html = pypandoc.convert_file("wiki/"+ file_page +".md","html5",format='md', extra_args=["--mathjax"], filters=['pandoc-xnos'])
             mod = "Last modified: %s" % time.ctime(os.path.getmtime("wiki/"+file_page + ".md"))
         except:
             None
@@ -76,9 +76,8 @@ def index():
     else:
         html = ""
         try:
-            latex = pypandoc.convert_file("wiki/homepage.md", "tex", format="md")
-            html = pypandoc.convert_text(latex,"html5",format='tex', extra_args=["--mathjax"])
-            #tml = pypandoc.convert_file("wiki/homepage.md","html5", extra_args=["--mathjax"])
+            html = pypandoc.convert_file("wiki/"+ file_page +".md","html5",format='md', extra_args=["--mathjax"], filters=['pandoc-xnos'])
+
         except:
             None
         gitcom()
