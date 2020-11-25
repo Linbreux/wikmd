@@ -7,7 +7,7 @@
 
 Clone te repository
 ```
-git clone https://github.com/brechtgijsens/wikmd.git
+git clone https://github.com/Linbreux/wikmd.git
 ```
 cd in wikimd
 ```
