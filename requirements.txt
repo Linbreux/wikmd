@@ -6,6 +6,13 @@ itsdangerous==1.1.0
 Jinja2==2.11.2
 Markdown==3.3.3
 MarkupSafe==1.1.1
+pandoc-eqnos==2.4.0
+pandoc-fignos==2.4.0
+pandoc-secnos==2.2.2
+pandoc-tablenos==2.3.0
+pandoc-xnos==2.5.0
+pandocfilters==1.4.3
+psutil==5.7.3
 pypandoc==1.5
 smmap==3.0.4
 Werkzeug==1.0.1
