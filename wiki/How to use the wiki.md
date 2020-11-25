@@ -1,4 +1,4 @@
-# Simple markdown
+# Simple markdown test
 
 To see al the markdown syntax you can visit the [markdown cheatsheet](/Markdown%20cheatsheet)
 
