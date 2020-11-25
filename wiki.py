@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request,redirect, url_for
 import datetime
+import time
 import git
 import pypandoc
 import markdown
@@ -57,13 +58,15 @@ def file_page(file_page):
         return search()
     else:
         html =""
+        mod = ""
         try:
             latex = pypandoc.convert_file("wiki/" + file_page + ".md", "tex", format="md")
             html = pypandoc.convert_text(latex,"html5",format='tex', extra_args=["--mathjax"])
             #html = pypandoc.convert_file("wiki/"+ file_page +".md","html5",format='md', extra_args=["--mathjax"])
+            mod = "Last modified: %s" % time.ctime(os.path.getmtime("wiki/"+file_page + ".md"))
         except:
             None
-        return render_template('content.html', title=file_page, info=html)
+        return render_template('content.html', title=file_page, info=html, modif=mod)
 
 
 @app.route('/', methods = ['POST','GET'])
