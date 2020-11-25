@@ -1,4 +1,6 @@
 from flask import Flask, render_template, request,redirect, url_for
+import datetime
+import git
 import pypandoc
 import markdown
 import os
@@ -11,6 +13,7 @@ def save():
     content = request.form['CT']
     with open('wiki/' + page_name + '.md', 'w') as f:
         f.write(content)
+    gitcom()
 
 def search():
     search_term = request.form['ss']
@@ -32,6 +35,21 @@ def search():
             except:
                 None
     return render_template('search.html', zoekterm=found )
+
+def gitcom():
+    try:
+        repo = git.Repo.init("wiki/")
+        repo.git.checkout("-b","master")
+    except:
+        None
+    repo.git.add("--all")
+    date = datetime.datetime.now()
+    commit = "Commit add " + str(date)
+    try:
+        repo.git.commit('-m', commit)
+    except:
+        print("nothing to commit")
+
 
 @app.route('/<file_page>', methods = ['POST', 'GET'])
 def file_page(file_page):
@@ -60,6 +78,7 @@ def index():
             #tml = pypandoc.convert_file("wiki/homepage.md","html5", extra_args=["--mathjax"])
         except:
             None
+        gitcom()
         return render_template('index.html', homepage = html)
 
 @app.route('/add_new', methods = ['POST','GET'])
@@ -99,6 +118,7 @@ def edit(page):
 
 
 if __name__ == '__main__':
-   app.run()
+    gitcom()
+    app.run()
 
 
