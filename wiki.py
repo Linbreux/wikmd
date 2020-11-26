@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request,redirect, url_for
+from flask import Flask, render_template, request,redirect, url_for, flash, send_from_directory
+from werkzeug.utils import secure_filename
 import datetime
 import time
 import git
@@ -7,7 +8,11 @@ import markdown
 import os
 import re
 
+UPLOAD_FOLDER = 'wiki/img'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
 app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def save():
     page_name = request.form['PN']
@@ -118,6 +123,36 @@ def edit(page):
             content = f.read()
         return render_template("new.html", content = content, title = page)
 
+@app.route('/img', methods=['POST', 'DELETE'])
+def upload_file():
+    # Upload image when POST
+    if request.method == "POST":
+        file_names=[]
+        for key in request.files:
+            file = request.files[key]
+            filename = secure_filename(file.filename)
+            file_names.append(filename)
+            try:
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            except:
+                print('save fail: ' + os.path.join(upload_dir,  filename))
+        return filename
+
+    # DELETE when DELETE
+    if request.method =="DELETE":
+        # request data is in format "b'nameoffile.png" decode by utf-8
+        filename = request.data.decode("utf-8")
+        print(str(filename))
+        try:
+            os.remove((os.path.join(app.config['UPLOAD_FOLDER'], filename)))
+        except:
+            print("Could not remove")
+        return 'OK'
+
+@app.route('/img/<path:filename>')
+def display_image(filename):
+    #print('display_image filename: ' + filename)
+    return send_from_directory(UPLOAD_FOLDER,filename,as_attachment=False)
 
 if __name__ == '__main__':
     gitcom()

@@ -1,9 +1,15 @@
 # wikmd
 ![preview](static/images/wiki.png)
 
+## New features
+
+- 26/11/20 
+    - added git support
+    - added image support
+
 ## Installation
 ! It's tested on windows and linux based systems.
-! Only for personal use, can have security issues.
+! Runs on flask server
 
 Clone te repository
 ```
