@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request,redirect, url_for, flash, send_from_directory
 from werkzeug.utils import secure_filename
+from random import randint
 import datetime
 import time
 import git
@@ -131,11 +132,17 @@ def upload_file():
         for key in request.files:
             file = request.files[key]
             filename = secure_filename(file.filename)
+            for fil in os.listdir('wiki/img'):
+                if fil == filename:
+                    print("duplicate!")
+                    filename, file_extension = os.path.splitext(filename)
+                    filename=filename+str(randint(1,9999999))+file_extension
+
             file_names.append(filename)
             try:
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             except:
-                print('save fail: ' + os.path.join(upload_dir,  filename))
+                print('save fail ')
         return filename
 
     # DELETE when DELETE
