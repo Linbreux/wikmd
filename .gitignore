@@ -136,3 +136,14 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+wiki/*
+wiki/src/*
+
+!wiki/Features.md
+!wiki/How to use the wiki.md
+!wiki/Markdown cheatsheet.md
+!wiki/Using the version control system.md
+!wiki/homepage.md
+!wiki/src
+
