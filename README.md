@@ -1,5 +1,5 @@
 # wikmd
-![preview](static/images/wiki.png)
+![preview](static/images/wiki.gif)
 
 ## New features
 
