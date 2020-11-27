@@ -83,9 +83,9 @@ $$x_{1,2} = \frac{-b ± \sqrt{b^2 - 4 a c}}{2a}$$
 
 The homepage is default the "homepage.md" file, this can't be changed. If this file doesn't exist create it in de wiki folder.
 
-## Static images
+## Uploaded images
 
-If you have images that you don't want to be available on the internet, you can put them inside the folder **"static/images/"** for example **"testfile.png"**, now you can link to **"/static/images/testfile.png"**
+If you have images that you don't want to be available on the internet, you can put them inside the folder **"wiki/img/"** for example **"testfile.png"**, now you can link to **"/wiki/img/testfile.png"**
 
 ## Latex
 
@@ -98,9 +98,9 @@ It's possible to use latex syntax inside your markdown because the markdown is f
 
 ### Image references
 ```
-![\label{test}](https://i.ibb.co/Dzp0SfC/download.jpg){width="50%"}
+![Nice mountain](https://i.ibb.co/Dzp0SfC/download.jpg){#fig:mountain width="50%"}
 
-Inside picture \ref{landscape picture} you can see a nice mountain.
+Inside picture @fig:mountain you can see a nice mountain.
 
 ```
 
