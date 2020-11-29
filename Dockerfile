@@ -13,6 +13,9 @@ RUN pip3 install -r requirements.txt
 
 COPY . /app
 
+RUN git config --global user.email "user@wikmd.com"
+RUN git config --global user.name "user"
+
 ENTRYPOINT [ "python3"  ]
 
 CMD [ "wiki.py"  ]
