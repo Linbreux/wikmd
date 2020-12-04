@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request,redirect, url_for, flash, send_from_directory
+import logging
 from werkzeug.utils import secure_filename
 from random import randint
 import datetime
@@ -70,8 +71,8 @@ def file_page(file_page):
             #html = pypandoc.convert_text(latex,"html5",format='tex', extra_args=["--mathjax"])
             html = pypandoc.convert_file("wiki/"+ file_page +".md","html5",format='md', extra_args=["--mathjax"], filters=['pandoc-xnos'])
             mod = "Last modified: %s" % time.ctime(os.path.getmtime("wiki/"+file_page + ".md"))
-        except:
-            None
+        except Exception as a:
+            app.logger.info(a)
         return render_template('content.html', title=file_page, info=html, modif=mod)
 
 
@@ -81,11 +82,13 @@ def index():
       return search()
     else:
         html = ""
+        print("homepage displaying")
         try:
             html = pypandoc.convert_file("wiki/homepage.md","html5",format='md', extra_args=["--mathjax"], filters=['pandoc-xnos'])
 
-        except:
-            None
+        except Exception as a:
+            app.logger.error(a)
+
         gitcom()
         return render_template('index.html', homepage = html)
 
