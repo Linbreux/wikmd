@@ -1,6 +1,17 @@
 # wikmd
 ![preview](static/images/wiki.gif)
 
+## What is it?
+It’s a file-based wiki that aims to simplicity. The documents are completely written in Markdown which is an easy markup language that you can learn in 60 sec.
+
+## Why markdown?
+If you compare markdown to a WYSIWYG editor it may look less easy to use but the opposite is true. When writing markdown you don’t get to see the result directly which is the only downside. Their are more pros: - Easy to process to other file formats - Scalable, it reformats for the perfect display width
+
+## How does it work?
+Instead of storing the data in a database I chose to have a file-based system. The advantage of this system is that every file is directly readable inside a terminal etc. Also when you have direct access to the system you can export the files to anything you like.
+
+To view the documents in the browser, the document is converted to html.
+
 ## New features
 
 - 26/11/20 
@@ -15,9 +26,9 @@ Clone te repository
 ```
 git clone https://github.com/Linbreux/wikmd.git
 ```
-cd in wikimd
+cd in wikmd
 ```
-cd wikimd
+cd wikmd
 ```
 
 Create a virtual env and activate it(optional)
@@ -61,17 +72,6 @@ Also highly recommended is to create a folder 'img' inside 'wiki/'
 cp wikmd/wiki/* ~/wiki/data/
 mkdir ~/wiki/img
 ```
-
-## What is it?
-It’s a file-based wiki that aims to simplicity. The documents are completely written in Markdown which is an easy markup language that you can learn in 60 sec.
-
-## Why markdown?
-If you compare markdown to a WYSIWYG editor it may look less easy to use but the opposite is true. When writing markdown you don’t get to see the result directly which is the only downside. Their are more pros: - Easy to process to other file formats - Scalable, it reformats for the perfect display width
-
-## How does it work?
-Instead of storing the data in a database I chose to have a file-based system. The advantage of this system is that every file is directly readable inside a terminal etc. Also when you have direct access to the system you can export the files to anything you like.
-
-To view the documents in the browser, the document is converted to html.
 
 ### Image support
 ![](https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Markdown-mark.svg/208px-Markdown-mark.svg.png)
