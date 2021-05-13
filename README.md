@@ -52,6 +52,8 @@ sudo apt-get update && sudo apt-get install pandoc
 
 Now visit localhost:5000 and you will see the wiki. With the 0.0.0.0. option it will show up everywhere on the network.
 
+If there are problems feel free to open an github issue you could post the output of wikmd.log to it.
+
 ## Docker install
 
 ### Build docker
