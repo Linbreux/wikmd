@@ -17,6 +17,9 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
+
 def save():
     page_name = request.form['PN']
     content = request.form['CT']
