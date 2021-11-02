@@ -12,11 +12,13 @@ Instead of storing the data in a database I chose to have a file-based system. T
 
 To view the documents in the browser, the document is converted to html.
 
-## New features
-
-- 26/11/20 
-    - added git support
-    - added image support
+## Features
+- git support (version control)
+- image support including sizing and referencing
+- math/latex
+- code highlight
+- file searching
+- file based
 
 ## Installation
 ! It's tested on windows and linux based systems.
