@@ -1,7 +1,7 @@
 {% extends 'base.html'%}
 
 {%block content%}
-<h1>Found {{zoekterm|length}} result(s)
+<h2>Found {{zoekterm|length}} result(s)</h2>
     <ul>
 {%for i in zoekterm%}
 <li><a href="{{i.url}}">{{i.doc}}<a></li>
