@@ -1,0 +1,18 @@
+[Unit]
+Description=Wiki engine
+
+[Service]
+Restart=always
+ExecStartPre=-/usr/bin/podman rm -f wiki-ng
+ExecStart=/usr/bin/podman run \
+  --name=wiki-ng \
+  -p 26008:5000 \
+  -v /var/storage/wastebox/tiredsysadmin.cc/wiki/repo:/app/wiki \
+  --restart unless-stopped \
+  repo.rcmd.space/wiki-ng:latest
+ExecStop=/usr/bin/podman stop -t 2 wiki-ng
+ExecStopPost=-/usr/bin/podman rm -f wiki-ng
+ExecStopPost=/bin/sleep 2
+
+[Install]
+WantedBy=default.target

@@ -1,7 +1,6 @@
-FROM ubuntu:18.04
+FROM alpine:latest
 
-RUN apt-get update -y && \
-    apt-get install -y python3-pip python3-dev pandoc git
+RUN apk add --no-cache py3-pip python3-dev git
 
 COPY ./requirements.txt /app/requirements.txt
 
@@ -13,10 +12,9 @@ RUN pip3 install -r requirements.txt
 
 COPY . /app
 
-RUN git config --global user.email "user@wikmd.com"
-RUN git config --global user.name "user"
+RUN git config --global user.email "azer.abdullaev.berlin+git@gmail.com"
+RUN git config --global user.name "Azer Abdullaev"
 
 ENTRYPOINT [ "python3"  ]
 
 CMD [ "wiki.py"  ]
-
