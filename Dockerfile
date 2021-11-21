@@ -1,6 +1,6 @@
 FROM alpine:latest
 
-RUN apk add --no-cache py3-pip python3-dev git gcc musl-dev
+RUN apk add --no-cache py3-pip python3-dev git gcc musl-dev linux-headers
 
 COPY ./requirements.txt /app/requirements.txt
 
