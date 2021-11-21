@@ -37,13 +37,13 @@
                 server:{
                     url:'/',
                     process:{
-                        url: '.{{upload_path}}',
+                        url: './{{upload_path}}',
                         onload: (response) => {
                                     let filename=response;
                                     messages.push(filename);
                                     let mes = "";
                                     for (i in messages){
-                                        md = "![caption](img/" + messages[i] + ")";
+                                        md = "![caption]({{upload_path}}/" + messages[i] + ")";
                                         m = "<li>Use <b>"+md+"</b> inside your markdown file <a id='myLink' href='#' onclick=\"copy_fun('"+md+"')\">Copy</a> </li>";
                                         mes = mes +m
                                     }

@@ -6,7 +6,7 @@ Restart=always
 ExecStartPre=-/usr/bin/podman rm -f wiki-ng
 ExecStart=/usr/bin/podman run \
   --name=wiki-ng \
-  --env IMAGES_ROUTE=/media/pictures \
+  --env IMAGES_ROUTE=media/pictures \
   -p 26008:5000 \
   -v /var/storage/wastebox/tiredsysadmin.cc/wiki/repo:/app/wiki \
   --restart unless-stopped \

@@ -10,8 +10,8 @@ import markdown
 import os
 import re
 
-IMAGES_ROUTE = os.getenv('IMAGES_ROUTE', '/img')
-UPLOAD_FOLDER = 'wiki' + IMAGES_ROUTE
+IMAGES_ROUTE = os.getenv('IMAGES_ROUTE', 'img')
+UPLOAD_FOLDER = 'wiki/' + IMAGES_ROUTE
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 
@@ -159,7 +159,7 @@ def edit(page):
         return render_template("new.html", content=content, title=page, upload_path=IMAGES_ROUTE)
 
 
-@app.route(IMAGES_ROUTE, methods=['POST', 'DELETE'])
+@app.route('/' + IMAGES_ROUTE, methods=['POST', 'DELETE'])
 def upload_file():
     app.logger.info("uploading image...")
     # Upload image when POST
@@ -169,7 +169,7 @@ def upload_file():
             file = request.files[key]
             filename = secure_filename(file.filename)
             # bug found by cat-0
-            while filename in os.listdir('wiki' + IMAGES_ROUTE):
+            while filename in os.listdir('wiki/' + IMAGES_ROUTE):
                 app.logger.info(
                     "There is a duplicate, solving this by extending the filename...")
                 filename, file_extension = os.path.splitext(filename)
@@ -195,7 +195,7 @@ def upload_file():
         return 'OK'
 
 
-@app.route(IMAGES_ROUTE + '/<path:filename>')
+@app.route('/' + IMAGES_ROUTE + '/<path:filename>')
 def display_image(filename):
     #print('display_image filename: ' + filename)
     return send_from_directory(UPLOAD_FOLDER, filename, as_attachment=False)
