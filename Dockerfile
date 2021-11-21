@@ -1,6 +1,6 @@
-FROM alpine:latest
+FROM ubuntu:focal
 
-RUN apk add --no-cache py3-pip python3-dev git gcc musl-dev linux-headers pandoc
+RUN apk add --no-cache python3-pip python3-dev git gcc pandoc
 
 COPY ./requirements.txt /app/requirements.txt
 
