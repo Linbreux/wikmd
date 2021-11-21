@@ -129,7 +129,7 @@ def add_new():
 
         return redirect(url_for("file_page", file_page=request.form['PN']))
     else:
-        return render_template('new.html')
+        return render_template('new.html', upload_path=IMAGES_ROUTE)
 
 
 @app.route('/edit/homepage', methods=['POST', 'GET'])
@@ -141,7 +141,7 @@ def edit_homepage():
     else:
         with open('wiki/homepage.md', 'r', encoding="utf-8") as f:
             content = f.read()
-        return render_template("new.html", content=content, title="homepage")
+        return render_template("new.html", content=content, title="homepage", upload_path=IMAGES_ROUTE)
 
 
 @app.route('/edit/<page>', methods=['POST', 'GET'])
@@ -156,7 +156,7 @@ def edit(page):
     else:
         with open('wiki/'+page+'.md', 'r', encoding="utf-8") as f:
             content = f.read()
-        return render_template("new.html", content=content, title=page)
+        return render_template("new.html", content=content, title=page, upload_path=IMAGES_ROUTE)
 
 
 @app.route(IMAGES_ROUTE, methods=['POST', 'DELETE'])

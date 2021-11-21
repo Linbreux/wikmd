@@ -37,7 +37,7 @@
                 server:{
                     url:'/',
                     process:{
-                        url: './img',
+                        url: '.{{upload_path}}',
                         onload: (response) => {
                                     let filename=response;
                                     messages.push(filename);
