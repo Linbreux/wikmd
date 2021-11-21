@@ -1,6 +1,7 @@
-FROM ubuntu:focal
+FROM ubuntu:18.04
 
-RUN apt -y update && apt install -y python3-pip python3-dev git gcc pandoc
+RUN apt-get update -y && \
+    apt-get install -y python3-pip python3-dev pandoc git
 
 COPY ./requirements.txt /app/requirements.txt
 
@@ -12,9 +13,10 @@ RUN pip3 install -r requirements.txt
 
 COPY . /app
 
-RUN git config --global user.email "azer.abdullaev.berlin+git@gmail.com"
-RUN git config --global user.name "Azer Abdullaev"
+RUN git config --global user.email "user@wikmd.com"
+RUN git config --global user.name "user"
 
 ENTRYPOINT [ "python3"  ]
 
 CMD [ "wiki.py"  ]
+
