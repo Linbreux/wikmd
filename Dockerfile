@@ -1,6 +1,6 @@
 FROM ubuntu:focal
 
-RUN apk add --no-cache python3-pip python3-dev git gcc pandoc
+RUN apt -y update && apt install -y python3-pip python3-dev git gcc pandoc
 
 COPY ./requirements.txt /app/requirements.txt
 
