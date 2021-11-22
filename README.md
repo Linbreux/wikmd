@@ -91,6 +91,17 @@ The homepage is default the "homepage.md" file, this can't be changed. If this f
 
 If you have images that you don't want to be available on the internet, you can put them inside the folder **"wiki/img/"** for example **"testfile.png"**, now you can link to **"/wiki/img/testfile.png"**
 
+## Custom picture upload
+
+It's possible to add a custom picture upload path. This is done by adding a `IMAGE_ROUTE` environment variable.
+
+```
+export IMAGES_ROUTE="media/pictures"
+```
+
+Thanks to @reactorcoremeltdown
+
+
 ## Latex
 
 It's possible to use latex syntax inside your markdown because the markdown is first converted to latex and after that to html. This means you have a lot more flexibility.
