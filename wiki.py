@@ -27,6 +27,8 @@ def save():
     content = request.form['CT']
     app.logger.info("saving "+page_name)
     try:
+        if not os.path.exists('wiki/' + os.path.dirname(page_name + '.md')):
+            os.makedirs('wiki/' + os.path.dirname(page_name + '.md'))
         with open('wiki/' + page_name + '.md', 'w') as f:
             f.write(content)
     except Exception as e:
@@ -84,7 +86,7 @@ def gitcom(pagename=""):
         app.logger.info("nothing commit: " + str(e))
 
 
-@app.route('/<file_page>', methods=['POST', 'GET'])
+@app.route('/<path:file_page>', methods=['POST', 'GET'])
 def file_page(file_page):
     if request.method == 'POST':
         return search()
@@ -144,7 +146,7 @@ def edit_homepage():
         return render_template("new.html", content=content, title="homepage", upload_path=IMAGES_ROUTE)
 
 
-@app.route('/edit/<page>', methods=['POST', 'GET'])
+@app.route('/edit/<path:page>', methods=['POST', 'GET'])
 def edit(page):
     if request.method == 'POST':
         name = request.form['PN']
