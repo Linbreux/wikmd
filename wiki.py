@@ -42,24 +42,28 @@ def search():
 
     app.logger.info("searching for "+search_term + " ...")
 
-    for fil in os.listdir('wiki/'):
-        path = os.path.join('wiki/', fil)
-        if os.path.isdir(path):
-            # skip directories
-            app.logger.debug("skipping " + path + " : is dir")
-            continue
-        if fil == "wiki/images":
-            continue
-        with open('wiki/' + fil, encoding="utf8") as f:
-            fin = f.read()
-            try:
-                if re.search(search_term, fil, re.IGNORECASE) or re.search(search_term, fin, re.IGNORECASE) != None:
-                    info = {'doc': fil,
-                            'url': os.path.splitext(fil)[0]}
-                    found.append(info)
-                    app.logger.info("found "+search_term + " in "+fil)
-            except Exception as e:
-                app.logger.error("There was an error: " + str(e))
+    for root, subfolder, files in os.walk('wiki/'):
+        for item in files:
+            path = os.path.join(root, item)
+            if 'wiki/.git' in str(path):
+                # We don't want to search there
+                app.logger.debug("skipping " + path + " : is git file")
+                continue
+            if 'wiki/' + IMAGES_ROUTE in str(path):
+                # Nothing interesting there too
+                continue
+            with open(root + '/' + item, encoding="utf8") as f:
+                fin = f.read()
+                try:
+                    if (re.search(search_term, root + '/' + item, re.IGNORECASE) or
+                            re.search(search_term, fin, re.IGNORECASE) != None):
+                        # Stripping 'wiki/' part of path before serving as a search result
+                        info = {'doc': item,
+                                'url': os.path.splitext(root[5:] + '/' + item)[0]}
+                        found.append(info)
+                        app.logger.info("found "+search_term + " in "+item)
+                except Exception as e:
+                    app.logger.error("There was an error: " + str(e))
 
     return render_template('search.html', zoekterm=found)
 
