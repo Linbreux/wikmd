@@ -67,6 +67,32 @@ def search():
 
     return render_template('search.html', zoekterm=found)
 
+@app.route('/list/', methods=['GET'])
+def list_full_wiki():
+    return list_wiki("")
+
+
+@app.route('/list/<path:folderpath>', methods=['GET'])
+def list_wiki(folderpath):
+    list = []
+    for root, subfolder, files in os.walk('wiki/'+folderpath):
+        for item in files:
+            path = os.path.join(root, item)
+            if 'wiki/.git' in str(path):
+                # We don't want to search there
+                app.logger.debug("skipping " + path + " : is git file")
+                continue
+            if 'wiki/' + IMAGES_ROUTE in str(path):
+                # Nothing interesting there too
+                continue
+            info = {'doc': item,
+                    'url': os.path.splitext(root[len("wiki/"):] + '/' + item)[0],
+                    'folder': root[len("wiki/"):],
+                    'folder_url': root[len("wiki/"):]
+                    }
+            list.append(info)            
+
+    return render_template('list_files.html', list=list,folder=folderpath)
 
 def gitcom(pagename=""):
     try:

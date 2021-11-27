@@ -1,0 +1,11 @@
+{% extends 'base.html'%}
+
+{%block content%}
+<h2><b>{{folder}}</b> ALL FILES</h2>
+    <ul>
+<li><i><a href=".">..</a></i></li>
+{%for i in list%}
+<li>{% if i.folder != ""%}<b><a href="{{i.folder_url}}">{{i.folder}}/ </a></b> <a href="/{{i.url}}">{{i.doc}}<a>{%else%}<a href="{{i.url}}">{{i.doc}}<a></a>{%endif%}</li>
+{%endfor%}
+    </ul>
+{%endblock%}
