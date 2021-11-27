@@ -4,7 +4,7 @@
 <h2>Found {{zoekterm|length}} result(s)</h2>
     <ul>
 {%for i in zoekterm%}
-<li><a href="{{i.url}}">{{i.doc}}<a></li>
+<li>{% if i.folder != ""%}<a href="/{{i.url}}">{{i.doc}}</a>{%else%}<a href="{{i.url}}">{{i.doc}}{%endif%}<a></li>
 {%endfor%}
     </ul>
 {%endblock%}
