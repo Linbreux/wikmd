@@ -59,7 +59,7 @@ def search():
                             re.search(search_term, fin, re.IGNORECASE) != None):
                         # Stripping 'wiki/' part of path before serving as a search result
                         info = {'doc': item,
-                                'url': os.path.splitext(root[5:] + '/' + item)[0]}
+                                'url': os.path.splitext(root[len("wiki/"):] + '/' + item)[0]}
                         found.append(info)
                         app.logger.info("found "+search_term + " in "+item)
                 except Exception as e:
