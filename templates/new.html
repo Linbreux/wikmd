@@ -4,6 +4,7 @@
 <link rel="stylesheet"
   href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/codemirror.min.css">
 </link>
+<link rel="stylesheet" href="/static/css/ayu-mirage.css">
 
 <script type="text/javascript"
   src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/codemirror.min.js">
@@ -77,5 +78,9 @@
             theme: "default",
             extraKeys: {"Enter": "newlineAndIndentContinueMarkdownList"}
         });
+
+        {% if system.darktheme == True%}
+            editor.setOption("theme","ayu-mirage");
+        {% endif %}
     </script>
 {% endblock %}

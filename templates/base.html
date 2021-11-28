@@ -12,7 +12,11 @@
         <!-- JavaScript Bundle with Popper -->
         <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
         <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/default.min.css">
+    {% if system.darktheme == True %}
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/dark.min.css">
+    {%else%}
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/default.min.css">
+    {%endif%}
 	<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js"></script>
         <script>hljs.highlightAll();</script>
         {% block head%}
@@ -32,9 +36,21 @@
 
         .container-fluid{padding-right:0px; padding-left:0px}
 
-	.hljs {
-        	background-color:#f6f8fa;
-	}
+        .hljs {
+                background-color:#f6f8fa;
+        }
+
+        {% if system.darktheme == True %}
+        body{
+            background-color:#343a40;
+            color:whitesmoke;
+        }
+        pre { background-color: #3f4449; padding: 16px; border-radius:6px;}
+
+        .hljs {
+                background-color:#3f4449;
+        }
+        {% endif %}
 
         </style>
         </head>

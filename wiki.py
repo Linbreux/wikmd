@@ -14,6 +14,10 @@ IMAGES_ROUTE = os.getenv('IMAGES_ROUTE', 'img')
 UPLOAD_FOLDER = 'wiki/' + IMAGES_ROUTE
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
+SYSTEM_SETTINGS = {
+    "darktheme": True
+}
+
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -67,7 +71,7 @@ def search():
                 except Exception as e:
                     app.logger.error("There was an error: " + str(e))
 
-    return render_template('search.html', zoekterm=found)
+    return render_template('search.html', zoekterm=found, system=SYSTEM_SETTINGS)
 
 @app.route('/list/', methods=['GET'])
 def list_full_wiki():
@@ -94,7 +98,7 @@ def list_wiki(folderpath):
                     }
             list.append(info)            
 
-    return render_template('list_files.html', list=list,folder=folderpath)
+    return render_template('list_files.html', list=list,folder=folderpath, system=SYSTEM_SETTINGS)
 
 def gitcom(pagename=""):
     try:
@@ -135,7 +139,7 @@ def file_page(file_page):
             app.logger.info("showing html page of " + file_page)
         except Exception as a:
             app.logger.info(a)
-        return render_template('content.html', title=file_page, info=html, modif=mod)
+        return render_template('content.html', title=file_page, info=html, modif=mod, system=SYSTEM_SETTINGS)
 
 
 @app.route('/', methods=['POST', 'GET'])
@@ -153,7 +157,7 @@ def index():
             app.logger.error(a)
 
         gitcom()
-        return render_template('index.html', homepage=html)
+        return render_template('index.html', homepage=html, system=SYSTEM_SETTINGS)
 
 
 @app.route('/add_new', methods=['POST', 'GET'])
@@ -163,7 +167,7 @@ def add_new():
 
         return redirect(url_for("file_page", file_page=request.form['PN']))
     else:
-        return render_template('new.html', upload_path=IMAGES_ROUTE)
+        return render_template('new.html', upload_path=IMAGES_ROUTE, system=SYSTEM_SETTINGS)
 
 
 @app.route('/edit/homepage', methods=['POST', 'GET'])
@@ -175,7 +179,7 @@ def edit_homepage():
     else:
         with open('wiki/homepage.md', 'r', encoding="utf-8") as f:
             content = f.read()
-        return render_template("new.html", content=content, title="homepage", upload_path=IMAGES_ROUTE)
+        return render_template("new.html", content=content, title="homepage", upload_path=IMAGES_ROUTE, system=SYSTEM_SETTINGS)
 
 
 @app.route('/edit/<path:page>', methods=['POST', 'GET'])
@@ -190,7 +194,7 @@ def edit(page):
     else:
         with open('wiki/'+page+'.md', 'r', encoding="utf-8") as f:
             content = f.read()
-        return render_template("new.html", content=content, title=page, upload_path=IMAGES_ROUTE)
+        return render_template("new.html", content=content, title=page, upload_path=IMAGES_ROUTE, system=SYSTEM_SETTINGS)
 
 
 @app.route('/' + IMAGES_ROUTE, methods=['POST', 'DELETE'])
