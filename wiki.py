@@ -238,6 +238,12 @@ def display_image(filename):
     #print('display_image filename: ' + filename)
     return send_from_directory(UPLOAD_FOLDER, filename, as_attachment=False)
 
+@app.route('/toggle-darktheme/', methods=['GET'])
+def toggle_darktheme():
+    SYSTEM_SETTINGS['darktheme'] = not SYSTEM_SETTINGS['darktheme']
+    return index()
+
+
 
 logging.basicConfig(filename='wikmd.log', level=logging.INFO)
 
