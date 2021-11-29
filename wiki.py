@@ -136,10 +136,14 @@ def file_page(file_page):
                                          format='md', extra_args=["--mathjax"], filters=['pandoc-xnos'])
             mod = "Last modified: %s" % time.ctime(
                 os.path.getmtime("wiki/"+file_page + ".md"))
+            folder = file_page.split("/")
+            file_page = folder[-1:][0]
+            folder = folder[:-1]
+            folder = "/".join(folder)
             app.logger.info("showing html page of " + file_page)
         except Exception as a:
             app.logger.info(a)
-        return render_template('content.html', title=file_page, info=html, modif=mod, system=SYSTEM_SETTINGS)
+        return render_template('content.html', title=file_page, folder=folder, info=html, modif=mod, system=SYSTEM_SETTINGS)
 
 
 @app.route('/', methods=['POST', 'GET'])
