@@ -129,6 +129,7 @@ def file_page(file_page):
     else:
         html = ""
         mod = ""
+        folder = ""
         try:
             #latex = pypandoc.convert_file("wiki/" + file_page + ".md", "tex", format="md")
             #html = pypandoc.convert_text(latex,"html5",format='tex', extra_args=["--mathjax"])

@@ -19,6 +19,8 @@ To view the documents in the browser, the document is converted to html.
 - code highlight
 - file searching
 - file based
+- dark theme
+- codemirror for editing
 
 ## Installation
 ! It's tested on windows and linux based systems.
