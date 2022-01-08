@@ -93,6 +93,14 @@ The homepage is default the "homepage.md" file, this can't be changed. If this f
 
 If you have images that you don't want to be available on the internet, you can put them inside the folder **"wiki/img/"** for example **"testfile.png"**, now you can link to **"/wiki/img/testfile.png"**
 
+## Custom data path
+
+Usually, wikmd looks for content in the subfolder `wiki`. In case you want to store your wiki data somewhere else, you can set a custom data path via the environment variable `WIKI_DATA`:
+
+```
+export WIKI_DATA="~/.wikidata"
+```
+
 ## Custom picture upload
 
 It's possible to add a custom picture upload path. This is done by adding a `IMAGE_ROUTE` environment variable.
@@ -102,7 +110,6 @@ export IMAGES_ROUTE="media/pictures"
 ```
 
 Thanks to @reactorcoremeltdown
-
 
 ## Latex
 
