@@ -10,14 +10,16 @@ import markdown
 import os
 import re
 
+WIKI_DATA = os.getenv('WIKI_DATA', "wiki")
 IMAGES_ROUTE = os.getenv('IMAGES_ROUTE', 'img')
-UPLOAD_FOLDER = 'wiki/' + IMAGES_ROUTE
+UPLOAD_FOLDER = WIKI_DATA + '/' + IMAGES_ROUTE
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 SYSTEM_SETTINGS = {
     "darktheme": True
 }
 
+print(WIKI_DATA)
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -31,9 +33,11 @@ def save():
     content = request.form['CT']
     app.logger.info("saving "+page_name)
     try:
-        if not os.path.exists('wiki/' + os.path.dirname(page_name + '.md')):
-            os.makedirs('wiki/' + os.path.dirname(page_name + '.md'))
-        with open('wiki/' + page_name + '.md', 'w') as f:
+        filename = os.path.join(WIKI_DATA, page_name + '.md')
+        dirname = os.path.dirname(filename)
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
+        with open(filename, 'w') as f:
             f.write(content)
     except Exception as e:
         app.logger.error("Error while saving: "+str(e))
@@ -46,14 +50,14 @@ def search():
 
     app.logger.info("searching for "+search_term + " ...")
 
-    for root, subfolder, files in os.walk('wiki/'):
+    for root, subfolder, files in os.walk(WIKI_DATA):
         for item in files:
             path = os.path.join(root, item)
-            if 'wiki/.git' in str(path):
+            if os.path.join(WIKI_DATA, '.git') in str(path):
                 # We don't want to search there
                 app.logger.debug("skipping " + path + " : is git file")
                 continue
-            if 'wiki/' + IMAGES_ROUTE in str(path):
+            if os.path.join(WIKI_DATA, IMAGES_ROUTE) in str(path):
                 # Nothing interesting there too
                 continue
             with open(root + '/' + item, encoding="utf8") as f:
@@ -63,9 +67,9 @@ def search():
                             re.search(search_term, fin, re.IGNORECASE) != None):
                         # Stripping 'wiki/' part of path before serving as a search result
                         info = {'doc': item,
-                                'url': os.path.splitext(root[len("wiki/"):] + '/' + item)[0],
-                                'folder': root[len("wiki/"):],
-                                'folder_url': root[len("wiki/"):]}
+                                'url': os.path.splitext(root[len(WIKI_DATA + "/"):] + '/' + item)[0],
+                                'folder': root[len(WIKI_DATA + "/"):],
+                                'folder_url': root[len(WIKI_DATA + "/"):]}
                         found.append(info)
                         app.logger.info("found "+search_term + " in "+item)
                 except Exception as e:
@@ -81,28 +85,28 @@ def list_full_wiki():
 @app.route('/list/<path:folderpath>', methods=['GET'])
 def list_wiki(folderpath):
     list = []
-    for root, subfolder, files in os.walk('wiki/'+folderpath):
+    for root, subfolder, files in os.walk(os.path.join(WIKI_DATA, folderpath)):
         for item in files:
             path = os.path.join(root, item)
-            if 'wiki/.git' in str(path):
+            if os.path.join(WIKI_DATA, '.git') in str(path):
                 # We don't want to search there
                 app.logger.debug("skipping " + path + " : is git file")
                 continue
-            if 'wiki/' + IMAGES_ROUTE in str(path):
+            if os.path.join(WIKI_DATA, IMAGES_ROUTE) in str(path):
                 # Nothing interesting there too
                 continue
             info = {'doc': item,
-                    'url': os.path.splitext(root[len("wiki/"):] + '/' + item)[0],
-                    'folder': root[len("wiki/"):],
-                    'folder_url': root[len("wiki/"):]
+                    'url': os.path.splitext(root[len(WIKI_DATA + "/"):] + '/' + item)[0],
+                    'folder': root[len(WIKI_DATA + "/"):],
+                    'folder_url': root[len(WIKI_DATA + "/"):]
                     }
-            list.append(info)            
+            list.append(info)
 
     return render_template('list_files.html', list=list,folder=folderpath, system=SYSTEM_SETTINGS)
 
 def gitcom(pagename=""):
     try:
-        repo = git.Repo.init("wiki/")
+        repo = git.Repo.init(WIKI_DATA)
         repo.git.checkout("-b", "master")
         repo.config_writer().set_value("user", "name", "wikmd").release()
         repo.config_writer().set_value("user", "email", "wikmd@no-mail.com").release()
@@ -131,12 +135,12 @@ def file_page(file_page):
         mod = ""
         folder = ""
         try:
+            filename = os.path.join(WIKI_DATA, file_page + ".md")
             #latex = pypandoc.convert_file("wiki/" + file_page + ".md", "tex", format="md")
             #html = pypandoc.convert_text(latex,"html5",format='tex', extra_args=["--mathjax"])
-            html = pypandoc.convert_file("wiki/" + file_page + ".md", "html5",
+            html = pypandoc.convert_file(filename, "html5",
                                          format='md', extra_args=["--mathjax"], filters=['pandoc-xnos'])
-            mod = "Last modified: %s" % time.ctime(
-                os.path.getmtime("wiki/"+file_page + ".md"))
+            mod = "Last modified: %s" % time.ctime(os.path.getmtime(filename))
             folder = file_page.split("/")
             file_page = folder[-1:][0]
             folder = folder[:-1]
@@ -156,7 +160,7 @@ def index():
         app.logger.info("homepage displaying")
         try:
             html = pypandoc.convert_file(
-                "wiki/homepage.md", "html5", format='md', extra_args=["--mathjax"], filters=['pandoc-xnos'])
+                os.path.join(WIKI_DATA, "homepage.md"), "html5", format='md', extra_args=["--mathjax"], filters=['pandoc-xnos'])
 
         except Exception as a:
             app.logger.error(a)
@@ -182,22 +186,23 @@ def edit_homepage():
 
         return redirect(url_for("file_page", file_page=request.form['PN']))
     else:
-        with open('wiki/homepage.md', 'r', encoding="utf-8") as f:
+        with open(os.path.join(WIKI_DATA, 'homepage.md'), 'r', encoding="utf-8") as f:
             content = f.read()
         return render_template("new.html", content=content, title="homepage", upload_path=IMAGES_ROUTE, system=SYSTEM_SETTINGS)
 
 
 @app.route('/edit/<path:page>', methods=['POST', 'GET'])
 def edit(page):
+    filename = os.path.join(WIKI_DATA, page + '.md')
     if request.method == 'POST':
         name = request.form['PN']
         if name != page:
-            os.remove('wiki/' + page + '.md')
+            os.remove(filename)
 
         save()
         return redirect(url_for("file_page", file_page=name))
     else:
-        with open('wiki/'+page+'.md', 'r', encoding="utf-8") as f:
+        with open(filename, 'r', encoding="utf-8") as f:
             content = f.read()
         return render_template("new.html", content=content, title=page, upload_path=IMAGES_ROUTE, system=SYSTEM_SETTINGS)
 
@@ -212,7 +217,7 @@ def upload_file():
             file = request.files[key]
             filename = secure_filename(file.filename)
             # bug found by cat-0
-            while filename in os.listdir('wiki/' + IMAGES_ROUTE):
+            while filename in os.listdir(os.path.join(WIKI_DATA, IMAGES_ROUTE)):
                 app.logger.info(
                     "There is a duplicate, solving this by extending the filename...")
                 filename, file_extension = os.path.splitext(filename)
