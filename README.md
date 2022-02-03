@@ -197,3 +197,6 @@ lof: true
 ---
 ```
 For more information you have to read the pandoc documentation.
+
+### New features
+Create a page with a random id by typing *{id}* in the name.

@@ -9,6 +9,7 @@ import pypandoc
 import markdown
 import os
 import re
+import uuid
 
 WIKI_DATA = os.getenv('WIKI_DATA', "wiki")
 IMAGES_ROUTE = os.getenv('IMAGES_ROUTE', 'img')
@@ -26,8 +27,7 @@ log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
 
 
-def save():
-    page_name = request.form['PN']
+def save(page_name):
     content = request.form['CT']
     app.logger.info("saving " + page_name)
     try:
@@ -191,9 +191,10 @@ def index():
 @app.route('/add_new', methods=['POST', 'GET'])
 def add_new():
     if request.method == 'POST':
-        save()
+        page_name = fetch_page_name()
+        save(page_name)
 
-        return redirect(url_for("file_page", file_page=request.form['PN']))
+        return redirect(url_for("file_page", file_page=page_name))
     else:
         return render_template('new.html', upload_path=IMAGES_ROUTE, system=SYSTEM_SETTINGS)
 
@@ -201,14 +202,22 @@ def add_new():
 @app.route('/edit/homepage', methods=['POST', 'GET'])
 def edit_homepage():
     if request.method == 'POST':
-        save()
+        page_name = fetch_page_name()
+        save(page_name)
 
-        return redirect(url_for("file_page", file_page=request.form['PN']))
+        return redirect(url_for("file_page", file_page=page_name))
     else:
         with open(os.path.join(WIKI_DATA, 'homepage.md'), 'r', encoding="utf-8") as f:
             content = f.read()
         return render_template("new.html", content=content, title="homepage", upload_path=IMAGES_ROUTE,
                                system=SYSTEM_SETTINGS)
+
+
+def fetch_page_name() -> str:
+    page_name = request.form['PN']
+    if page_name[-4:] == "{id}":
+        page_name = f"{page_name[:-4]}{uuid.uuid4().hex}"
+    return page_name
 
 
 @app.route('/remove/<path:page>', methods=['GET'])
@@ -223,12 +232,12 @@ def remove(page):
 def edit(page):
     filename = os.path.join(WIKI_DATA, page + '.md')
     if request.method == 'POST':
-        name = request.form['PN']
-        if name != page:
+        page_name = fetch_page_name()
+        if page_name != page:
             os.remove(filename)
 
-        save()
-        return redirect(url_for("file_page", file_page=name))
+        save(page_name)
+        return redirect(url_for("file_page", file_page=page_name))
     else:
         with open(filename, 'r', encoding="utf-8") as f:
             content = f.read()
