@@ -1,12 +1,17 @@
-{% extends 'base.html'%}
+{% extends 'base.html' %}
 
-{%block content%}
-<h1>{%if folder%}
-        <a style="{%if system.darktheme%}color:white{%else%}color:black{%endif%}" href="/list/{{folder}}">{{folder}}</a>/
-        {%endif%}
-        {{title}}</h1><hr>
-{{info|safe}}
-<hr>
-<p>{{modif}}</p>
-<a href="/edit/{% if folder%}{{folder}}/{%endif%}{{title}}">Edit page</a>
-{%endblock%}
+{% block content %}
+    <h1>{% if folder %}
+        <a style="{% if system.darktheme %}color:white{% else %}color:black{% endif %}"
+           href="/list/{{ folder }}">{{ folder }}</a>/
+    {% endif %}
+        {{ title }}</h1>
+    <hr>
+    {{ info|safe }}
+    <hr>
+    <p>{{ modif }}</p>
+    <div>
+        <a style="color:deepskyblue;" href="/edit/{% if folder %}{{ folder }}/{% endif %}{{ title }}">Edit page</a>
+    </div>
+    <a style="color:orangered;" href="/remove/{% if folder %}{{ folder }}/{% endif %}{{ title }}">Remove page</a>
+{% endblock %}

@@ -205,6 +205,14 @@ def edit_homepage():
                                system=SYSTEM_SETTINGS)
 
 
+@app.route('/remove/<path:page>', methods=['GET'])
+def remove(page):
+    filename = os.path.join(WIKI_DATA, page + '.md')
+    os.remove(filename)
+
+    return redirect("/")
+
+
 @app.route('/edit/<path:page>', methods=['POST', 'GET'])
 def edit(page):
     filename = os.path.join(WIKI_DATA, page + '.md')
