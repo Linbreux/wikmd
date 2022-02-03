@@ -44,6 +44,7 @@ def save(page_name):
 
 def search():
     search_term = request.form['ss']
+    escaped_search_term = re.escape(search_term)
     found = []
 
     app.logger.info("searching for " + search_term + " ...")
@@ -61,8 +62,8 @@ def search():
             with open(root + '/' + item, encoding="utf8") as f:
                 fin = f.read()
                 try:
-                    if (re.search(search_term, root + '/' + item, re.IGNORECASE) or
-                            re.search(search_term, fin, re.IGNORECASE) != None):
+                    if (re.search(escaped_search_term, root + '/' + item, re.IGNORECASE) or
+                            re.search(escaped_search_term, fin, re.IGNORECASE) != None):
                         # Stripping 'wiki/' part of path before serving as a search result
                         folder = root[len(WIKI_DATA + "/"):]
                         if folder == "":
