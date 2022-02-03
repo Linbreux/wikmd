@@ -64,9 +64,15 @@ def search():
                     if (re.search(search_term, root + '/' + item, re.IGNORECASE) or
                             re.search(search_term, fin, re.IGNORECASE) != None):
                         # Stripping 'wiki/' part of path before serving as a search result
+                        folder = root[len(WIKI_DATA + "/"):]
+                        if folder == "":
+                            url = os.path.splitext(root[len(WIKI_DATA + "/"):] + "/" + item)[0]
+                        else:
+                            url = "/" + os.path.splitext(root[len(WIKI_DATA + "/"):] + "/" + item)[0]
+
                         info = {'doc': item,
-                                'url': os.path.splitext(root[len(WIKI_DATA + "/"):] + '/' + item)[0],
-                                'folder': root[len(WIKI_DATA + "/"):],
+                                'url': url,
+                                'folder': folder,
                                 'folder_url': root[len(WIKI_DATA + "/"):]}
                         found.append(info)
                         app.logger.info("found " + search_term + " in " + item)
