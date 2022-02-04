@@ -1,0 +1,19 @@
+body {
+    background-color: #343a40;
+    color: whitesmoke;
+}
+
+.modal-content {
+    background-color: #343a40;
+    color: whitesmoke;
+}
+
+pre {
+    background-color: #3f4449;
+    padding: 16px;
+    border-radius: 6px;
+}
+
+.hljs {
+    background-color: #3f4449;
+}
