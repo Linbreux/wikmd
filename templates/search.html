@@ -1,46 +1,51 @@
-{% extends 'base.html'%}
+{% extends 'base.html' %}
 
-{% block head%}
-<style>
-ul#list{
-        list-style: none;
-        padding:0px
-}
-ul#list li{
-        margin:5px;
-        padding-left:15px;
+{% block head %}
+    <style>
+        ul#list {
+            list-style: none;
+            padding: 0px
+        }
+
+        ul#list li {
+            margin: 5px;
+            padding-left: 15px;
         {% if system.darktheme%}
-        background: #343a40;
+            background: #343a40;
         {%endif%}
-        border-left-style: solid;
-}
+            border-left-style: solid;
+        }
 
-ul#list li:hover{
+        ul#list li:hover {
 
         {% if system.darktheme%}
-        background: #3f4448;
+            background: #3f4448;
         {%else%}
-        background: #ECECEC;
+            background: #ECECEC;
         {%endif%}
-}
-ul#list li a{
-        font-size: 1.2em;
+        }
+
+        ul#list li a {
+            font-size: 1.2em;
 
         {% if system.darktheme%}
-        color: white;
+            color: white;
         {%else%}
-        color:black;
+            color: black;
         {%endif%}
-}
-</style>
+        }
+    </style>
 
-{%endblock%}
+{% endblock %}
 
-{%block content%}
-<h2>Found {{zoekterm|length}} result(s)</h2>
+{% block content %}
+    <h2>Found {{ zoekterm|length }} result(s)</h2>
     <ul id="list">
-{%for i in zoekterm%}
-<li>{% if i.folder != ""%}<a href="/{{i.url}}">{{i.doc}}</a>{%else%}<a href="{{i.url}}">{{i.doc}}{%endif%}<a></li>
-{%endfor%}
+        {% for i in zoekterm %}
+            <li>{% if i.folder != ""%}
+                <b><a href="/list/{{ i.folder }}">{{ i.folder }}/ </a></b><a href="{{ i.url }}">{{ i.doc }}<a>
+                    {% else %}
+                    <a href="{{ i.url }}">{{ i.doc }}<a></a>{% endif %}</li>
+        {% endfor %}
     </ul>
-{%endblock%}
+{% endblock %}
