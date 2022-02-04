@@ -24,14 +24,14 @@
         {%endblock%}
         <style>
 
-        blockquote {  padding: 0 50px;  margin-left: 0;  border-left: 4px solid orange;  } 
+        blockquote {  padding: 0 50px;  margin-left: 0;  border-left: 4px solid orange;  }
 
         pre { background-color: #f6f8fa; padding: 16px; border-radius:6px;}
 
         code, pre{ font-family: monospace; font-size:14px}
 
         img {max-width: 100%}
-        
+
         figure {text-align: center}
 
         .container-fluid{padding-right:0px; padding-left:0px}
@@ -42,6 +42,10 @@
 
         {% if system.darktheme == True %}
         body{
+            background-color:#343a40;
+            color:whitesmoke;
+        }
+        .modal-content {
             background-color:#343a40;
             color:whitesmoke;
         }
@@ -57,7 +61,7 @@
     <body>
         <div class="container-fluid">
               <nav class="navbar navbar-dark bg-dark navbar-expand-lg">
-                  <a class="navbar-brand" href="/">Wiki</a> 
+                  <a class="navbar-brand" href="/">Wiki</a>
                   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                   </button>
@@ -72,8 +76,8 @@
                     <li class="nav-item ">
                         <a class="nav-link" href="/add_new">Add new page</a>
                     </li>
-                    
-                    
+
+
                   </ul>
                   <form class="form-inline" method="POST">
                       <a href="/toggle-darktheme" style="margin-right: 10px;"><img src="/static/images/contrast-2-fill.svg"></a>

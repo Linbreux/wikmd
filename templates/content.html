@@ -13,5 +13,30 @@
     <div>
         <a style="color:deepskyblue;" href="/edit/{% if folder %}{{ folder }}/{% endif %}{{ title }}">Edit page</a>
     </div>
-    <a style="color:orangered;" href="/remove/{% if folder %}{{ folder }}/{% endif %}{{ title }}">Remove page</a>
+    <a style="color:orangered;" data-target="#removeModal" data-toggle="modal" href="#removeModal">Remove page</a>
+
+    <div id="removeModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure that you want to delete this page?</p>
+                </div>
+                <div class="modal-footer">
+                    <form action="/remove/{% if folder %}{{ folder }}/{% endif %}{{ title }}" method="GET">
+                        <button type="submit" class="btn btn-default" style="background-color: #4CAF50;">
+                                Yes
+                        </button>
+                    </form>
+                    <button type="button" class="btn btn-default" style="background-color: #f44336;"
+                            data-dismiss="modal">No
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
 {% endblock %}
