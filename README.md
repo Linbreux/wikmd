@@ -109,7 +109,7 @@ mkdir ~/wiki/img
 $$x_{1,2} = \frac{-b ± \sqrt{b^2 - 4 a c}}{2a}$$
 ## Homepage
 
-The homepage is default the "homepage.md" file, this can't be changed. If this file doesn't exist create it in de wiki folder.
+The homepage is defaulted to the "homepage.md" file. If you want to use a different file, you can specify the file to use for the homepage with the environment variable `HOMEPAGE` as well as the title with `HOMEPAGE_TITLE`.
 
 ## Uploaded images
 
