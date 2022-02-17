@@ -11,6 +11,8 @@ import os
 import re
 import uuid
 
+HOMEPAGE = os.getenv('HOMEPAGE', "homepage.md")
+HOMEPAGE_TITLE = os.getenv('HOMEPAGE_TITLE', "homepage")
 WIKI_DATA = os.getenv('WIKI_DATA', "wiki")
 IMAGES_ROUTE = os.getenv('IMAGES_ROUTE', 'img')
 UPLOAD_FOLDER = WIKI_DATA + '/' + IMAGES_ROUTE
@@ -106,7 +108,7 @@ def list_wiki(folderpath):
 
             folder = root[len(WIKI_DATA + "/"):]
             if folder == "":
-                if item == "homepage.md":
+                if item == HOMEPAGE:
                     continue
                 url = os.path.splitext(root[len(WIKI_DATA + "/"):] + "/" + item)[0]
             else:
@@ -179,7 +181,7 @@ def index():
         app.logger.info("homepage displaying")
         try:
             html = pypandoc.convert_file(
-                os.path.join(WIKI_DATA, "homepage.md"), "html5", format='md', extra_args=["--mathjax"],
+                os.path.join(WIKI_DATA, HOMEPAGE), "html5", format='md', extra_args=["--mathjax"],
                 filters=['pandoc-xnos'])
 
         except Exception as a:
@@ -208,9 +210,9 @@ def edit_homepage():
 
         return redirect(url_for("file_page", file_page=page_name))
     else:
-        with open(os.path.join(WIKI_DATA, 'homepage.md'), 'r', encoding="utf-8") as f:
+        with open(os.path.join(WIKI_DATA, HOMEPAGE), 'r', encoding="utf-8") as f:
             content = f.read()
-        return render_template("new.html", content=content, title="homepage", upload_path=IMAGES_ROUTE,
+        return render_template("new.html", content=content, title=HOMEPAGE_TITLE, upload_path=IMAGES_ROUTE,
                                system=SYSTEM_SETTINGS)
 
 
