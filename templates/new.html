@@ -20,7 +20,7 @@
 </style>
 {%endblock%}
 {% block content %}
-    <form method="post">
+    <form id="form" method="post">
         <div class="form-group">
             <label for="name">Page name</label>
             <input type="text" class="form-control" id="name" name="PN" value="{{title}}">
@@ -82,5 +82,22 @@
         {% if system.darktheme == True%}
             editor.setOption("theme","ayu-mirage");
         {% endif %}
+
+    
+        document.addEventListener('keydown', e => {
+            if (e.ctrlKey && e.key === "s"){
+                e.preventDefault();
+                document.getElementById("content").value = editor.getValue();
+                var form = document.getElementById("form");
+                document.getElementById("name").value = "Test jonge";
+                var id = document.getElementById("name").value;
+                var data = new FormData(form);
+                var xmlhttp = new XMLHttpRequest();
+                xmlhttp.open("POST", window.location.href,true);
+                xmlhttp.send(data);
+    
+            }
+        })
+
     </script>
 {% endblock %}
