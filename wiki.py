@@ -19,7 +19,8 @@ UPLOAD_FOLDER = WIKI_DATA + '/' + IMAGES_ROUTE
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 SYSTEM_SETTINGS = {
-    "darktheme": True
+    "darktheme": False,
+    "listsortMTime": False,
 }
 
 app = Flask(__name__)
@@ -98,6 +99,7 @@ def list_wiki(folderpath):
             root = root[:-1]
         for item in files:
             path = os.path.join(root, item)
+            mtime = os.path.getmtime(os.path.join(root,item))
             if os.path.join(WIKI_DATA, '.git') in str(path):
                 # We don't want to search there
                 app.logger.debug("skipping " + path + " : is git file")
@@ -118,8 +120,12 @@ def list_wiki(folderpath):
                     'url': url,
                     'folder': folder,
                     'folder_url': folder,
+                    'mtime':mtime,
                     }
             list.append(info)
+
+    if SYSTEM_SETTINGS['listsortMTime']:
+        list.sort(key=lambda x: x["mtime"],reverse=True)
 
     return render_template('list_files.html', list=list, folder=folderpath, system=SYSTEM_SETTINGS)
 
