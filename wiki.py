@@ -126,6 +126,8 @@ def list_wiki(folderpath):
 
     if SYSTEM_SETTINGS['listsortMTime']:
         list.sort(key=lambda x: x["mtime"],reverse=True)
+    else:
+        list.sort(key=lambda x: (str(x["url"]).casefold()))
 
     return render_template('list_files.html', list=list, folder=folderpath, system=SYSTEM_SETTINGS)
 
@@ -300,6 +302,11 @@ def display_image(filename):
 def toggle_darktheme():
     SYSTEM_SETTINGS['darktheme'] = not SYSTEM_SETTINGS['darktheme']
     return index()
+
+@app.route('/toggle-sorting/', methods=['GET'])
+def toggle_sort():
+    SYSTEM_SETTINGS['listsortMTime'] = not SYSTEM_SETTINGS['listsortMTime']
+    return redirect("/list")
 
 
 logging.basicConfig(filename='wikmd.log', level=logging.INFO)

@@ -37,6 +37,7 @@
 {% endblock %}
 
 {% block content %}
+    <a style="float:right" href="/toggle-sorting">Sort ({% if system.listsortMTime %}last modified{% else %}a-z{% endif%})</a>
     <h2><b>{{ folder }}</b> ALL FILES</h2>
     <ul id="list">
         <li><i><a href="../">..</a></i></li>
