@@ -71,7 +71,9 @@
     // initialize your network!
     var network = new vis.Network(container, data, options);
     network.on("doubleClick", function (params) {
-        window.location.href = '/nav/'+params.nodes[0];
+        if (params.nodes[0] != undefined){
+            window.location.href = '/nav/'+params.nodes[0];params.nodes[0]
+        }
       });
 </script>
 {%endblock%}
