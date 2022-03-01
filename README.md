@@ -13,6 +13,7 @@ Instead of storing the data in a database I chose to have a file-based system. T
 To view the documents in the browser, the document is converted to html.
 
 ## Features
+- knowledge graph
 - git support (version control)
 - image support including sizing and referencing
 - math/latex
@@ -100,6 +101,9 @@ Also highly recommended is to create a folder 'img' inside 'wiki/'
 cp wikmd/wiki/* ~/wiki/data/
 mkdir ~/wiki/img
 ```
+### Knowledge graph
+NEW: A knowledge graph that visualize the links between different pages
+![Knowledge graph](static/images/Knowledge-graph.png)
 
 ### Image support
 ![](https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Markdown-mark.svg/208px-Markdown-mark.svg.png)
