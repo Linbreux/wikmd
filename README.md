@@ -103,7 +103,7 @@ mkdir ~/wiki/img
 ```
 ### Knowledge graph
 NEW: A knowledge graph that visualize the links between different pages
-![Knowledge graph](static/images/Knowledge-graph.png)
+![Knowledge graph](static/images/knowledge-graph.png)
 
 ### Image support
 ![](https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Markdown-mark.svg/208px-Markdown-mark.svg.png)
