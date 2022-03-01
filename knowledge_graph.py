@@ -1,5 +1,6 @@
 import os
 import re
+from urllib.parse import unquote
 
 WIKI_DATA = os.getenv('WIKI_DATA', "wiki")
 IMAGES_ROUTE = os.getenv('IMAGES_ROUTE', 'img')
@@ -10,8 +11,10 @@ def extend_ids(links):
     for link in links:
         for l in link["links"]:
             for i in links:
-                if i["pagename"]==l["filename"]:
+                print(i["path"] + " : " + l["filename"])
+                if i["path"]==l["filename"]:
                     l["id"] = i["id"]
+    
     return links
 
 def find_links():
@@ -28,6 +31,7 @@ def find_links():
                 "id": id,
                 "pagename":pagename,
                 "path":path[len(WIKI_DATA)+1:-len(".md")],
+                "weight": 0,
                 "links":[],
                 }
             id += 1
@@ -39,18 +43,21 @@ def find_links():
                 continue
             with open(root + '/' + item, encoding="utf8") as f:
                 fin = f.read()
-                #print("--------------------")
-                #print("filename: ", pagename)
+                print("--------------------")
+                print("filename: ", pagename)
                 try:
                     for match in re.finditer(pattern,fin):
                         description, url = match.groups()
                         # only show files that are in the wiki. Not external sites.
-                        if (url+".md") in files:
-                            #print("file: ", url)
+                        if url.startswith("/"):
+                            url = url[1:]
+                        url = unquote(url)
+                        if os.path.exists(WIKI_DATA+"/"+url+".md"):
                             info = {
                                 "filename": url,
                             }
                             value["links"].append(info)
+                            print(url)
                             
                 except Exception as e:
                     print("error: " ,e)
