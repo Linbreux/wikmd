@@ -10,6 +10,7 @@ import markdown
 import os
 import re
 import uuid
+import knowledge_graph
 
 HOMEPAGE = os.getenv('HOMEPAGE', "homepage.md")
 HOMEPAGE_TITLE = os.getenv('HOMEPAGE_TITLE', "homepage")
@@ -291,6 +292,19 @@ def upload_file():
             app.logger.error("Could not remove " + str(filename))
         return 'OK'
 
+@app.route('/knowledge-graph', methods=['GET'])
+def graph():
+    global links 
+    links = knowledge_graph.find_links()
+    return render_template("knowledge-graph.html", links=links ,system=SYSTEM_SETTINGS)
+
+# Translate id to page path
+@app.route('/nav/<path:id>/', methods=['GET'])
+def nav_id_to_page(id):
+    for i in links:
+        if i["id"]==int(id):
+            return redirect("/"+i["path"])
+    return redirect("/")
 
 @app.route('/' + IMAGES_ROUTE + '/<path:filename>')
 def display_image(filename):
