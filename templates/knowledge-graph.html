@@ -16,8 +16,6 @@
 
 <div id="mynetwork"></div>
 
-{{links}}
-
 <script type="text/javascript">
     // create an array with nodes
     var nodes = new vis.DataSet([
@@ -69,7 +67,6 @@
     var network = new vis.Network(container, data, options);
     network.on("doubleClick", function (params) {
         window.location.href = '/nav/'+params.nodes[0];
-        console.log(params.nodes[0])
       });
 </script>
 {%endblock%}
