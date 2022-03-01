@@ -101,7 +101,7 @@ Also highly recommended is to create a folder 'img' inside 'wiki/'
 cp wikmd/wiki/* ~/wiki/data/
 mkdir ~/wiki/img
 ```
-### Knowledge graph (beta)
+## Knowledge graph (beta)
 NEW: A knowledge graph that visualize the links between different pages.
 
 Link files with a full path name like: ```test/path``` instead of ```path```
