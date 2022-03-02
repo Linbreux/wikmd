@@ -5,15 +5,22 @@
         <a style="{% if system.darktheme %}color:white{% else %}color:black{% endif %}"
            href="/list/{{ folder }}">{{ folder }}</a>/
     {% endif %}
-        {{ title }}</h1>
+        {{ title }}
+        <a style="float:right" href="/edit/{% if folder %}{{ folder }}/{% endif %}{{ title }}">
+            <img height="30px" src="/static/images/edit.svg"/>
+        </a>
+        <a style="float:right" data-target="#removeModal" data-toggle="modal" href="#removeModal">
+            <img height="30px" src="/static/images/delete.svg"/>
+        </a>
+    </h1>
+
     <hr>
     {{ info|safe }}
     <hr>
     <p>{{ modif }}</p>
     <div>
-        <a style="color:deepskyblue;" href="/edit/{% if folder %}{{ folder }}/{% endif %}{{ title }}">Edit page</a>
+       
     </div>
-    <a style="color:orangered;" data-target="#removeModal" data-toggle="modal" href="#removeModal">Remove page</a>
 
     <div id="removeModal" class="modal fade" role="dialog">
         <div class="modal-dialog">
