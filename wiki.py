@@ -71,9 +71,12 @@ def search():
                         # Stripping 'wiki/' part of path before serving as a search result
                         folder = root[len(WIKI_DATA + "/"):]
                         if folder == "":
-                            url = os.path.splitext(root[len(WIKI_DATA + "/"):] + "/" + item)[0]
+                            url = os.path.splitext(
+                                root[len(WIKI_DATA + "/"):] + "/" + item)[0]
                         else:
-                            url = "/" + os.path.splitext(root[len(WIKI_DATA + "/"):] + "/" + item)[0]
+                            url = "/" + \
+                                os.path.splitext(
+                                    root[len(WIKI_DATA + "/"):] + "/" + item)[0]
 
                         info = {'doc': item,
                                 'url': url,
@@ -100,7 +103,7 @@ def list_wiki(folderpath):
             root = root[:-1]
         for item in files:
             path = os.path.join(root, item)
-            mtime = os.path.getmtime(os.path.join(root,item))
+            mtime = os.path.getmtime(os.path.join(root, item))
             if os.path.join(WIKI_DATA, '.git') in str(path):
                 # We don't want to search there
                 app.logger.debug("skipping " + path + " : is git file")
@@ -113,20 +116,23 @@ def list_wiki(folderpath):
             if folder == "":
                 if item == HOMEPAGE:
                     continue
-                url = os.path.splitext(root[len(WIKI_DATA + "/"):] + "/" + item)[0]
+                url = os.path.splitext(
+                    root[len(WIKI_DATA + "/"):] + "/" + item)[0]
             else:
-                url = "/" + os.path.splitext(root[len(WIKI_DATA + "/"):] + "/" + item)[0]
+                url = "/" + \
+                    os.path.splitext(
+                        root[len(WIKI_DATA + "/"):] + "/" + item)[0]
 
             info = {'doc': item,
                     'url': url,
                     'folder': folder,
                     'folder_url': folder,
-                    'mtime':mtime,
+                    'mtime': mtime,
                     }
             list.append(info)
 
     if SYSTEM_SETTINGS['listsortMTime']:
-        list.sort(key=lambda x: x["mtime"],reverse=True)
+        list.sort(key=lambda x: x["mtime"], reverse=True)
     else:
         list.sort(key=lambda x: (str(x["url"]).casefold()))
 
@@ -144,11 +150,10 @@ def gitcom(pagename=""):
     except Exception as e:
         None
 
-    repo.git.add("--all")
-    date = datetime.datetime.now()
-    commit = "Commit add " + pagename + " " + str(date)
-
     try:
+        repo.git.add("--all")
+        date = datetime.datetime.now()
+        commit = "Commit add " + pagename + " " + str(date)
         repo.git.commit('-m', commit)
         app.logger.info("there was a new commit: " + commit)
     except Exception as e:
@@ -292,19 +297,23 @@ def upload_file():
             app.logger.error("Could not remove " + str(filename))
         return 'OK'
 
+
 @app.route('/knowledge-graph', methods=['GET'])
 def graph():
-    global links 
+    global links
     links = knowledge_graph.find_links()
-    return render_template("knowledge-graph.html", links=links ,system=SYSTEM_SETTINGS)
+    return render_template("knowledge-graph.html", links=links, system=SYSTEM_SETTINGS)
 
 # Translate id to page path
+
+
 @app.route('/nav/<path:id>/', methods=['GET'])
 def nav_id_to_page(id):
     for i in links:
-        if i["id"]==int(id):
+        if i["id"] == int(id):
             return redirect("/"+i["path"])
     return redirect("/")
+
 
 @app.route('/' + IMAGES_ROUTE + '/<path:filename>')
 def display_image(filename):
@@ -316,6 +325,7 @@ def display_image(filename):
 def toggle_darktheme():
     SYSTEM_SETTINGS['darktheme'] = not SYSTEM_SETTINGS['darktheme']
     return index()
+
 
 @app.route('/toggle-sorting/', methods=['GET'])
 def toggle_sort():
