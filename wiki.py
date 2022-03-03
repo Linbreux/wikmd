@@ -16,6 +16,10 @@ HOMEPAGE = os.getenv('HOMEPAGE', "homepage.md")
 HOMEPAGE_TITLE = os.getenv('HOMEPAGE_TITLE', "homepage")
 WIKI_DATA = os.getenv('WIKI_DATA', "wiki")
 IMAGES_ROUTE = os.getenv('IMAGES_ROUTE', 'img')
+WIKMD_LOGGING = os.getenv('WIKMD_LOGGING', 1)
+WIKMD_LOGGING_FILE = os.getenv('WIKMD_LOGGING_FILE', "wikmd.log")
+
+
 UPLOAD_FOLDER = WIKI_DATA + '/' + IMAGES_ROUTE
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
@@ -332,8 +336,8 @@ def toggle_sort():
     SYSTEM_SETTINGS['listsortMTime'] = not SYSTEM_SETTINGS['listsortMTime']
     return redirect("/list")
 
-
-logging.basicConfig(filename='wikmd.log', level=logging.INFO)
+if int(WIKMD_LOGGING) == 1:
+    logging.basicConfig(filename=WIKMD_LOGGING_FILE, level=logging.INFO)
 
 if __name__ == '__main__':
     gitcom()

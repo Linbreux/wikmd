@@ -37,3 +37,23 @@ It's possible to add a custom picture upload path. This is done by adding a `IMA
 export IMAGES_ROUTE="media/pictures"
 ```
 
+## Change logging file
+
+In case you need to rename the log file you can use `WIKMD_LOGGING_FILE`.
+
+`Default = wikmd.log`
+
+
+```
+export WIKMD_LOGGING_FILE=custom_log.log
+```
+
+## Disable logging
+
+You could optionaly choose to dissable logging by setting the environment variable `WIKMD_LOGGING` to `0`.
+
+`Default = 1`
+
+```
+export WIKMD_LOGGING=0
+```
