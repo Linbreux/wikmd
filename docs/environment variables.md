@@ -50,7 +50,7 @@ export WIKMD_LOGGING_FILE=custom_log.log
 
 ## Disable logging
 
-You could optionaly choose to dissable logging by setting the environment variable `WIKMD_LOGGING` to `0`.
+You could optionaly choose to disable logging by setting the environment variable `WIKMD_LOGGING` to `0`.
 
 `Default = 1`
 
