@@ -87,3 +87,5 @@ lof: true
 ---
 ```
 For more information you have to read the pandoc documentation.
+
+[Using the version control system](/Using the version control system)
