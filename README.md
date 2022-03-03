@@ -101,7 +101,7 @@ mkdir ~/wiki/img
 ## Knowledge graph (beta)
 NEW: A knowledge graph that visualize the links between different pages.
 
-Link files with a full path name like: ```test/path``` instead of ```path```
+Link files with a full path name like: ```/test/path``` instead of ```path```
 
 ![Knowledge graph](static/images/knowledge-graph.png)
 
