@@ -1,4 +1,7 @@
 # wikmd
+> :information_source: **Information** can be found in the docs: [https://linbreux.github.io/wikmd/](https://linbreux.github.io/wikmd/)
+
+
 ![preview](static/images/wiki.gif)
 
 ## What is it?
@@ -21,186 +24,15 @@ To view the documents in the browser, the document is converted to html.
 - codemirror for editing
 
 ## Installation
-! It's tested on windows and linux based systems.
-! Runs on flask server
 
-Clone te repository
-```
-git clone https://github.com/Linbreux/wikmd.git
-```
-cd in wikmd
-```
-cd wikmd
-```
+Detailed installation instruction can be found [here](https://linbreux.github.io/wikmd/installation.html).
 
-Create a virtual env and activate it(optional)
-```
-virtualenv venv
-source venv/bin/activate
-```
-Install requirements
-```
-pip install -r requirements.txt
-```
-Run the wiki
-```
-export FLASK_APP=wiki.py
-flask run --host=0.0.0.0
-```
-
-Now visit localhost:5000 and you will see the wiki. With the 0.0.0.0. option it will show up everywhere on the network.
-
-If there are problems feel free to open an github issue you could post the output of wikmd.log to it.
-
-### Linux
-
-Maybe you need to install pandoc on your system before this works.
-```
-sudo apt-get update && sudo apt-get install pandoc
-```
-
-### Windows
-
-You should install [pandoc](https://pandoc.org/installing.html) on your windows system. Now you should be able to start
-the server.
-```
-python wiki.py
-```
-If the content of the markdown files are not visible you should add the `pandoc-xnos` location to your path variable. Info about [Environment variables](https://www.computerhope.com/issues/ch000549.htm).
-```
-pip show --files pandoc-xnos
-# look for "location" in the output
-# example: C:\users\<user>\appdata\local\packages\pythonsoftwarefoundation.python.3.x\localcache\local-packages\python38\site-packages
-# change "site-packages" to "Scripts"
-# example: C:\Users\<user>\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.x\LocalCache\local-packages\Python38\Scripts
-# open your Environment variables and add the changed line to the path
-SET PATH=%PATH%;C:\Users\<user>\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.x\LocalCache\local-packages\Python38\Scripts
-```
-
-
-## Docker install
-
-### Build docker
-```
-docker build -t wiki-md:latest .
-```
-### Run Docker
-
-You may need to create wiki/data in your homefolder or you can change it if you want another place.
-
-```
-sudo docker run -d -p 5000:5000 -v ~/wiki/data:/app/wiki wiki-md
-```
-If you would like to have the default files inside your instance, you should copy the wiki files to ~/wiki/data in this case.
-Also highly recommended is to create a folder 'img' inside 'wiki/'
-
-```
-cp wikmd/wiki/* ~/wiki/data/
-mkdir ~/wiki/img
-```
 ## Knowledge graph (beta)
-NEW: A knowledge graph that visualize the links between different pages.
 
-Link files with a full path name like: ```/test/path``` instead of ```path```
+More info can be found in the [docs](https://linbreux.github.io/wikmd/knowledge%20graph.html).
 
 ![Knowledge graph](static/images/knowledge-graph.png)
 
-### Image support
-![](https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Markdown-mark.svg/208px-Markdown-mark.svg.png)
+## How to use wikmd
 
-### Latex support
-
-$$x_{1,2} = \frac{-b ± \sqrt{b^2 - 4 a c}}{2a}$$
-## Homepage
-
-The homepage is defaulted to the "homepage.md" file. If you want to use a different file, you can specify the file to use for the homepage with the environment variable `HOMEPAGE` as well as the title with `HOMEPAGE_TITLE`.
-
-## Uploaded images
-
-If you have images that you don't want to be available on the internet, you can put them inside the folder **"wiki/img/"** for example **"testfile.png"**, now you can link to **"/wiki/img/testfile.png"**
-
-## Custom data path
-
-Usually, wikmd looks for content in the subfolder `wiki`. In case you want to store your wiki data somewhere else, you can set a custom data path via the environment variable `WIKI_DATA`:
-
-```
-export WIKI_DATA="~/.wikidata"
-```
-
-## Custom picture upload
-
-It's possible to add a custom picture upload path. This is done by adding a `IMAGE_ROUTE` environment variable.
-
-```
-export IMAGES_ROUTE="media/pictures"
-```
-
-Thanks to @reactorcoremeltdown
-
-## Latex
-
-It's possible to use latex syntax inside your markdown because the markdown is first converted to latex and after that to html. This means you have a lot more flexibility.
-
-### Change image size
-```
-![](https://i.ibb.co/Dzp0SfC/download.jpg){width="50%"}
-```
-
-### Image references
-```
-![Nice mountain](https://i.ibb.co/Dzp0SfC/download.jpg){#fig:mountain width="50%"}
-
-Inside picture @fig:mountain you can see a nice mountain.
-
-```
-
-### Math
-```
-\begin{align}
-y(x) &= \int_0^\infty x^{2n} e^{-a x^2}\,dx\\
-&= \frac{2n-1}{2a} \int_0^\infty x^{2(n-1)} e^{-a x^2}\,dx\\
-&= \frac{(2n-1)!!}{2^{n+1}} \sqrt{\frac{\pi}{a^{2n+1}}}\\
-&= \frac{(2n)!}{n! 2^{2n+1}} \sqrt{\frac{\pi}{a^{2n+1}}}
-\end{align}
-```
-
-```
-You can also use $inline$ math to show $a=2$ and $b=8$
-```
-
-## Converting the files
-
-Open the wiki folder of your instance.  
-
-|- static  
-|- templates  
-|- **wiki** <--This folder  
-|- wiki.py  
-
-In this folder all the markdownfiles are listed. Editing the files will be visible in the web-version.  
-
-|- homepage.md  
-|- How to use the wiki.md  
-|- Markdown cheatsheet.md  
-
-The advantage is that u can use the commandline to process some data. For example using pandoc:
-```
-pandoc -f markdown -t latex homepage.md How\ to\ use\ the\ wiki.md -o file.pdf --pdf-engine=xelatex
-```
-This creates a nice pdf version of your article.  Its possible you have to create a yml header on top of your document to set the margins etc better
-```
----
-title: titlepage
-author: your name
-date: 05-11-2020
-geometry: margin=2.5cm
-header-includes: |
-        \usepackage{caption}
-        \usepackage{subcaption}
-lof: true
----
-```
-For more information you have to read the pandoc documentation.
-
-### New features
-Create a page with a random id by typing *{id}* in the name.
+[Using the wiki](https://linbreux.github.io/wikmd/Using%20the%20wiki.html)
