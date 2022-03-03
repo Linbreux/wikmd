@@ -5,5 +5,5 @@ _Provide a short overview ..._
 _Context to describe changes if necessary_
 
 ### Checks
-- [ ] In case of new feature, add short overview in ```README.md``` 
+- [ ] In case of new feature, add short overview in ```docs/<corresponding file>``` 
 - [ ] Tested changes
