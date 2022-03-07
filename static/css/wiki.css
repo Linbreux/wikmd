@@ -1,0 +1,34 @@
+
+blockquote {
+    padding: 0 50px;
+    margin-left: 0;
+    border-left: 4px solid orange;
+}
+
+pre {
+    background-color: #f6f8fa;
+    padding: 16px;
+    border-radius: 6px;
+}
+
+code, pre {
+    font-family: monospace;
+    font-size: 14px
+}
+
+img {
+    max-width: 100%
+}
+
+figure {
+    text-align: center
+}
+
+.container-fluid {
+    padding-right: 0px;
+    padding-left: 0px
+}
+
+.hljs {
+    background-color: #f6f8fa;
+}
