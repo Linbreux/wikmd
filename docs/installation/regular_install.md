@@ -32,6 +32,10 @@ Run the wiki
 export FLASK_APP=wiki.py
 flask run --host=0.0.0.0
 ```
+or 
+```
+python wiki.py
+```
 
 Now visit localhost:5000 and you will see the wiki. With the 0.0.0.0. option it will show up everywhere on the network.
 
