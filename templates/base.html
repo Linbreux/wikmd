@@ -35,7 +35,7 @@
     <!-- Navbar top -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
         <div class="container-fluid mx-2">
-            <a class="navbar-brand" href="#">Wiki</a>
+            <a class="navbar-brand" href="/">Wiki</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
                     aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -52,9 +52,10 @@
                 </form>
 
                 <ul class="navbar-nav mx-lg-2">
+                    <!-- New button -->
                     <li class="nav-item">
                         <a class="nav-link" href="/add_new">
-                            <button class="btn btn-success" type="submit">
+                            <button class="btn btn-success" type="button">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-plus" viewBox="0 0 16 16">
                                     <path d="M8.5 6a.5.5 0 0 0-1 0v1.5H6a.5.5 0 0 0 0 1h1.5V10a.5.5 0 0 0 1 0V8.5H10a.5.5 0 0 0 0-1H8.5V6z"/>
                                     <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1z"/>
@@ -65,15 +66,14 @@
                     </li>
                 </ul>
 
+                <!-- List all pages -->
                 <ul class="navbar-nav me-auto ms-sm-2">
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="/">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/list">List all</a>
+                        <a class="nav-link" href="/list">List all pages</a>
                     </li>
                 </ul>
 
+                <!-- Graph and toggle dark mode -->
                 <ul class="navbar-nav ms-auto ms-sm-2">
                     <li class="nav-item">
                         <a class="nav-link" href="/knowledge-graph">
@@ -102,8 +102,8 @@
         </div>
 
         <!-- Footer -->
-        <footer class="d-flex flex-wrap align-items-center py-3 my-4 mx-2 border-top">
-            <ul class="nav d-flex col-md-4 list-unstyled">
+        <footer class="d-flex flex-wrap justify-content-center py-3 my-4 mx-2 border-top">
+            <ul class="nav d-flex list-unstyled">
                 <li class="ms-2">
                     <a class="text-muted text-center" href="https://github.com/Mik3Rizzo/wikmd">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-github">
@@ -116,10 +116,7 @@
                 </li>
             </ul>
         </footer>
-
     </div>
-
-
 
 
     <!-- Scripts -->
