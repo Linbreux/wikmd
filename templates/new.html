@@ -5,7 +5,13 @@
     <link href="/static/css/filepond.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/codemirror.min.css" rel="stylesheet">
     <link href="/static/css/codemirror.custom.css" rel="stylesheet">
-    <link href="/static/css/codemirror.custom.dark.css" rel="stylesheet">
+
+    <!-- Add dark css if dark theme is toggled -->
+    {% if system.darktheme == True %}
+        <link href="/static/css/codemirror.custom.dark.css" rel="stylesheet">
+        <link rel="stylesheet" href="/static/css/filepond.dark.css" rel="stylesheet">
+    {% endif %}
+
 {%endblock%}
 
 

@@ -16,4 +16,7 @@
 
     /* CodeMirror */
     --linenumber-dark-color: #77797c;
+
+    /* FilePond */
+    --bg-filepond-dark: #303033;
 }
