@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, send_from_directory
 import logging
 from werkzeug.utils import secure_filename
 from random import randint
@@ -6,11 +6,13 @@ import datetime
 import time
 import git
 import pypandoc
-import markdown
 import os
 import re
 import uuid
 import knowledge_graph
+
+HOST = os.getenv('HOST', "0.0.0.0")
+PORT = os.getenv('PORT', 80)
 
 HOMEPAGE = os.getenv('HOMEPAGE', "homepage.md")
 HOMEPAGE_TITLE = os.getenv('HOMEPAGE_TITLE', "homepage")
@@ -18,7 +20,6 @@ WIKI_DATA = os.getenv('WIKI_DATA', "wiki")
 IMAGES_ROUTE = os.getenv('IMAGES_ROUTE', 'img')
 WIKMD_LOGGING = os.getenv('WIKMD_LOGGING', 1)
 WIKMD_LOGGING_FILE = os.getenv('WIKMD_LOGGING_FILE', "wikmd.log")
-
 
 UPLOAD_FOLDER = WIKI_DATA + '/' + IMAGES_ROUTE
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
@@ -31,13 +32,18 @@ SYSTEM_SETTINGS = {
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-log = logging.getLogger('werkzeug')
-log.setLevel(logging.ERROR)
+logger = logging.getLogger('werkzeug')
+logger.setLevel(logging.ERROR)
 
 
 def save(page_name):
+    """
+    Function that saves a *.md page and commits the changes.
+    :param page_name: name of the page
+    """
     content = request.form['CT']
-    app.logger.info("saving " + page_name)
+    app.logger.info(f"saving {page_name}")
+
     try:
         filename = os.path.join(WIKI_DATA, page_name + '.md')
         dirname = os.path.dirname(filename)
@@ -46,23 +52,26 @@ def save(page_name):
         with open(filename, 'w') as f:
             f.write(content)
     except Exception as e:
-        app.logger.error("Error while saving: " + str(e))
-    gitcom(pagename=page_name)
+        app.logger.error(f"Error while saving {page_name}: {str(e)}")
 
 
 def search():
+    """
+    Function that searches for a term.
+    :return:
+    """
     search_term = request.form['ss']
     escaped_search_term = re.escape(search_term)
     found = []
 
-    app.logger.info("searching for " + search_term + " ...")
+    app.logger.info(f"searching for {search_term} ...")
 
     for root, subfolder, files in os.walk(WIKI_DATA):
         for item in files:
             path = os.path.join(root, item)
             if os.path.join(WIKI_DATA, '.git') in str(path):
                 # We don't want to search there
-                app.logger.debug("skipping " + path + " : is git file")
+                app.logger.debug(f"skipping {path} is git file")
                 continue
             if os.path.join(WIKI_DATA, IMAGES_ROUTE) in str(path):
                 # Nothing interesting there too
@@ -87,9 +96,9 @@ def search():
                                 'folder': folder,
                                 'folder_url': root[len(WIKI_DATA + "/"):]}
                         found.append(info)
-                        app.logger.info("found " + search_term + " in " + item)
+                        app.logger.info(f"found {search_term} in {item}")
                 except Exception as e:
-                    app.logger.error("There was an error: " + str(e))
+                    app.logger.error(f"There was an error: {str(e)}")
 
     return render_template('search.html', zoekterm=found, system=SYSTEM_SETTINGS)
 
@@ -110,7 +119,7 @@ def list_wiki(folderpath):
             mtime = os.path.getmtime(os.path.join(root, item))
             if os.path.join(WIKI_DATA, '.git') in str(path):
                 # We don't want to search there
-                app.logger.debug("skipping " + path + " : is git file")
+                app.logger.debug(f"skipping {path}: is git file")
                 continue
             if os.path.join(WIKI_DATA, IMAGES_ROUTE) in str(path):
                 # Nothing interesting there too
@@ -143,7 +152,7 @@ def list_wiki(folderpath):
     return render_template('list_files.html', list=list, folder=folderpath, system=SYSTEM_SETTINGS)
 
 
-def gitcom(pagename=""):
+def git_commit(pagename=""):
     try:
         repo = git.Repo.init(WIKI_DATA)
         repo.git.checkout("-b", "master")
@@ -152,16 +161,16 @@ def gitcom(pagename=""):
         app.logger.info("There doesn't seem to be a repo, creating one...")
 
     except Exception as e:
-        None
+        app.logger.error(f"There was an error: {str(e)}")
 
     try:
         repo.git.add("--all")
         date = datetime.datetime.now()
-        commit = "Commit add " + pagename + " " + str(date)
-        repo.git.commit('-m', commit)
-        app.logger.info("there was a new commit: " + commit)
+        commit = f"Commit add {pagename} {str(date)}"
+        repo.git.git_commit('-m', commit)
+        app.logger.info(f"there was a new commit: {commit}")
     except Exception as e:
-        app.logger.info("nothing commit: " + str(e))
+        app.logger.info(f"nothing commit: {str(e)}")
 
 
 @app.route('/<path:file_page>', methods=['POST', 'GET'])
@@ -183,7 +192,7 @@ def file_page(file_page):
             file_page = folder[-1:][0]
             folder = folder[:-1]
             folder = "/".join(folder)
-            app.logger.info("showing html page of " + file_page)
+            app.logger.info(f"showing html page of {file_page}")
         except Exception as a:
             app.logger.info(a)
         return render_template('content.html', title=file_page, folder=folder, info=html, modif=mod,
@@ -202,10 +211,10 @@ def index():
                 os.path.join(WIKI_DATA, HOMEPAGE), "html5", format='md', extra_args=["--mathjax"],
                 filters=['pandoc-xnos'])
 
-        except Exception as a:
-            app.logger.error(a)
+        except Exception as e:
+            app.logger.error(e)
 
-        gitcom()
+        git_commit()
         return render_template('index.html', homepage=html, system=SYSTEM_SETTINGS)
 
 
@@ -214,6 +223,7 @@ def add_new():
     if request.method == 'POST':
         page_name = fetch_page_name()
         save(page_name)
+        git_commit(page_name)
 
         return redirect(url_for("file_page", file_page=page_name))
     else:
@@ -225,6 +235,7 @@ def edit_homepage():
     if request.method == 'POST':
         page_name = fetch_page_name()
         save(page_name)
+        git_commit(page_name)
 
         return redirect(url_for("file_page", file_page=page_name))
     else:
@@ -258,6 +269,8 @@ def edit(page):
             os.remove(filename)
 
         save(page_name)
+        git_commit(page_name)
+
         return redirect(url_for("file_page", file_page=page_name))
     else:
         with open(filename, 'r', encoding="utf-8") as f:
@@ -284,10 +297,10 @@ def upload_file():
 
             file_names.append(filename)
             try:
-                app.logger.info("Saving " + filename)
+                app.logger.info(f"Saving {filename}")
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             except Exception as e:
-                app.logger.error("error while saving image: " + str(e))
+                app.logger.error(f"Error while saving image: {str(e)}")
         return filename
 
     # DELETE when DELETE
@@ -295,10 +308,10 @@ def upload_file():
         # request data is in format "b'nameoffile.png" decode by utf-8
         filename = request.data.decode("utf-8")
         try:
-            app.logger.info("removing " + str(filename))
+            app.logger.info(f"removing {str(filename)}")
             os.remove((os.path.join(app.config['UPLOAD_FOLDER'], filename)))
-        except:
-            app.logger.error("Could not remove " + str(filename))
+        except Exception as e:
+            app.logger.error(f"Could not remove {str(filename)}")
         return 'OK'
 
 
@@ -336,9 +349,11 @@ def toggle_sort():
     SYSTEM_SETTINGS['listsortMTime'] = not SYSTEM_SETTINGS['listsortMTime']
     return redirect("/list")
 
-if int(WIKMD_LOGGING) == 1:
-    logging.basicConfig(filename=WIKMD_LOGGING_FILE, level=logging.INFO)
 
 if __name__ == '__main__':
-    gitcom()
-    app.run(debug=True, host="0.0.0.0")
+
+    if int(WIKMD_LOGGING) == 1:
+        logging.basicConfig(filename=WIKMD_LOGGING_FILE, level=logging.INFO)
+
+    git_commit()
+    app.run(debug=True, host=HOST, port=PORT)

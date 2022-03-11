@@ -1,0 +1,4 @@
+@import "wiki.colors.css";
+
+.CodeMirror { background: var(--bg-codeblock-light); height: auto; padding: 6px;  margin-bottom: 6px; border-radius: 6px; }
+.CodeMirror-gutters { background: var(--bg-codeblock-light); padding-right: 6px; }
