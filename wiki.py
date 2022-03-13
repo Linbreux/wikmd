@@ -11,8 +11,8 @@ import re
 import uuid
 import knowledge_graph
 
-HOST = os.getenv('HOST', "0.0.0.0")
-PORT = os.getenv('PORT', 80)
+HOST = os.getenv('WIKI_HOST', "0.0.0.0")
+PORT = os.getenv('WIKI_PORT', 80)
 
 HOMEPAGE = os.getenv('HOMEPAGE', "homepage.md")
 HOMEPAGE_TITLE = os.getenv('HOMEPAGE_TITLE', "homepage")
@@ -356,4 +356,4 @@ if __name__ == '__main__':
         logging.basicConfig(filename=WIKMD_LOGGING_FILE, level=logging.INFO)
 
     git_commit()
-    app.run(debug=True, host=HOST, port=PORT)
+    app.run(debug=True, host=WIKI_HOST, port=WIKI_PORT)
