@@ -12,7 +12,7 @@ import uuid
 import knowledge_graph
 
 HOST = os.getenv('WIKI_HOST', "0.0.0.0")
-PORT = os.getenv('WIKI_PORT', 80)
+PORT = os.getenv('WIKI_PORT', 5000)
 
 HOMEPAGE = os.getenv('HOMEPAGE', "homepage.md")
 HOMEPAGE_TITLE = os.getenv('HOMEPAGE_TITLE', "homepage")
