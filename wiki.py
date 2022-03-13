@@ -356,4 +356,4 @@ if __name__ == '__main__':
         logging.basicConfig(filename=WIKMD_LOGGING_FILE, level=logging.INFO)
 
     git_commit()
-    app.run(debug=True, host=WIKI_HOST, port=WIKI_PORT)
+    app.run(debug=True, host=HOST, port=PORT)
