@@ -1,0 +1,4 @@
+@import "wiki.colors.css";
+
+.filepond--panel-root { background: var(--bg-filepond-dark) }
+.filepond--drop-label { color: var(--txt-dark) }

@@ -21,6 +21,16 @@ export HOMEPAGE=<location>
 export HOMEPAGE_TITLE=<title>
 ```
 
+## Custom port and host
+
+You can change the host and port value by respectively changing the `WIKI_HOST` and `WIKI_PORT` variable.
+
+```
+export WIKI_HOST=0.0.0.0
+export WIKI_PORT=80
+```
+
+
 ## Custom data path
 
 Usually, wikmd looks for content in the subfolder `wiki`. In case you want to store your wiki data somewhere else, you can set a custom data path via the environment variable `WIKI_DATA`:
