@@ -69,15 +69,22 @@ def git_repo_init() -> git.Repo:
     """
     try:
         repo = git.Repo.init(WIKI_DIRECTORY)
-        repo.git.checkout("-b", "master")
+
+        # Check if the directory is already a .git repo
+        if ".git" in os.listdir(WIKI_DIRECTORY):
+            repo.git.checkout("master")  # checkout the master branch
+            app.logger.info("Detected existing repo.")
+        else:
+            repo.git.checkout("-b", "master")  # create a new (-b) master branch
+            app.logger.info("There doesn't seem to be a repo, a new one has been created.")
+
         repo.config_writer().set_value("user", "name", "wikmd").release()
         repo.config_writer().set_value("user", "email", "wikmd@no-mail.com").release()
-        app.logger.info("There doesn't seem to be a repo, creating one...")
 
         return repo
 
     except Exception as e:
-        app.logger.error(f"There was an error: {str(e)}")
+        app.logger.error(f"Error during git initialization: {str(e)}")
 
 
 def git_pull():
