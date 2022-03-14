@@ -225,8 +225,8 @@ def list_wiki(folderpath):
     return render_template('list_files.html', list=folder_list, folder=folderpath, system=SYSTEM_SETTINGS)
 
 
-@app.route('/<path:request_path>', methods=['POST', 'GET'])
-def wiki_page(request_path):
+@app.route('/<path:file_page>', methods=['POST', 'GET'])
+def file_page(file_page):
     if request.method == 'POST':
         return search()
     else:
@@ -234,9 +234,9 @@ def wiki_page(request_path):
         mod = ""
         folder = ""
 
-        if "favicon" not in request_path:  # if the GET request is not for the favicon
+        if "favicon" not in file_page:  # if the GET request is not for the favicon
             try:
-                md_file_path = os.path.join(CONFIG["wiki_directory"], request_path + ".md")
+                md_file_path = os.path.join(CONFIG["wiki_directory"], file_page + ".md")
                 # latex = pypandoc.convert_file("wiki/" + file_page + ".md", "tex", format="md")
                 # html = pypandoc.convert_text(latex,"html5",format='tex', extra_args=["--mathjax"])
 
@@ -245,15 +245,15 @@ def wiki_page(request_path):
                                              format='md', extra_args=["--mathjax"], filters=['pandoc-xnos'])
 
                 mod = "Last modified: %s" % time.ctime(os.path.getmtime(md_file_path))
-                folder = request_path.split("/")
-                request_path = folder[-1:][0]
+                folder = file_page.split("/")
+                file_page = folder[-1:][0]
                 folder = folder[:-1]
                 folder = "/".join(folder)
-                app.logger.info(f"Showing HTML page of '{request_path}'")
+                app.logger.info(f"Showing HTML page of '{file_page}'")
             except Exception as a:
                 app.logger.info(a)
 
-        return render_template('content.html', title=request_path, folder=folder, info=html, modif=mod,
+        return render_template('content.html', title=file_page, folder=folder, info=html, modif=mod,
                                system=SYSTEM_SETTINGS)
 
 
@@ -282,7 +282,7 @@ def add_new():
         save(page_name)
         git_commit(page_name, "Add")
 
-        return redirect(url_for("wiki_page", file_page=page_name))
+        return redirect(url_for("file_page", file_page=page_name))
     else:
         return render_template('new.html', upload_path=CONFIG["images_route"], system=SYSTEM_SETTINGS)
 
@@ -294,7 +294,7 @@ def edit_homepage():
         save(page_name)
         git_commit(page_name, "Edit")
 
-        return redirect(url_for("wiki_page", file_page=page_name))
+        return redirect(url_for("file_page", file_page=page_name))
     else:
         with open(os.path.join(CONFIG["wiki_directory"], CONFIG["homepage"]), 'r', encoding="utf-8") as f:
             content = f.read()
@@ -321,7 +321,7 @@ def edit(page):
         save(page_name)
         git_commit(page_name, "Edit")
 
-        return redirect(url_for("wiki_page", file_page=page_name))
+        return redirect(url_for("file_page", file_page=page_name))
     else:
         with open(filename, 'r', encoding="utf-8") as f:
             content = f.read()
