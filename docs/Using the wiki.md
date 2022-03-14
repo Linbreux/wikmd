@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Using the wiki
-nav_order: 6
+nav_order: 7
 ---
 # Using the wiki
 

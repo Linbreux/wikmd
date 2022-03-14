@@ -1,9 +1,9 @@
 ---
 layout: default
-title: Environment variables
+title: Configuration with environment variables
 nav_order: 5
 ---
-# Environment variables
+# Configuration with environment variables
 
 You can change static locations using Environment variables. Using (in linux):
 ```
@@ -23,11 +23,11 @@ export HOMEPAGE_TITLE=<title>
 
 ## Custom port and host
 
-You can change the host and port value by respectively changing the `WIKI_HOST` and `WIKI_PORT` variable.
+You can change the host and port value by respectively changing the `WIKMD_HOST` and `WIKMD_PORT` variable.
 
 ```
-export WIKI_HOST=0.0.0.0
-export WIKI_PORT=80
+export WIKMD_HOST=0.0.0.0
+export WIKMD_PORT=80
 ```
 
 
@@ -53,7 +53,6 @@ In case you need to rename the log file you can use `WIKMD_LOGGING_FILE`.
 
 `Default = wikmd.log`
 
-
 ```
 export WIKMD_LOGGING_FILE=custom_log.log
 ```
@@ -66,4 +65,15 @@ You could optionaly choose to disable logging by setting the environment variabl
 
 ```
 export WIKMD_LOGGING=0
+```
+
+## Enable synchronization with remote repo
+
+You could specify if you want to synchronize the wiki with your personal remote git repo. to do this, set the
+environment variable `SYNC_WITH_REMOTE` to `1`.
+
+`Default = 0`
+
+```
+export SYNCH_WITH_REMOTE=1
 ```
