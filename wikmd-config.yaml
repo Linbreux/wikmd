@@ -1,0 +1,13 @@
+# wikmd configuration file
+
+wikmd_host: "0.0.0.0"
+wikmd_port: 5000
+wikmd_logging: 1
+wikmd_logging_file: "wikmd.log"
+
+wiki_directory: "wiki"
+images_route: "img"
+
+homepage: "homepage.md"
+homepage_title: "homepage"
+

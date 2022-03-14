@@ -6,6 +6,7 @@ import re
 import logging
 import uuid
 import pypandoc
+import yaml
 import knowledge_graph
 
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory
@@ -13,28 +14,36 @@ from werkzeug.utils import secure_filename
 from random import randint
 
 
-WIKI_HOST_DEFAULT = "0.0.0.0"
-WIKI_PORT_DEFAULT = 5000
+WIKMD_CONFIG_FILE = "wikmd-config.yaml"
 
-HOMEPAGE_DEFAULT = "homepage.md"
-HOMEPAGE_TITLE_DEFAULT = "homepage"
-WIKI_DIRECTORY_DEFAULT = "wiki"
-IMAGES_ROUTE_DEFAULT = "img"
-
+# Default config parameters
+WIKMD_HOST_DEFAULT = "0.0.0.0"
+WIKMD_PORT_DEFAULT = 5000
 WIKMD_LOGGING_DEFAULT = 1
 WIKMD_LOGGING_FILE_DEFAULT = "wikmd.log"
 
+WIKI_DIRECTORY_DEFAULT = "wiki"
+IMAGES_ROUTE_DEFAULT = "img"
 
-HOST = os.getenv('WIKI_HOST', WIKI_HOST_DEFAULT)
-PORT = os.getenv('WIKI_PORT', WIKI_PORT_DEFAULT)
+HOMEPAGE_DEFAULT = "homepage.md"
+HOMEPAGE_TITLE_DEFAULT = "homepage"
 
-HOMEPAGE = os.getenv('HOMEPAGE', HOMEPAGE_DEFAULT)
-HOMEPAGE_TITLE = os.getenv('HOMEPAGE_TITLE', HOMEPAGE_TITLE_DEFAULT)
-WIKI_DIRECTORY = os.getenv('WIKI_DIRECTORY', WIKI_DIRECTORY_DEFAULT)
-IMAGES_ROUTE = os.getenv('IMAGES_ROUTE', IMAGES_ROUTE_DEFAULT)
 
-WIKMD_LOGGING = os.getenv('WIKMD_LOGGING', WIKMD_LOGGING_DEFAULT)
-WIKMD_LOGGING_FILE = os.getenv('WIKMD_LOGGING_FILE', WIKMD_LOGGING_FILE_DEFAULT)
+# .yaml config parameters
+with open(WIKMD_CONFIG_FILE) as f:
+    yaml_config = yaml.safe_load(f)
+
+# Load config parameters from yaml, env vars or default values (the firsts take precedence)
+WIKMD_HOST = yaml_config["wikmd_host"] or os.getenv("WIKMD_HOST") or WIKMD_HOST_DEFAULT
+WIKMD_PORT = yaml_config["wikmd_port"] or os.getenv("WIKMD_PORT") or WIKMD_PORT_DEFAULT
+WIKMD_LOGGING = yaml_config["wikmd_logging"] or os.getenv("WIKMD_LOGGING") or WIKMD_LOGGING_DEFAULT
+WIKMD_LOGGING_FILE = yaml_config["wikmd_logging_file"] or os.getenv("WIKMD_LOGGING_FILE") or WIKMD_LOGGING_FILE_DEFAULT
+
+WIKI_DIRECTORY = yaml_config["wiki_directory"] or os.getenv("WIKI_DIRECTORY") or WIKI_DIRECTORY_DEFAULT
+IMAGES_ROUTE = yaml_config["images_route"] or os.getenv("IMAGES_ROUTE") or IMAGES_ROUTE_DEFAULT
+
+HOMEPAGE = yaml_config["homepage"] or os.getenv("HOMEPAGE") or HOMEPAGE_DEFAULT
+HOMEPAGE_TITLE = yaml_config["homepage_title"] or os.getenv("HOMEPAGE_TITLE") or HOMEPAGE_TITLE_DEFAULT
 
 
 UPLOAD_FOLDER = WIKI_DIRECTORY + '/' + IMAGES_ROUTE
@@ -378,7 +387,7 @@ def run_wiki():
         logging.basicConfig(filename=WIKMD_LOGGING_FILE, level=logging.INFO)
 
     git_commit()
-    app.run(debug=True, host=HOST, port=PORT)
+    app.run(debug=True, host=WIKMD_HOST, port=WIKMD_PORT)
 
 
 if __name__ == '__main__':
