@@ -39,23 +39,27 @@ def git_repo_init() -> git.Repo:
     :return: initialized repo
     """
     try:
-        repo = git.Repo.init(CONFIG["wiki_directory"])
-
-        # Check if the directory is already a .git repo
-        if ".git" in os.listdir(CONFIG["wiki_directory"]):
-            repo.git.checkout("master")  # checkout the master branch
-            app.logger.info("Detected existing repo.")
-        else:
-            repo.git.checkout("-b", "master")  # create a new (-b) master branch
-            app.logger.info("There doesn't seem to be a repo, a new one has been created.")
-
-        repo.config_writer().set_value("user", "name", "wikmd").release()
-        repo.config_writer().set_value("user", "email", "wikmd@no-mail.com").release()
-
+        repo = git.Repo(CONFIG["wiki_directory"])
+        repo.git.checkout("master")  # checkout the master branch
         return repo
-
     except Exception as e:
-        app.logger.error(f"Error during git initialization: {str(e)}")
+        try:
+            # Check if the directory is already a .git repo
+            if ".git" in os.listdir(CONFIG["wiki_directory"]):
+                repo.git.checkout("master")  # checkout the master branch
+                app.logger.info("Detected existing repo.")
+            else:
+                repo = git.Repo.init(CONFIG["wiki_directory"])
+                repo.git.checkout("-b", "master")  # create a new (-b) master branch
+                app.logger.info("There doesn't seem to be a repo, a new one has been created.")
+
+            repo.config_writer().set_value("user", "name", "wikmd").release()
+            repo.config_writer().set_value("user", "email", "wikmd@no-mail.com").release()
+
+            return repo
+
+        except Exception as e:
+            app.logger.error(f"Error during git initialization: {str(e)}")
 
 
 def git_pull():
