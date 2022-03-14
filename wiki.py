@@ -62,6 +62,68 @@ logger = logging.getLogger('werkzeug')
 logger.setLevel(logging.ERROR)
 
 
+def git_repo_init() -> git.Repo:
+    """
+    Function that initializes the git repo of the Wiki (if there is one).
+    :return: initialized repo
+    """
+    try:
+        repo = git.Repo.init(WIKI_DIRECTORY)
+        repo.git.checkout("-b", "master")
+        repo.config_writer().set_value("user", "name", "wikmd").release()
+        repo.config_writer().set_value("user", "email", "wikmd@no-mail.com").release()
+        app.logger.info("There doesn't seem to be a repo, creating one...")
+
+        return repo
+
+    except Exception as e:
+        app.logger.error(f"There was an error: {str(e)}")
+
+
+def git_pull():
+    """
+    Function that pulls from the wiki repo.
+    """
+    try:
+        # git pull
+        repo.git.pull()
+        app.logger.info(f"Pulled from the repo")
+    except Exception as e:
+        app.logger.info(f"Error during git pull: {str(e)}")
+
+
+def git_commit(page_name="", commit_type=""):
+    """
+    Function that commits changes to the wiki repo.
+    :param commit_type: could be 'Add', 'Edit' or 'Remove'.
+    :param page_name: name of the page that has been changed.
+    """
+    try:
+        # git add --all
+        repo.git.add("--all")
+        date = datetime.datetime.now()
+        commit_msg = f"{commit_type} page '{page_name}' on {str(date)}"
+        # git commit -m
+        repo.git.commit('-m', commit_msg)
+        app.logger.info(f"New git commit: {commit_msg}")
+    except Exception as e:
+        app.logger.info(f"Nothing to commit: {str(e)}")
+
+
+def git_push():
+    """
+    Function that pushes changes to the wiki repo.
+    """
+    try:
+        repo.git.push()
+        app.logger.info("Pushed to the repo.")
+    except Exception as e:
+        app.logger.info(f"Error during git push: {str(e)}")
+
+
+repo = git_repo_init()
+
+
 @app.route('/list/', methods=['GET'])
 def list_full_wiki():
     return list_wiki("")
@@ -152,7 +214,6 @@ def index():
         except Exception as e:
             app.logger.error(e)
 
-        git_commit()
         return render_template('index.html', homepage=html, system=SYSTEM_SETTINGS)
 
 
@@ -161,7 +222,7 @@ def add_new():
     if request.method == 'POST':
         page_name = fetch_page_name()
         save(page_name)
-        git_commit(page_name)
+        git_commit(page_name, "Add")
 
         return redirect(url_for("file_page", file_page=page_name))
     else:
@@ -173,7 +234,7 @@ def edit_homepage():
     if request.method == 'POST':
         page_name = fetch_page_name()
         save(page_name)
-        git_commit(page_name)
+        git_commit(page_name, "Edit")
 
         return redirect(url_for("file_page", file_page=page_name))
     else:
@@ -187,7 +248,7 @@ def edit_homepage():
 def remove(page):
     filename = os.path.join(WIKI_DIRECTORY, page + '.md')
     os.remove(filename)
-
+    git_commit(page_name=page, commit_type="Remove")
     return redirect("/")
 
 
@@ -200,7 +261,7 @@ def edit(page):
             os.remove(filename)
 
         save(page_name)
-        git_commit(page_name)
+        git_commit(page_name, "Edit")
 
         return redirect(url_for("file_page", file_page=page_name))
     else:
@@ -212,11 +273,11 @@ def edit(page):
 
 def save(page_name):
     """
-    Function that saves a *.md page and commits the changes.
+    Function that saves a *.md page.
     :param page_name: name of the page
     """
     content = request.form['CT']
-    app.logger.info(f"saving {page_name}")
+    app.logger.info(f"Saving {page_name}")
 
     try:
         filename = os.path.join(WIKI_DIRECTORY, page_name + '.md')
@@ -347,31 +408,6 @@ def search():
     return render_template('search.html', zoekterm=found, system=SYSTEM_SETTINGS)
 
 
-def git_commit(page_name=""):
-    """
-    Function that commits changes to the wiki.
-    :param page_name: name of the page that has been changed.
-    """
-    try:
-        repo = git.Repo.init(WIKI_DIRECTORY)
-        repo.git.checkout("-b", "master")
-        repo.config_writer().set_value("user", "name", "wikmd").release()
-        repo.config_writer().set_value("user", "email", "wikmd@no-mail.com").release()
-        app.logger.info("There doesn't seem to be a repo, creating one...")
-
-    except Exception as e:
-        app.logger.error(f"There was an error: {str(e)}")
-
-    try:
-        repo.git.add("--all")
-        date = datetime.datetime.now()
-        commit = f"Commit add {page_name} {str(date)}"
-        repo.git.git_commit('-m', commit)
-        app.logger.info(f"there was a new commit: {commit}")
-    except Exception as e:
-        app.logger.info(f"nothing commit: {str(e)}")
-
-
 def fetch_page_name() -> str:
     page_name = request.form['PN']
     if page_name[-4:] == "{id}":
@@ -386,7 +422,6 @@ def run_wiki():
     if int(WIKMD_LOGGING) == 1:
         logging.basicConfig(filename=WIKMD_LOGGING_FILE, level=logging.INFO)
 
-    git_commit()
     app.run(debug=True, host=WIKMD_HOST, port=WIKMD_PORT)
 
 
