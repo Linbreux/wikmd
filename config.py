@@ -9,6 +9,7 @@ WIKMD_PORT_DEFAULT = 5000
 WIKMD_LOGGING_DEFAULT = 1
 WIKMD_LOGGING_FILE_DEFAULT = "wikmd.log"
 
+SYNC_WITH_REMOTE_DEFAULT = 0
 WIKI_DIRECTORY_DEFAULT = "wiki"
 IMAGES_ROUTE_DEFAULT = "img"
 
@@ -34,6 +35,7 @@ def get_config() -> dict:
     config["wikmd_logging"] = yaml_config["wikmd_logging"] or os.getenv("WIKMD_LOGGING") or WIKMD_LOGGING_DEFAULT
     config["wikmd_logging_file"] = yaml_config["wikmd_logging_file"] or os.getenv("WIKMD_LOGGING_FILE") or WIKMD_LOGGING_FILE_DEFAULT
 
+    config["sync_with_remote"] = yaml_config["sync_with_remote"] or os.getenv("SYNC_WITH_REMOTE") or SYNC_WITH_REMOTE_DEFAULT
     config["wiki_directory"] = yaml_config["wiki_directory"] or os.getenv("WIKI_DIRECTORY") or WIKI_DIRECTORY_DEFAULT
     config["images_route"] = yaml_config["images_route"] or os.getenv("IMAGES_ROUTE") or IMAGES_ROUTE_DEFAULT
 

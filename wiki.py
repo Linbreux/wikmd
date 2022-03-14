@@ -35,7 +35,7 @@ logger.setLevel(logging.ERROR)
 
 def git_repo_init() -> git.Repo:
     """
-    Function that initializes the git repo of the Wiki (if there is one).
+    Function that initializes the git repo of the Wiki.
     :return: initialized repo
     """
     try:
@@ -60,7 +60,7 @@ def git_repo_init() -> git.Repo:
 
 def git_pull():
     """
-    Function that pulls from the wiki repo.
+    Function that pulls from the remote wiki repo.
     """
     try:
         # git pull
@@ -90,13 +90,30 @@ def git_commit(page_name="", commit_type=""):
 
 def git_push():
     """
-    Function that pushes changes to the wiki repo.
+    Function that pushes changes to the remote wiki repo.
     """
     try:
-        repo.git.push()
+        # git push
+        repo.git.push("-u", "origin", "master")
         app.logger.info("Pushed to the repo.")
     except Exception as e:
         app.logger.info(f"Error during git push: {str(e)}")
+
+
+def git_sync(page_name="", commit_type=""):
+    """
+    Function that manages the synchronization with a git repo, that could be local or remote.
+    If SYNC_WITH_REMOTE is set, it also pull before committing and then pushes changes to the remote repo.
+    :param commit_type: could be 'Add', 'Edit' or 'Remove'.
+    :param page_name: name of the page that has been changed.
+    """
+    if CONFIG["sync_with_remote"]:
+        git_pull()
+
+    git_commit(page_name=page_name, commit_type=commit_type)
+
+    if CONFIG["sync_with_remote"]:
+        git_push()
 
 
 repo = git_repo_init()
@@ -280,7 +297,7 @@ def add_new():
     if request.method == 'POST':
         page_name = fetch_page_name()
         save(page_name)
-        git_commit(page_name, "Add")
+        git_sync(page_name, "Add")
 
         return redirect(url_for("file_page", file_page=page_name))
     else:
@@ -292,7 +309,7 @@ def edit_homepage():
     if request.method == 'POST':
         page_name = fetch_page_name()
         save(page_name)
-        git_commit(page_name, "Edit")
+        git_sync(page_name, "Edit")
 
         return redirect(url_for("file_page", file_page=page_name))
     else:
@@ -306,7 +323,7 @@ def edit_homepage():
 def remove(page):
     filename = os.path.join(CONFIG["wiki_directory"], page + '.md')
     os.remove(filename)
-    git_commit(page_name=page, commit_type="Remove")
+    git_sync(page_name=page, commit_type="Remove")
     return redirect("/")
 
 
@@ -319,7 +336,7 @@ def edit(page):
             os.remove(filename)
 
         save(page_name)
-        git_commit(page_name, "Edit")
+        git_sync(page_name, "Edit")
 
         return redirect(url_for("file_page", file_page=page_name))
     else:

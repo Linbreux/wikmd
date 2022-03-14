@@ -5,6 +5,7 @@ wikmd_port: 5000
 wikmd_logging: 1
 wikmd_logging_file: "wikmd.log"
 
+sync_with_remote: 0
 wiki_directory: "wiki"
 images_route: "img"
 
