@@ -13,7 +13,7 @@ Here are some example snippets to help you get started creating a container.
 Build the image,
 
 ```bash
-docker build -t wiki-md:latest .
+docker build -t linbreux/wikmd:latest .
 ```
 
 ### docker-compose (recommended, [click here for more info](https://docs.linuxserver.io/general/docker-compose))
@@ -23,7 +23,7 @@ docker build -t wiki-md:latest .
 version: "2.1"
 services:
   wikmd:
-    image: wikmd:latest
+    image: linbreux/wikmd:latest
     container_name: wikmd
     environment:
       - PUID=1000
@@ -88,3 +88,4 @@ In this instance `PUID=1000` and `PGID=1000`, to find yours use `id user` as bel
 
 * Shell access whilst the container is running: `docker exec -it wikmd /bin/bash`
 * To monitor the logs of the container in realtime: `docker logs -f wikmd`
+
