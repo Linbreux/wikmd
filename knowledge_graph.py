@@ -41,7 +41,7 @@ def find_links():
             if os.path.join(WIKI_DATA, IMAGES_ROUTE) in str(path):
                 # Nothing interesting there too
                 continue
-            with open(root + '/' + item, encoding="utf8") as f:
+            with open(root + '/' + item, encoding="utf8", errors='ignore') as f:
                 fin = f.read()
                 print("--------------------")
                 print("filename: ", pagename)
