@@ -258,7 +258,7 @@ def file_page(file_page):
 
                 app.logger.info(f"Converting '{md_file_path}' to HTML with pandoc")
                 html = pypandoc.convert_file(md_file_path, "html5",
-                                             format='md', extra_args=["--mathjax"], filters=['pandoc-xnos'])
+                                             format='md', extra_args=["--mathjax"],) #filters=['pandoc-xnos'])
 
                 mod = "Last modified: %s" % time.ctime(os.path.getmtime(md_file_path))
                 folder = file_page.split("/")
@@ -282,8 +282,8 @@ def index():
         app.logger.info("Showing HTML page of 'homepage'")
         try:
             html = pypandoc.convert_file(
-                os.path.join(CONFIG["wiki_directory"], CONFIG["homepage"]), "html5", format='md', extra_args=["--mathjax"],
-                filters=['pandoc-xnos'])
+                os.path.join(CONFIG["wiki_directory"], CONFIG["homepage"]), "html5", format='md', extra_args=["--mathjax"],)
+                #filters=['pandoc-xnos'])
 
         except Exception as e:
             app.logger.error(e)
