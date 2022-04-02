@@ -69,11 +69,20 @@ export WIKMD_LOGGING=0
 
 ## Enable synchronization with remote repo
 
-You could specify if you want to synchronize the wiki with your personal remote git repo. to do this, set the
-environment variable `SYNC_WITH_REMOTE` to `1`.
+You could specify if you want to synchronize the wiki with your personal remote git repo. 
+
+To do this, set the environment variable `SYNC_WITH_REMOTE` to `1`.
 
 `Default = 0`
 
 ```
 export SYNCH_WITH_REMOTE=1
+```
+
+Also set the environment variable `REMOTE_URL` to your remote repo URL. 
+
+`Default = ""`
+
+```
+export REMOTE_URL="https://github.com/user/wiki_repo.git"
 ```
