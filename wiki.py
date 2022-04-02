@@ -1,7 +1,6 @@
 import os
 import datetime
 import time
-import git
 import re
 import logging
 import uuid
@@ -11,6 +10,7 @@ import knowledge_graph
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory
 from werkzeug.utils import secure_filename
 from random import randint
+from git import Repo, InvalidGitRepositoryError, GitCommandError, NoSuchPathError
 
 from config import get_config
 
@@ -33,28 +33,88 @@ logger = logging.getLogger('werkzeug')
 logger.setLevel(logging.ERROR)
 
 
-def git_repo_init() -> git.Repo:
+def is_git_repo(path: str) -> bool:
     """
-    Function that initializes the git repo of the Wiki.
-    :return: initialized repo
+    Function that determines if the given path is a git repo.
+    :return: True if is a repo, False otherwise.
     """
     try:
-        repo = git.Repo(CONFIG["wiki_directory"])
-        repo.git.checkout("master")  # checkout the master branch
-        return repo
-    except Exception as e:
-        try:
-            repo = git.Repo.init(CONFIG["wiki_directory"])
-            repo.git.checkout("-b", "master")  # create a new (-b) master branch
-            app.logger.info("There doesn't seem to be a repo, a new one has been created.")
+        _ = Repo(path).git_dir
+        return True
+    except (InvalidGitRepositoryError, NoSuchPathError):
+        return False
 
-            repo.config_writer().set_value("user", "name", "wikmd").release()
-            repo.config_writer().set_value("user", "email", "wikmd@no-mail.com").release()
 
-            return repo
+def git_repo_init() -> Repo:
+    """
+    Function that initializes the git repo of the Wiki.
+    The repo can be local or remote (it will be cloned), according to the config setting.
+    :return: initialized repo
+    """
+    git_repo = None
+    if is_git_repo(CONFIG["wiki_directory"]):
+        git_repo = git_get_existing_repo()
+        print("existing")
+    else:
+        if CONFIG["remote_url"]:  # if a remote url has been set, clone the repo
+            git_repo = git_clone_remote()
+            print("remote clone")
+        else:
+            git_repo = git_new_local()
+            print("new local")
 
-        except Exception as e:
-            app.logger.error(f"Error during git initialization: {str(e)}")
+    # Configure git username and email
+    if git_repo:  # if the repo has been initialized
+        git_repo.config_writer().set_value("user", "name", "wikmd").release()
+        git_repo.config_writer().set_value("user", "email", "wikmd@no-mail.com").release()
+
+    return git_repo
+
+
+def git_get_existing_repo() -> Repo:
+    """
+    Function that gets the existing repo in the wiki_directory.
+    Could be local or remote.
+    :return: Repo
+    """
+    git_repo = None
+    try:
+        app.logger.info("Initializing existing repo ...")
+        git_repo = Repo(CONFIG["wiki_directory"])
+        git_repo.git.checkout()  # don't specify branch, it could be main or master
+    except (InvalidGitRepositoryError, GitCommandError, NoSuchPathError) as e:
+        app.logger.error(f"Error during existing git repo initialization: {str(e)}")
+
+    return git_repo
+
+
+def git_clone_remote() -> Repo:
+    """
+    Function that clones a remote git repo according to the remote_url and the wiki_directory set in the config.
+    :return: Repo
+    """
+    git_repo = None
+    try:
+        app.logger.info(f"Cloning {CONFIG['remote_url']} ...")
+        git_repo = Repo.clone_from(url=CONFIG["remote_url"], to_path=CONFIG["wiki_directory"])
+    except (InvalidGitRepositoryError, GitCommandError, NoSuchPathError) as e:
+        app.logger.error(f"Error during remote git repo cloning: {str(e)}")
+    return git_repo
+
+
+def git_new_local() -> Repo:
+    """
+    Function that inits a new local git repo according to the wiki_directory set in the config.
+    :return: Repo
+    """
+    git_repo = None
+    try:
+        app.logger.info("Creating a new local git repo ...")
+        git_repo = Repo.init(path=CONFIG["wiki_directory"])
+        git_repo.git.checkout("-b", "main")  # create a new (-b) main branch
+    except (InvalidGitRepositoryError, GitCommandError, NoSuchPathError) as e:
+        app.logger.error(f"Error during new local git repo initialization: {str(e)}")
+    return git_repo
 
 
 def git_pull():
@@ -281,12 +341,13 @@ def index():
         html = ""
         app.logger.info("Showing HTML page of 'homepage'")
         try:
+            app.logger.info(f"Converting 'homepage' to HTML with pandoc")
             html = pypandoc.convert_file(
                 os.path.join(CONFIG["wiki_directory"], CONFIG["homepage"]), "html5", format='md', extra_args=["--mathjax"],
                 filters=['pandoc-xnos'])
 
         except Exception as e:
-            app.logger.error(e)
+            app.logger.error("Error during 'homepage' to HTML conversion")
 
         return render_template('index.html', homepage=html, system=SYSTEM_SETTINGS)
 
