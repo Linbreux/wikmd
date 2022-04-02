@@ -53,14 +53,11 @@ class WikiRepoManager:
         """
         if is_git_repo(CONFIG["wiki_directory"]):
             git_repo = self.get_existing_repo()
-            print("existing")
         else:
             if CONFIG["remote_url"]:  # if a remote url has been set, clone the repo
                 git_repo = self.git_clone_remote()
-                print("remote clone")
             else:
                 git_repo = self.git_new_local()
-                print("new local")
 
         # Configure git username and email
         if git_repo:  # if the repo has been initialized
