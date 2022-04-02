@@ -340,7 +340,7 @@ def run_wiki():
     if int(CONFIG["wikmd_logging"]) == 1:
         logging.basicConfig(filename=CONFIG["wikmd_logging_file"], level=logging.INFO)
 
-    app.run(debug=True, host=CONFIG["wikmd_host"], port=CONFIG["wikmd_port"])
+    app.run(host=CONFIG["wikmd_host"], port=CONFIG["wikmd_port"], debug=True, use_reloader=False)
 
 
 if __name__ == '__main__':
