@@ -40,7 +40,7 @@ def save(page_name):
     :param page_name: name of the page
     """
     content = request.form['CT']
-    app.logger.info(f"Saving {page_name}")
+    app.logger.info(f"Saving >>> '{page_name}' ...")
 
     try:
         filename = os.path.join(CONFIG["wiki_directory"], page_name + '.md')
@@ -50,7 +50,7 @@ def save(page_name):
         with open(filename, 'w') as f:
             f.write(content)
     except Exception as e:
-        app.logger.error(f"Error while saving {page_name}: {str(e)}")
+        app.logger.error(f"Error while saving '{page_name}' >>> {str(e)}")
 
 
 def search():
@@ -61,14 +61,14 @@ def search():
     escaped_search_term = re.escape(search_term)
     found = []
 
-    app.logger.info(f"searching for {search_term} ...")
+    app.logger.info(f"Searching >>> '{search_term}' ...")
 
     for root, subfolder, files in os.walk(CONFIG["wiki_directory"]):
         for item in files:
             path = os.path.join(root, item)
             if os.path.join(CONFIG["wiki_directory"], '.git') in str(path):
                 # We don't want to search there
-                app.logger.debug(f"skipping {path} is git file")
+                app.logger.debug(f"Skipping {path} is git file")
                 continue
             if os.path.join(CONFIG["wiki_directory"], CONFIG["images_route"]) in str(path):
                 # Nothing interesting there too
@@ -93,9 +93,9 @@ def search():
                                 'folder': folder,
                                 'folder_url': root[len(CONFIG["wiki_directory"] + "/"):]}
                         found.append(info)
-                        app.logger.info(f"found {search_term} in {item}")
+                        app.logger.info(f"Found '{search_term}' in '{item}'")
                 except Exception as e:
-                    app.logger.error(f"There was an error: {str(e)}")
+                    app.logger.error(f"Error while searching >>> {str(e)}")
 
     return render_template('search.html', zoekterm=found, system=SYSTEM_SETTINGS)
 
@@ -115,7 +115,7 @@ def list_full_wiki():
 @app.route('/list/<path:folderpath>/', methods=['GET'])
 def list_wiki(folderpath):
     folder_list = []
-    app.logger.info("Showing 'all files'")
+    app.logger.info("Showing >>> 'all files'")
     for root, subfolder, files in os.walk(os.path.join(CONFIG["wiki_directory"], folderpath)):
         if root[-1] == '/':
             root = root[:-1]
@@ -172,7 +172,7 @@ def file_page(file_page):
                 # latex = pypandoc.convert_file("wiki/" + file_page + ".md", "tex", format="md")
                 # html = pypandoc.convert_text(latex,"html5",format='tex', extra_args=["--mathjax"])
 
-                app.logger.info(f"Converting '{md_file_path}' to HTML with pandoc")
+                app.logger.info(f"Converting to HTML with pandoc >>> '{md_file_path}' ...")
                 html = pypandoc.convert_file(md_file_path, "html5",
                                              format='md', extra_args=["--mathjax"], filters=['pandoc-xnos'])
 
@@ -181,7 +181,7 @@ def file_page(file_page):
                 file_page = folder[-1:][0]
                 folder = folder[:-1]
                 folder = "/".join(folder)
-                app.logger.info(f"Showing HTML page of '{file_page}'")
+                app.logger.info(f"Showing HTML page >>> '{file_page}'")
             except Exception as a:
                 app.logger.info(a)
 
@@ -195,15 +195,15 @@ def index():
         return search()
     else:
         html = ""
-        app.logger.info("Showing HTML page of 'homepage'")
+        app.logger.info("Showing HTML page >>> 'homepage'")
         try:
-            app.logger.info(f"Converting 'homepage' to HTML with pandoc")
+            app.logger.info("Converting to HTML with pandoc >>> 'homepage' ...")
             html = pypandoc.convert_file(
                 os.path.join(CONFIG["wiki_directory"], CONFIG["homepage"]), "html5", format='md', extra_args=["--mathjax"],
                 filters=['pandoc-xnos'])
 
         except Exception as e:
-            app.logger.error("Error during 'homepage' to HTML conversion")
+            app.logger.error(f"Conversion to HTML failed >>> {str(e)}")
 
         return render_template('index.html', homepage=html, system=SYSTEM_SETTINGS)
 
@@ -264,7 +264,7 @@ def edit(page):
 
 @app.route('/' + CONFIG["images_route"], methods=['POST', 'DELETE'])
 def upload_file():
-    app.logger.info("uploading image...")
+    app.logger.info(f"Uploading new image ...")
     # Upload image when POST
     if request.method == "POST":
         file_names = []
@@ -280,10 +280,10 @@ def upload_file():
 
             file_names.append(filename)
             try:
-                app.logger.info(f"Saving {filename}")
+                app.logger.info(f"Saving image >>> '{filename}' ...")
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             except Exception as e:
-                app.logger.error(f"Error while saving image: {str(e)}")
+                app.logger.error(f"Error while saving image >>> {str(e)}")
         return filename
 
     # DELETE when DELETE
@@ -291,7 +291,7 @@ def upload_file():
         # request data is in format "b'nameoffile.png" decode by utf-8
         filename = request.data.decode("utf-8")
         try:
-            app.logger.info(f"removing {str(filename)}")
+            app.logger.info(f"Removing >>> '{str(filename)}' ...")
             os.remove((os.path.join(app.config['UPLOAD_FOLDER'], filename)))
         except Exception as e:
             app.logger.error(f"Could not remove {str(filename)}")
