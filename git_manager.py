@@ -27,20 +27,20 @@ class WikiRepoManager:
 
     def __init__(self, flask_app):
         self.flask_app = flask_app
-        self.repo: Repo = self.git_repo_init()
+        self.repo: Repo = self.__git_repo_init()
 
-    def git_repo_init(self) -> Repo:
+    def __git_repo_init(self) -> Repo:
         """
         Function that initializes the git repo of the Wiki.
         :return: initialized repo
         """
         if is_git_repo(CONFIG["wiki_directory"]):
-            git_repo = self.get_existing_repo()
+            git_repo = self.__get_existing_repo()
         else:
             if CONFIG["remote_url"]:  # if a remote url has been set, clone the repo
-                git_repo = self.git_clone_remote()
+                git_repo = self.__git_clone_remote()
             else:
-                git_repo = self.git_new_local()
+                git_repo = self.__git_new_local()
 
         # Configure git username and email
         if git_repo:  # if the repo has been initialized
@@ -49,7 +49,7 @@ class WikiRepoManager:
 
         return git_repo
 
-    def get_existing_repo(self) -> Repo:
+    def __get_existing_repo(self) -> Repo:
         """
         Function that gets the existing repo in the wiki_directory.
         Could be local or remote.
@@ -65,7 +65,7 @@ class WikiRepoManager:
 
         return git_repo
 
-    def git_clone_remote(self) -> Repo:
+    def __git_clone_remote(self) -> Repo:
         """
         Function that clones a remote git repo according to the remote_url and the wiki_directory set in the config.
         :return: Repo
@@ -78,7 +78,7 @@ class WikiRepoManager:
             self.flask_app.logger.error(f"Cloning from remote repo failed >>> {str(e)}")
         return git_repo
 
-    def git_new_local(self) -> Repo:
+    def __git_new_local(self) -> Repo:
         """
         Function that inits a new local git repo according to the wiki_directory set in the config.
         :return: Repo
@@ -92,7 +92,7 @@ class WikiRepoManager:
             self.flask_app.logger.error(f"New local repo initialization failed >>> {str(e)}")
         return git_repo
 
-    def git_pull(self):
+    def __git_pull(self):
         """
         Function that pulls from the remote wiki repo.
         """
@@ -103,7 +103,7 @@ class WikiRepoManager:
         except Exception as e:
             self.flask_app.logger.info(f"git pull failed >>> {str(e)}")
 
-    def git_commit(self, page_name="", commit_type=""):
+    def __git_commit(self, page_name="", commit_type=""):
         """
         Function that commits changes to the wiki repo.
         :param commit_type: could be 'Add', 'Edit' or 'Remove'.
@@ -120,7 +120,7 @@ class WikiRepoManager:
         except Exception as e:
             self.flask_app.logger.error(f"git commit failed >>> {str(e)}")
 
-    def git_push(self):
+    def __git_push(self):
         """
         Function that pushes changes to the remote wiki repo.
         """
@@ -134,14 +134,14 @@ class WikiRepoManager:
     def git_sync(self, page_name="", commit_type=""):
         """
         Function that manages the synchronization with a git repo, that could be local or remote.
-        If SYNC_WITH_REMOTE is set, it also pull before committing and then pushes changes to the remote repo.
+        If SYNC_WITH_REMOTE is set, it also pulls before committing and then pushes changes to the remote repo.
         :param commit_type: could be 'Add', 'Edit' or 'Remove'.
         :param page_name: name of the page that has been changed.
         """
         if CONFIG["sync_with_remote"]:
-            self.git_pull()
+            self.__git_pull()
 
-        self.git_commit(page_name=page_name, commit_type=commit_type)
+        self.__git_commit(page_name=page_name, commit_type=commit_type)
 
         if CONFIG["sync_with_remote"]:
-            self.git_push()
+            self.__git_push()
