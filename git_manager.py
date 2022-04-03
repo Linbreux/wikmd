@@ -1,5 +1,7 @@
+import os
 import datetime
 
+from flask import Flask
 from git import Repo, InvalidGitRepositoryError, GitCommandError, NoSuchPathError
 from config import get_config
 
@@ -19,14 +21,45 @@ def is_git_repo(path: str) -> bool:
         return False
 
 
+def get_main_branch_name(repo: Repo) -> str:
+    """
+    Function that gets the main branch name of a given Repo.
+    It could be 'main' or 'master'.
+    :return: name of the main branch
+    """
+    origin_branch_name = str(repo.remote(name="origin").refs[0])  # 'origin/main' OR 'origin/master'
+    return origin_branch_name.split("/")[1]
+
+
+def move_all_files(src_dir, dest_dir):
+    """
+    Function that moves all the files from a source directory to a destination one.
+    If a file with the same name is already present in the destination, the source file will be renamed with a '-copy'
+    suffix.
+    :param src_dir: source directory
+    :param dest_dir: destination directory
+    """
+    if not os.path.isdir(dest_dir):
+        os.mkdir(dest_dir)  # make the dir if it doesn't exists
+
+    src_files = os.listdir(src_dir)
+    dest_files = os.listdir(dest_dir)
+
+    for file in src_files:
+        if file not in dest_files:
+            os.rename(src_dir + "/" + file, dest_dir + "/" + file)
+        else:
+            os.rename(src_dir + "/" + file, dest_dir + "/" + file.split(".")[0] + "-copy." + file.split(".")[1])
+
+
 class WikiRepoManager:
     """
     Class that manages the git repo of the wiki.
     The repo could be local or remote (it will be cloned) depending on the config settings.
     """
-
     def __init__(self, flask_app):
-        self.flask_app = flask_app
+        self.flask_app: Flask = flask_app
+        self.main_branch_name: str = "main"
         self.repo: Repo = self.__git_repo_init()
 
     def __git_repo_init(self) -> Repo:
@@ -59,7 +92,8 @@ class WikiRepoManager:
         try:
             self.flask_app.logger.info(f"Initializing existing repo >>> {CONFIG['wiki_directory']} ...")
             git_repo = Repo(CONFIG["wiki_directory"])
-            git_repo.git.checkout()  # don't specify branch, it could be main or master
+            self.main_branch_name = get_main_branch_name(git_repo)  # update the main branch name
+            git_repo.git.checkout(self.main_branch_name)
         except (InvalidGitRepositoryError, GitCommandError, NoSuchPathError) as e:
             self.flask_app.logger.error(f"Existing repo initialization failed >>> {str(e)}")
 
@@ -71,11 +105,22 @@ class WikiRepoManager:
         :return: Repo
         """
         git_repo = None
+        self.flask_app.logger.info(f"Cloning >>> {CONFIG['remote_url']} ...")
+        moved = False
+        if os.listdir(CONFIG["wiki_directory"]):  # if the wiki directory is not empty
+            self.flask_app.logger.info(f"'{CONFIG['wiki_directory']}' not empty, temporary moving them to 'temp' ...")
+            move_all_files(CONFIG["wiki_directory"], "temp")
+            moved = True
         try:
-            self.flask_app.logger.info(f"Cloning >>> {CONFIG['remote_url']} ...")
             git_repo = Repo.clone_from(url=CONFIG["remote_url"], to_path=CONFIG["wiki_directory"])
+            self.main_branch_name = get_main_branch_name(git_repo)  # update the main branch name
         except (InvalidGitRepositoryError, GitCommandError, NoSuchPathError) as e:
             self.flask_app.logger.error(f"Cloning from remote repo failed >>> {str(e)}")
+        if moved:
+            move_all_files("temp", CONFIG["wiki_directory"])
+            os.rmdir("temp")
+        self.flask_app.logger.info(f"Cloned repo >>> {CONFIG['remote_url']}")
+
         return git_repo
 
     def __git_new_local(self) -> Repo:
@@ -87,7 +132,7 @@ class WikiRepoManager:
         try:
             self.flask_app.logger.info(f"Creating a new local repo >>> {CONFIG['wiki_directory']} ...")
             git_repo = Repo.init(path=CONFIG["wiki_directory"])
-            git_repo.git.checkout("-b", "main")  # create a new (-b) main branch
+            git_repo.git.checkout("-b", self.main_branch_name)  # create a new (-b) main branch
         except (InvalidGitRepositoryError, GitCommandError, NoSuchPathError) as e:
             self.flask_app.logger.error(f"New local repo initialization failed >>> {str(e)}")
         return git_repo
@@ -126,7 +171,7 @@ class WikiRepoManager:
         """
         try:
             # git push
-            self.repo.git.push("-u", "origin", "master")
+            self.repo.git.push("-u", "origin", self.main_branch_name)
             self.flask_app.logger.info("Pushed to the repo.")
         except Exception as e:
             self.flask_app.logger.error(f"git push failed >>> {str(e)}")
