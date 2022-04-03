@@ -28,6 +28,10 @@ SYSTEM_SETTINGS = {
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+# console logger
+app.logger.setLevel(logging.INFO)
+
+# file logger
 logger = logging.getLogger('werkzeug')
 logger.setLevel(logging.ERROR)
 
