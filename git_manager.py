@@ -123,8 +123,6 @@ class WikiRepoManager:
         if not self.repo.remotes:  # if the remote repo hasn't any branch yet
             self.__git_create_main_branch()
 
-        self.repo.git.checkout()
-
         if moved:  # move back the files from the 'temp' directory
             move_all_files(TEMP_DIR, self.wiki_directory)
             os.rmdir(TEMP_DIR)
@@ -139,6 +137,7 @@ class WikiRepoManager:
         try:
             self.repo = Repo.init(path=self.wiki_directory)
             self.__git_create_main_branch()
+            self.repo.git.checkout()
         except (InvalidGitRepositoryError, GitCommandError, NoSuchPathError) as e:
             self.flask_app.logger.error(f"New local repo initialization failed >>> {str(e)}")
 
@@ -148,7 +147,7 @@ class WikiRepoManager:
         The repo could be local or remote; in the latter case, local changes are pushed.
         """
         self.flask_app.logger.info(f"Creating 'main' branch ...")
-        self.repo.git.checkout("-b", MAIN_BRANCH_NAME_DEFAULT)  # git checkout -b main
+        self.repo.git.branch("-M", MAIN_BRANCH_NAME_DEFAULT)
         self.__git_commit("First init commit")
         if self.sync_with_remote:
             self.__git_push()
