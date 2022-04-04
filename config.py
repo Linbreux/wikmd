@@ -29,26 +29,27 @@ class WikmdConfig:
     def __init__(self):
         """
         Function that gets the configuration parameters from .yaml file, os environment variables or default values.
-        The .yaml file takes precedence.
+        Each configuration parameter is stored into a class attribute.
+        Env. vars take precedence.
         """
         # .yaml config file
         with open(WIKMD_CONFIG_FILE) as f:
             yaml_config = yaml.safe_load(f)
 
-        # Load config parameters from yaml, env vars or default values (the firsts take precedence)
-        self.wikmd_host = yaml_config["wikmd_host"] or os.getenv("WIKMD_HOST") or WIKMD_HOST_DEFAULT
-        self.wikmd_port = yaml_config["wikmd_port"] or os.getenv("WIKMD_PORT") or WIKMD_PORT_DEFAULT
-        self.wikmd_logging = yaml_config["wikmd_logging"] or os.getenv("WIKMD_LOGGING") or WIKMD_LOGGING_DEFAULT
-        self.wikmd_logging_file = yaml_config["wikmd_logging_file"] or os.getenv("WIKMD_LOGGING_FILE") or WIKMD_LOGGING_FILE_DEFAULT
+        # Load config parameters from env. vars, yaml or default values (the firsts take precedence)
+        self.wikmd_host = os.getenv("WIKMD_HOST") or yaml_config["wikmd_host"] or WIKMD_HOST_DEFAULT
+        self.wikmd_port = os.getenv("WIKMD_PORT") or yaml_config["wikmd_port"] or WIKMD_PORT_DEFAULT
+        self.wikmd_logging = os.getenv("WIKMD_LOGGING") or yaml_config["wikmd_logging"] or WIKMD_LOGGING_DEFAULT
+        self.wikmd_logging_file = os.getenv("WIKMD_LOGGING_FILE") or yaml_config["wikmd_logging_file"] or WIKMD_LOGGING_FILE_DEFAULT
 
-        self.git_user = yaml_config["git_user"] or os.getenv("GIT_USER") or GIT_USER_DEFAULT
-        self.git_email = yaml_config["git_email"] or os.getenv("GIT_EMAIL") or GIT_EMAIL_DEFAULT
+        self.git_user = os.getenv("GIT_USER") or yaml_config["git_user"] or GIT_USER_DEFAULT
+        self.git_email = os.getenv("GIT_EMAIL") or yaml_config["git_email"] or GIT_EMAIL_DEFAULT
 
-        self.main_branch_name = yaml_config["main_branch_name"] or os.getenv("MAIN_BRANCH_NAME") or MAIN_BRANCH_NAME_DEFAULT
-        self.sync_with_remote = yaml_config["sync_with_remote"] or os.getenv("SYNC_WITH_REMOTE") or SYNC_WITH_REMOTE_DEFAULT
-        self.remote_url = yaml_config["remote_url"] or os.getenv("REMOTE_URL") or REMOTE_URL_DEFAULT
+        self.main_branch_name = os.getenv("MAIN_BRANCH_NAME") or yaml_config["main_branch_name"] or MAIN_BRANCH_NAME_DEFAULT
+        self.sync_with_remote = os.getenv("SYNC_WITH_REMOTE") or yaml_config["sync_with_remote"] or SYNC_WITH_REMOTE_DEFAULT
+        self.remote_url = os.getenv("REMOTE_URL") or yaml_config["remote_url"] or REMOTE_URL_DEFAULT
 
-        self.wiki_directory = yaml_config["wiki_directory"] or os.getenv("WIKI_DIRECTORY") or WIKI_DIRECTORY_DEFAULT
-        self.images_route = yaml_config["images_route"] or os.getenv("IMAGES_ROUTE") or IMAGES_ROUTE_DEFAULT
-        self.homepage = yaml_config["homepage"] or os.getenv("HOMEPAGE") or HOMEPAGE_DEFAULT
-        self.homepage_title = yaml_config["homepage_title"] or os.getenv("HOMEPAGE_TITLE") or HOMEPAGE_TITLE_DEFAULT
+        self.wiki_directory = os.getenv("WIKI_DIRECTORY") or yaml_config["wiki_directory"] or WIKI_DIRECTORY_DEFAULT
+        self.images_route = os.getenv("IMAGES_ROUTE") or yaml_config["images_route"] or IMAGES_ROUTE_DEFAULT
+        self.homepage = os.getenv("HOMEPAGE") or yaml_config["homepage"] or HOMEPAGE_DEFAULT
+        self.homepage_title = os.getenv("HOMEPAGE_TITLE") or yaml_config["homepage_title"] or HOMEPAGE_TITLE_DEFAULT
