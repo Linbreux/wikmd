@@ -9,6 +9,7 @@ import knowledge_graph
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory
 from werkzeug.utils import secure_filename
 from random import randint
+from threading import Thread
 
 from config import get_config
 from git_manager import WikiRepoManager
@@ -217,7 +218,8 @@ def add_new():
     if request.method == 'POST':
         page_name = fetch_page_name()
         save(page_name)
-        wrm.git_sync(page_name, "Add")
+        git_sync_thread = Thread(target=wrm.git_sync, args=(page_name, "Add"))
+        git_sync_thread.start()
 
         return redirect(url_for("file_page", file_page=page_name))
     else:
@@ -229,7 +231,8 @@ def edit_homepage():
     if request.method == 'POST':
         page_name = fetch_page_name()
         save(page_name)
-        wrm.git_sync(page_name, "Edit")
+        git_sync_thread = Thread(target=wrm.git_sync, args=(page_name, "Edit"))
+        git_sync_thread.start()
 
         return redirect(url_for("file_page", file_page=page_name))
     else:
@@ -243,7 +246,8 @@ def edit_homepage():
 def remove(page):
     filename = os.path.join(CONFIG["wiki_directory"], page + '.md')
     os.remove(filename)
-    wrm.git_sync(page_name=page, commit_type="Remove")
+    git_sync_thread = Thread(target=wrm.git_sync, args=(page_name, "Remove"))
+    git_sync_thread.start()
     return redirect("/")
 
 
@@ -256,7 +260,8 @@ def edit(page):
             os.remove(filename)
 
         save(page_name)
-        wrm.git_sync(page_name, "Edit")
+        git_sync_thread = Thread(target=wrm.git_sync, args=(page_name, "Edit"))
+        git_sync_thread.start()
 
         return redirect(url_for("file_page", file_page=page_name))
     else:
