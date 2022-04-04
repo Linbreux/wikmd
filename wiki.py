@@ -1,27 +1,23 @@
-from flask import Flask, render_template, request, redirect, url_for, send_from_directory
-import logging
-from werkzeug.utils import secure_filename
-from random import randint
-import datetime
-import time
-import git
-import pypandoc
 import os
+import time
 import re
+import logging
 import uuid
+import pypandoc
 import knowledge_graph
 
-HOST = os.getenv('WIKI_HOST', "0.0.0.0")
-PORT = os.getenv('WIKI_PORT', 5000)
+from flask import Flask, render_template, request, redirect, url_for, send_from_directory
+from werkzeug.utils import secure_filename
+from random import randint
+from threading import Thread
 
-HOMEPAGE = os.getenv('HOMEPAGE', "homepage.md")
-HOMEPAGE_TITLE = os.getenv('HOMEPAGE_TITLE', "homepage")
-WIKI_DATA = os.getenv('WIKI_DATA', "wiki")
-IMAGES_ROUTE = os.getenv('IMAGES_ROUTE', 'img')
-WIKMD_LOGGING = os.getenv('WIKMD_LOGGING', 1)
-WIKMD_LOGGING_FILE = os.getenv('WIKMD_LOGGING_FILE', "wikmd.log")
+from config import get_config
+from git_manager import WikiRepoManager
 
-UPLOAD_FOLDER = WIKI_DATA + '/' + IMAGES_ROUTE
+
+CONFIG = get_config()
+
+UPLOAD_FOLDER = CONFIG["wiki_directory"] + '/' + CONFIG["images_route"]
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 SYSTEM_SETTINGS = {
@@ -29,78 +25,91 @@ SYSTEM_SETTINGS = {
     "listsortMTime": False,
 }
 
+
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+# console logger
+app.logger.setLevel(logging.INFO)
+
+# file logger
 logger = logging.getLogger('werkzeug')
 logger.setLevel(logging.ERROR)
+
+wrm = WikiRepoManager(flask_app=app)
 
 
 def save(page_name):
     """
-    Function that saves a *.md page and commits the changes.
+    Function that saves a *.md page.
     :param page_name: name of the page
     """
     content = request.form['CT']
-    app.logger.info(f"saving {page_name}")
+    app.logger.info(f"Saving >>> '{page_name}' ...")
 
     try:
-        filename = os.path.join(WIKI_DATA, page_name + '.md')
+        filename = os.path.join(CONFIG["wiki_directory"], page_name + '.md')
         dirname = os.path.dirname(filename)
         if not os.path.exists(dirname):
             os.makedirs(dirname)
         with open(filename, 'w') as f:
             f.write(content)
     except Exception as e:
-        app.logger.error(f"Error while saving {page_name}: {str(e)}")
+        app.logger.error(f"Error while saving '{page_name}' >>> {str(e)}")
 
 
 def search():
     """
-    Function that searches for a term.
-    :return:
+    Function that searches for a term and shows the results.
     """
     search_term = request.form['ss']
     escaped_search_term = re.escape(search_term)
     found = []
 
-    app.logger.info(f"searching for {search_term} ...")
+    app.logger.info(f"Searching >>> '{search_term}' ...")
 
-    for root, subfolder, files in os.walk(WIKI_DATA):
+    for root, subfolder, files in os.walk(CONFIG["wiki_directory"]):
         for item in files:
             path = os.path.join(root, item)
-            if os.path.join(WIKI_DATA, '.git') in str(path):
+            if os.path.join(CONFIG["wiki_directory"], '.git') in str(path):
                 # We don't want to search there
-                app.logger.debug(f"skipping {path} is git file")
+                app.logger.debug(f"Skipping {path} is git file")
                 continue
-            if os.path.join(WIKI_DATA, IMAGES_ROUTE) in str(path):
+            if os.path.join(CONFIG["wiki_directory"], CONFIG["images_route"]) in str(path):
                 # Nothing interesting there too
                 continue
             with open(root + '/' + item, encoding="utf8", errors='ignore') as f:
                 fin = f.read()
                 try:
                     if (re.search(escaped_search_term, root + '/' + item, re.IGNORECASE) or
-                            re.search(escaped_search_term, fin, re.IGNORECASE) != None):
+                            re.search(escaped_search_term, fin, re.IGNORECASE) is not None):
                         # Stripping 'wiki/' part of path before serving as a search result
-                        folder = root[len(WIKI_DATA + "/"):]
+                        folder = root[len(CONFIG["wiki_directory"] + "/"):]
                         if folder == "":
                             url = os.path.splitext(
-                                root[len(WIKI_DATA + "/"):] + "/" + item)[0]
+                                root[len(CONFIG["wiki_directory"] + "/"):] + "/" + item)[0]
                         else:
                             url = "/" + \
-                                os.path.splitext(
-                                    root[len(WIKI_DATA + "/"):] + "/" + item)[0]
+                                  os.path.splitext(
+                                      root[len(CONFIG["wiki_directory"] + "/"):] + "/" + item)[0]
 
                         info = {'doc': item,
                                 'url': url,
                                 'folder': folder,
-                                'folder_url': root[len(WIKI_DATA + "/"):]}
+                                'folder_url': root[len(CONFIG["wiki_directory"] + "/"):]}
                         found.append(info)
-                        app.logger.info(f"found {search_term} in {item}")
+                        app.logger.info(f"Found '{search_term}' in '{item}'")
                 except Exception as e:
-                    app.logger.error(f"There was an error: {str(e)}")
+                    app.logger.error(f"Error while searching >>> {str(e)}")
 
     return render_template('search.html', zoekterm=found, system=SYSTEM_SETTINGS)
+
+
+def fetch_page_name() -> str:
+    page_name = request.form['PN']
+    if page_name[-4:] == "{id}":
+        page_name = f"{page_name[:-4]}{uuid.uuid4().hex}"
+    return page_name
 
 
 @app.route('/list/', methods=['GET'])
@@ -110,31 +119,32 @@ def list_full_wiki():
 
 @app.route('/list/<path:folderpath>/', methods=['GET'])
 def list_wiki(folderpath):
-    list = []
-    for root, subfolder, files in os.walk(os.path.join(WIKI_DATA, folderpath)):
+    folder_list = []
+    app.logger.info("Showing >>> 'all files'")
+    for root, subfolder, files in os.walk(os.path.join(CONFIG["wiki_directory"], folderpath)):
         if root[-1] == '/':
             root = root[:-1]
         for item in files:
             path = os.path.join(root, item)
             mtime = os.path.getmtime(os.path.join(root, item))
-            if os.path.join(WIKI_DATA, '.git') in str(path):
+            if os.path.join(CONFIG["wiki_directory"], '.git') in str(path):
                 # We don't want to search there
                 app.logger.debug(f"skipping {path}: is git file")
                 continue
-            if os.path.join(WIKI_DATA, IMAGES_ROUTE) in str(path):
+            if os.path.join(CONFIG["wiki_directory"], CONFIG["images_route"]) in str(path):
                 # Nothing interesting there too
                 continue
 
-            folder = root[len(WIKI_DATA + "/"):]
+            folder = root[len(CONFIG["wiki_directory"] + "/"):]
             if folder == "":
-                if item == HOMEPAGE:
+                if item == CONFIG["homepage"]:
                     continue
                 url = os.path.splitext(
-                    root[len(WIKI_DATA + "/"):] + "/" + item)[0]
+                    root[len(CONFIG["wiki_directory"] + "/"):] + "/" + item)[0]
             else:
                 url = "/" + \
                     os.path.splitext(
-                        root[len(WIKI_DATA + "/"):] + "/" + item)[0]
+                        root[len(CONFIG["wiki_directory"] + "/"):] + "/" + item)[0]
 
             info = {'doc': item,
                     'url': url,
@@ -142,35 +152,14 @@ def list_wiki(folderpath):
                     'folder_url': folder,
                     'mtime': mtime,
                     }
-            list.append(info)
+            folder_list.append(info)
 
     if SYSTEM_SETTINGS['listsortMTime']:
-        list.sort(key=lambda x: x["mtime"], reverse=True)
+        folder_list.sort(key=lambda x: x["mtime"], reverse=True)
     else:
-        list.sort(key=lambda x: (str(x["url"]).casefold()))
+        folder_list.sort(key=lambda x: (str(x["url"]).casefold()))
 
-    return render_template('list_files.html', list=list, folder=folderpath, system=SYSTEM_SETTINGS)
-
-
-def git_commit(pagename=""):
-    try:
-        repo = git.Repo.init(WIKI_DATA)
-        repo.git.checkout("-b", "master")
-        repo.config_writer().set_value("user", "name", "wikmd").release()
-        repo.config_writer().set_value("user", "email", "wikmd@no-mail.com").release()
-        app.logger.info("There doesn't seem to be a repo, creating one...")
-
-    except Exception as e:
-        app.logger.error(f"There was an error: {str(e)}")
-
-    try:
-        repo.git.add("--all")
-        date = datetime.datetime.now()
-        commit = f"Commit add {pagename} {str(date)}"
-        repo.git.git_commit('-m', commit)
-        app.logger.info(f"there was a new commit: {commit}")
-    except Exception as e:
-        app.logger.info(f"nothing commit: {str(e)}")
+    return render_template('list_files.html', list=folder_list, folder=folderpath, system=SYSTEM_SETTINGS)
 
 
 @app.route('/<path:file_page>', methods=['POST', 'GET'])
@@ -181,20 +170,26 @@ def file_page(file_page):
         html = ""
         mod = ""
         folder = ""
-        try:
-            filename = os.path.join(WIKI_DATA, file_page + ".md")
-            # latex = pypandoc.convert_file("wiki/" + file_page + ".md", "tex", format="md")
-            # html = pypandoc.convert_text(latex,"html5",format='tex', extra_args=["--mathjax"])
-            html = pypandoc.convert_file(filename, "html5",
-                                         format='md', extra_args=["--mathjax"], filters=['pandoc-xnos'])
-            mod = "Last modified: %s" % time.ctime(os.path.getmtime(filename))
-            folder = file_page.split("/")
-            file_page = folder[-1:][0]
-            folder = folder[:-1]
-            folder = "/".join(folder)
-            app.logger.info(f"showing html page of {file_page}")
-        except Exception as a:
-            app.logger.info(a)
+
+        if "favicon" not in file_page:  # if the GET request is not for the favicon
+            try:
+                md_file_path = os.path.join(CONFIG["wiki_directory"], file_page + ".md")
+                # latex = pypandoc.convert_file("wiki/" + file_page + ".md", "tex", format="md")
+                # html = pypandoc.convert_text(latex,"html5",format='tex', extra_args=["--mathjax"])
+
+                app.logger.info(f"Converting to HTML with pandoc >>> '{md_file_path}' ...")
+                html = pypandoc.convert_file(md_file_path, "html5",
+                                             format='md', extra_args=["--mathjax"], filters=['pandoc-xnos'])
+
+                mod = "Last modified: %s" % time.ctime(os.path.getmtime(md_file_path))
+                folder = file_page.split("/")
+                file_page = folder[-1:][0]
+                folder = folder[:-1]
+                folder = "/".join(folder)
+                app.logger.info(f"Showing HTML page >>> '{file_page}'")
+            except Exception as a:
+                app.logger.info(a)
+
         return render_template('content.html', title=file_page, folder=folder, info=html, modif=mod,
                                system=SYSTEM_SETTINGS)
 
@@ -205,16 +200,16 @@ def index():
         return search()
     else:
         html = ""
-        app.logger.info("homepage displaying")
+        app.logger.info("Showing HTML page >>> 'homepage'")
         try:
+            app.logger.info("Converting to HTML with pandoc >>> 'homepage' ...")
             html = pypandoc.convert_file(
-                os.path.join(WIKI_DATA, HOMEPAGE), "html5", format='md', extra_args=["--mathjax"],
+                os.path.join(CONFIG["wiki_directory"], CONFIG["homepage"]), "html5", format='md', extra_args=["--mathjax"],
                 filters=['pandoc-xnos'])
 
         except Exception as e:
-            app.logger.error(e)
+            app.logger.error(f"Conversion to HTML failed >>> {str(e)}")
 
-        git_commit()
         return render_template('index.html', homepage=html, system=SYSTEM_SETTINGS)
 
 
@@ -223,11 +218,12 @@ def add_new():
     if request.method == 'POST':
         page_name = fetch_page_name()
         save(page_name)
-        git_commit(page_name)
+        git_sync_thread = Thread(target=wrm.git_sync, args=(page_name, "Add"))
+        git_sync_thread.start()
 
         return redirect(url_for("file_page", file_page=page_name))
     else:
-        return render_template('new.html', upload_path=IMAGES_ROUTE, system=SYSTEM_SETTINGS)
+        return render_template('new.html', upload_path=CONFIG["images_route"], system=SYSTEM_SETTINGS)
 
 
 @app.route('/edit/homepage', methods=['POST', 'GET'])
@@ -235,53 +231,51 @@ def edit_homepage():
     if request.method == 'POST':
         page_name = fetch_page_name()
         save(page_name)
-        git_commit(page_name)
+        git_sync_thread = Thread(target=wrm.git_sync, args=(page_name, "Edit"))
+        git_sync_thread.start()
 
         return redirect(url_for("file_page", file_page=page_name))
     else:
-        with open(os.path.join(WIKI_DATA, HOMEPAGE), 'r', encoding="utf-8", errors='ignore') as f:
+
+        with open(os.path.join(CONFIG["wiki_directory"], CONFIG["homepage"]), 'r', encoding="utf-8", errors='ignore') as f:
+
             content = f.read()
-        return render_template("new.html", content=content, title=HOMEPAGE_TITLE, upload_path=IMAGES_ROUTE,
+        return render_template("new.html", content=content, title=CONFIG["homepage_title"], upload_path=CONFIG["images_route"],
                                system=SYSTEM_SETTINGS)
-
-
-def fetch_page_name() -> str:
-    page_name = request.form['PN']
-    if page_name[-4:] == "{id}":
-        page_name = f"{page_name[:-4]}{uuid.uuid4().hex}"
-    return page_name
 
 
 @app.route('/remove/<path:page>', methods=['GET'])
 def remove(page):
-    filename = os.path.join(WIKI_DATA, page + '.md')
+    filename = os.path.join(CONFIG["wiki_directory"], page + '.md')
     os.remove(filename)
-
+    git_sync_thread = Thread(target=wrm.git_sync, args=(page_name, "Remove"))
+    git_sync_thread.start()
     return redirect("/")
 
 
 @app.route('/edit/<path:page>', methods=['POST', 'GET'])
 def edit(page):
-    filename = os.path.join(WIKI_DATA, page + '.md')
+    filename = os.path.join(CONFIG["wiki_directory"], page + '.md')
     if request.method == 'POST':
         page_name = fetch_page_name()
         if page_name != page:
             os.remove(filename)
 
         save(page_name)
-        git_commit(page_name)
+        git_sync_thread = Thread(target=wrm.git_sync, args=(page_name, "Edit"))
+        git_sync_thread.start()
 
         return redirect(url_for("file_page", file_page=page_name))
     else:
         with open(filename, 'r', encoding="utf-8", errors='ignore') as f:
             content = f.read()
-        return render_template("new.html", content=content, title=page, upload_path=IMAGES_ROUTE,
+        return render_template("new.html", content=content, title=page, upload_path=CONFIG["images_route"],
                                system=SYSTEM_SETTINGS)
 
 
-@app.route('/' + IMAGES_ROUTE, methods=['POST', 'DELETE'])
+@app.route('/' + CONFIG["images_route"], methods=['POST', 'DELETE'])
 def upload_file():
-    app.logger.info("uploading image...")
+    app.logger.info(f"Uploading new image ...")
     # Upload image when POST
     if request.method == "POST":
         file_names = []
@@ -289,7 +283,7 @@ def upload_file():
             file = request.files[key]
             filename = secure_filename(file.filename)
             # bug found by cat-0
-            while filename in os.listdir(os.path.join(WIKI_DATA, IMAGES_ROUTE)):
+            while filename in os.listdir(os.path.join(CONFIG["wiki_directory"], CONFIG["images_route"])):
                 app.logger.info(
                     "There is a duplicate, solving this by extending the filename...")
                 filename, file_extension = os.path.splitext(filename)
@@ -297,10 +291,10 @@ def upload_file():
 
             file_names.append(filename)
             try:
-                app.logger.info(f"Saving {filename}")
+                app.logger.info(f"Saving image >>> '{filename}' ...")
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             except Exception as e:
-                app.logger.error(f"Error while saving image: {str(e)}")
+                app.logger.error(f"Error while saving image >>> {str(e)}")
         return filename
 
     # DELETE when DELETE
@@ -308,7 +302,7 @@ def upload_file():
         # request data is in format "b'nameoffile.png" decode by utf-8
         filename = request.data.decode("utf-8")
         try:
-            app.logger.info(f"removing {str(filename)}")
+            app.logger.info(f"Removing >>> '{str(filename)}' ...")
             os.remove((os.path.join(app.config['UPLOAD_FOLDER'], filename)))
         except Exception as e:
             app.logger.error(f"Could not remove {str(filename)}")
@@ -332,7 +326,7 @@ def nav_id_to_page(id):
     return redirect("/")
 
 
-@app.route('/' + IMAGES_ROUTE + '/<path:filename>')
+@app.route('/' + CONFIG["images_route"] + '/<path:filename>')
 def display_image(filename):
     # print('display_image filename: ' + filename)
     return send_from_directory(UPLOAD_FOLDER, filename, as_attachment=False)
@@ -350,10 +344,17 @@ def toggle_sort():
     return redirect("/list")
 
 
+def run_wiki():
+    """
+    Function that runs the wiki as a Flask app.
+    """
+    if int(CONFIG["wikmd_logging"]) == 1:
+        logging.basicConfig(filename=CONFIG["wikmd_logging_file"], level=logging.INFO)
+
+    app.run(host=CONFIG["wikmd_host"], port=CONFIG["wikmd_port"], debug=True, use_reloader=False)
+
+
 if __name__ == '__main__':
+    run_wiki()
 
-    if int(WIKMD_LOGGING) == 1:
-        logging.basicConfig(filename=WIKMD_LOGGING_FILE, level=logging.INFO)
 
-    git_commit()
-    app.run(debug=True, host=HOST, port=PORT)

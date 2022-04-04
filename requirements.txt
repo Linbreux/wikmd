@@ -14,5 +14,6 @@ pandoc-xnos==2.5.0
 pandocfilters==1.4.3
 psutil==5.7.3
 pypandoc==1.5
+PyYAML==6.0
 smmap==3.0.4
 Werkzeug==1.0.1
