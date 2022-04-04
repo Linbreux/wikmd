@@ -10,9 +10,7 @@ from utils import move_all_files
 
 
 TEMP_DIR = "temp"
-GIT_EMAIL_DEFAULT = "wikmd@no-mail.com"
-GIT_USER_DEFAULT = "wikmd"
-MAIN_BRANCH_NAME_DEFAULT = "main"
+
 
 cfg = WikmdConfig()
 
@@ -58,8 +56,8 @@ class WikiRepoManager:
 
         # Configure git username and email
         if self.repo:  # if the repo has been initialized
-            self.repo.config_writer().set_value("user", "name", GIT_USER_DEFAULT).release()
-            self.repo.config_writer().set_value("user", "email", GIT_EMAIL_DEFAULT).release()
+            self.repo.config_writer().set_value("user", "name", cfg.git_user).release()
+            self.repo.config_writer().set_value("user", "email", cfg.git_email).release()
 
     def __init_existing_repo(self):
         """
@@ -122,7 +120,7 @@ class WikiRepoManager:
         The repo could be local or remote; in the latter case, local changes are pushed.
         """
         self.flask_app.logger.info(f"Creating 'main' branch ...")
-        self.repo.git.branch("-M", MAIN_BRANCH_NAME_DEFAULT)
+        self.repo.git.branch("-M", cfg.main_branch_name)
         self.__git_commit("First init commit")
         if self.sync_with_remote:
             self.__git_push()

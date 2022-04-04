@@ -9,11 +9,15 @@ WIKMD_PORT_DEFAULT = 5000
 WIKMD_LOGGING_DEFAULT = 1
 WIKMD_LOGGING_FILE_DEFAULT = "wikmd.log"
 
+GIT_EMAIL_DEFAULT = "wikmd@no-mail.com"
+GIT_USER_DEFAULT = "wikmd"
+
+MAIN_BRANCH_NAME_DEFAULT = "main"
 SYNC_WITH_REMOTE_DEFAULT = 0
 REMOTE_URL_DEFAULT = ""
+
 WIKI_DIRECTORY_DEFAULT = "wiki"
 IMAGES_ROUTE_DEFAULT = "img"
-
 HOMEPAGE_DEFAULT = "homepage.md"
 HOMEPAGE_TITLE_DEFAULT = "homepage"
 
@@ -37,10 +41,14 @@ class WikmdConfig:
         self.wikmd_logging = yaml_config["wikmd_logging"] or os.getenv("WIKMD_LOGGING") or WIKMD_LOGGING_DEFAULT
         self.wikmd_logging_file = yaml_config["wikmd_logging_file"] or os.getenv("WIKMD_LOGGING_FILE") or WIKMD_LOGGING_FILE_DEFAULT
 
+        self.git_user = yaml_config["git_user"] or os.getenv("GIT_USER") or GIT_USER_DEFAULT
+        self.git_email = yaml_config["git_email"] or os.getenv("GIT_EMAIL") or GIT_EMAIL_DEFAULT
+
+        self.main_branch_name = yaml_config["main_branch_name"] or os.getenv("MAIN_BRANCH_NAME") or MAIN_BRANCH_NAME_DEFAULT
         self.sync_with_remote = yaml_config["sync_with_remote"] or os.getenv("SYNC_WITH_REMOTE") or SYNC_WITH_REMOTE_DEFAULT
         self.remote_url = yaml_config["remote_url"] or os.getenv("REMOTE_URL") or REMOTE_URL_DEFAULT
+
         self.wiki_directory = yaml_config["wiki_directory"] or os.getenv("WIKI_DIRECTORY") or WIKI_DIRECTORY_DEFAULT
         self.images_route = yaml_config["images_route"] or os.getenv("IMAGES_ROUTE") or IMAGES_ROUTE_DEFAULT
-
         self.homepage = yaml_config["homepage"] or os.getenv("HOMEPAGE") or HOMEPAGE_DEFAULT
         self.homepage_title = yaml_config["homepage_title"] or os.getenv("HOMEPAGE_TITLE") or HOMEPAGE_TITLE_DEFAULT
