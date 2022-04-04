@@ -107,3 +107,6 @@ wiki/src/*
 !wiki/homepage.md
 !wiki/src
 
+wikmd-config.yaml
+
+temp/*
