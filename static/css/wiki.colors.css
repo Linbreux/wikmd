@@ -19,4 +19,7 @@
 
     /* FilePond */
     --bg-filepond-dark: #303033;
+
+    /* Default primary */
+    --prmry-color: #b8daff;
 }

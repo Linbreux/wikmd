@@ -78,7 +78,7 @@ def search():
             if os.path.join(CONFIG["wiki_directory"], CONFIG["images_route"]) in str(path):
                 # Nothing interesting there too
                 continue
-            with open(root + '/' + item, encoding="utf8") as f:
+            with open(root + '/' + item, encoding="utf8", errors='ignore') as f:
                 fin = f.read()
                 try:
                     if (re.search(escaped_search_term, root + '/' + item, re.IGNORECASE) or
@@ -236,7 +236,9 @@ def edit_homepage():
 
         return redirect(url_for("file_page", file_page=page_name))
     else:
-        with open(os.path.join(CONFIG["wiki_directory"], CONFIG["homepage"]), 'r', encoding="utf-8") as f:
+
+        with open(os.path.join(CONFIG["wiki_directory"], CONFIG["homepage"]), 'r', encoding="utf-8", errors='ignore') as f:
+
             content = f.read()
         return render_template("new.html", content=content, title=CONFIG["homepage_title"], upload_path=CONFIG["images_route"],
                                system=SYSTEM_SETTINGS)
@@ -265,7 +267,7 @@ def edit(page):
 
         return redirect(url_for("file_page", file_page=page_name))
     else:
-        with open(filename, 'r', encoding="utf-8") as f:
+        with open(filename, 'r', encoding="utf-8", errors='ignore') as f:
             content = f.read()
         return render_template("new.html", content=content, title=page, upload_path=CONFIG["images_route"],
                                system=SYSTEM_SETTINGS)

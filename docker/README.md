@@ -1,10 +1,3 @@
----
-layout: default
-title: Docker installation
-parent: Installation
-nav_order: 2
----
-
 # wikmd Docker image
 
 [wikmd](https://github.com/Linbreux/wikmd) is a file based wiki that uses markdown.

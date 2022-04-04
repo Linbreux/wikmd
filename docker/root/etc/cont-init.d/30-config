@@ -1,0 +1,18 @@
+#!/usr/bin/with-contenv bash
+
+touch /var/log/wikmd.log
+chown abc:abc /var/log/wikmd.log
+
+# if /wiki isn't mounted create it and populate it with the examples
+if [ ! -d "/wiki" ]
+then
+  # create directories
+  mkdir -p /wiki
+
+  # copy examples
+  cp /app/wikmd/wiki/*.md /wiki/.
+
+  # permissions
+  chown abc:abc /wiki /wiki/*
+fi
+
