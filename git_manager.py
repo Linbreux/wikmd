@@ -5,7 +5,7 @@ from typing import Optional
 from flask import Flask
 from git import Repo, InvalidGitRepositoryError, GitCommandError, NoSuchPathError
 
-from config import get_config
+from config import WikmdConfig
 from utils import move_all_files
 
 
@@ -14,7 +14,7 @@ GIT_EMAIL_DEFAULT = "wikmd@no-mail.com"
 GIT_USER_DEFAULT = "wikmd"
 MAIN_BRANCH_NAME_DEFAULT = "main"
 
-CONFIG = get_config()
+cfg = WikmdConfig()
 
 
 def is_git_repo(path: str) -> bool:
@@ -37,9 +37,9 @@ class WikiRepoManager:
     def __init__(self, flask_app: Flask):
         self.flask_app: Flask = flask_app
 
-        self.wiki_directory = CONFIG["wiki_directory"]
-        self.sync_with_remote = CONFIG["sync_with_remote"]
-        self.remote_url = CONFIG["remote_url"]
+        self.wiki_directory = cfg.wiki_directory
+        self.sync_with_remote = cfg.sync_with_remote
+        self.remote_url = cfg.remote_url
 
         self.repo: Optional[Repo] = None
         self.__git_repo_init()
