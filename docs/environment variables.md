@@ -15,7 +15,6 @@ export <env>=<value or path>
 The homepage is defaulted to the "homepage.md" file. If you want to use a different file, 
 you can specify the file to use for the homepage with the environment variable `HOMEPAGE` as well as the title with `HOMEPAGE_TITLE`.
 
-
 ```
 export HOMEPAGE=<location>
 export HOMEPAGE_TITLE=<title>
@@ -33,10 +32,11 @@ export WIKMD_PORT=80
 
 ## Custom data path
 
-Usually, wikmd looks for content in the subfolder `wiki`. In case you want to store your wiki data somewhere else, you can set a custom data path via the environment variable `WIKI_DATA`:
+Usually, wikmd looks for content in the subfolder `wiki`. In case you want to store your wiki data somewhere else, you 
+can set a custom data path via the environment variable `WIKI_DIRECTORY`:
 
 ```
-export WIKI_DATA="~/.wikidata"
+export WIKI_DIRECTORY="~/.wikidata"
 ```
 
 ## Custom picture upload
@@ -85,4 +85,24 @@ Also set the environment variable `REMOTE_URL` to your remote repo URL.
 
 ```
 export REMOTE_URL="https://github.com/user/wiki_repo.git"
+```
+
+## Custom git user and email
+
+If you want to use custom git user and email, set the environment variables `GIT_USER` and `GIT_EMAIL`.
+
+The default user is `wikmd` and the email is `wikmd@no-mail.com`.
+
+```
+export GIT_USER="your_user"
+export GIT_EMAIL="your_email@domain.com"
+```
+
+## Custom main branch name
+
+You can specify a custom name for the main branch of the wiki repo setting the `MAIN_BRANCH_NAME` environment variable.
+The default value is `main`.
+
+```
+export MAIN_BRANCH_NAME="master"
 ```
