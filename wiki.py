@@ -248,7 +248,7 @@ def edit_homepage():
 def remove(page):
     filename = os.path.join(CONFIG["wiki_directory"], page + '.md')
     os.remove(filename)
-    git_sync_thread = Thread(target=wrm.git_sync, args=(page_name, "Remove"))
+    git_sync_thread = Thread(target=wrm.git_sync, args=(page, "Remove"))
     git_sync_thread.start()
     return redirect("/")
 
