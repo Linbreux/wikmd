@@ -73,7 +73,6 @@ You could specify if you want to synchronize the wiki with your personal remote 
 
 To do this, set the environment variable `SYNC_WITH_REMOTE` to `1`.
 
-`Default = 0`
 
 ```
 export SYNCH_WITH_REMOTE=1
@@ -81,7 +80,6 @@ export SYNCH_WITH_REMOTE=1
 
 Also set the environment variable `REMOTE_URL` to your remote repo URL. 
 
-`Default = ""`
 
 ```
 export REMOTE_URL="https://github.com/user/wiki_repo.git"
@@ -101,7 +99,7 @@ export GIT_EMAIL="your_email@domain.com"
 ## Custom main branch name
 
 You can specify a custom name for the main branch of the wiki repo setting the `MAIN_BRANCH_NAME` environment variable.
-The default value is `main`.
+The default value is the new standard `main`, but a common older choice is `master`.
 
 ```
 export MAIN_BRANCH_NAME="master"
