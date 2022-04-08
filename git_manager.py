@@ -38,6 +38,11 @@ class WikiRepoManager:
         self.flask_app: Flask = flask_app
 
         self.wiki_directory = CONFIG["wiki_directory"]
+
+        if not os.path.exists(CONFIG["wiki_directory"]):
+            os.mkdir(CONFIG["wiki_directory"])
+        
+
         self.sync_with_remote = CONFIG["sync_with_remote"]
         self.remote_url = CONFIG["remote_url"]
 
