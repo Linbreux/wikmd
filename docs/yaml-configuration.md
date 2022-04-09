@@ -5,11 +5,11 @@ nav_order: 6
 ---
 # Configuration with YAML
 
-The entire configuration of the wiki can also be done through a `.yaml` file. 
+The entire configuration of the wiki can be done with environment variables but also through the file 
+`wikmd-config.yaml`.
 
-All the customizations possible with environment variables, could be directly done editing the `wikmd-config.yaml` file.
-
-Please, notice that if you set up both `wikmd-config.yaml` and environment variables, the `.yaml` file takes precedence.
+Please, notice that if you set up both environment variables and `wikmd-config.yaml`, the environment variables take 
+precedence.
 
 ## Configuration parameters
 
@@ -19,11 +19,15 @@ wikmd_port: 5000
 wikmd_logging: 1
 wikmd_logging_file: "wikmd.log"
 
+git_user: "wikmd"
+git_email: "wikmd@no-mail.com"
+
+main_branch_name: "main"
 sync_with_remote: 0
 remote_url: ""
+
 wiki_directory: "wiki"
 images_route: "img"
-
 homepage: "homepage.md"
 homepage_title: "homepage"
 ```
