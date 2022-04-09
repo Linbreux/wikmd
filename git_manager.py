@@ -37,7 +37,10 @@ class WikiRepoManager:
 
         self.wiki_directory = cfg.wiki_directory
         self.sync_with_remote = cfg.sync_with_remote
+        if not os.path.exists(self.wiki_directory):
+            os.mkdir(self.wiki_directory)
         self.remote_url = cfg.remote_url
+        
 
         self.repo: Optional[Repo] = None
         self.__git_repo_init()
