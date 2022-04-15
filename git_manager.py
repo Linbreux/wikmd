@@ -5,16 +5,14 @@ from typing import Optional
 from flask import Flask
 from git import Repo, InvalidGitRepositoryError, GitCommandError, NoSuchPathError
 
-from config import get_config
+from config import WikmdConfig
 from utils import move_all_files
 
 
 TEMP_DIR = "temp"
-GIT_EMAIL_DEFAULT = "wikmd@no-mail.com"
-GIT_USER_DEFAULT = "wikmd"
-MAIN_BRANCH_NAME_DEFAULT = "main"
 
-CONFIG = get_config()
+
+cfg = WikmdConfig()
 
 
 def is_git_repo(path: str) -> bool:
@@ -37,9 +35,12 @@ class WikiRepoManager:
     def __init__(self, flask_app: Flask):
         self.flask_app: Flask = flask_app
 
-        self.wiki_directory = CONFIG["wiki_directory"]
-        self.sync_with_remote = CONFIG["sync_with_remote"]
-        self.remote_url = CONFIG["remote_url"]
+        self.wiki_directory = cfg.wiki_directory
+        self.sync_with_remote = cfg.sync_with_remote
+        if not os.path.exists(self.wiki_directory):
+            os.mkdir(self.wiki_directory)
+        self.remote_url = cfg.remote_url
+        
 
         self.repo: Optional[Repo] = None
         self.__git_repo_init()
@@ -58,8 +59,8 @@ class WikiRepoManager:
 
         # Configure git username and email
         if self.repo:  # if the repo has been initialized
-            self.repo.config_writer().set_value("user", "name", GIT_USER_DEFAULT).release()
-            self.repo.config_writer().set_value("user", "email", GIT_EMAIL_DEFAULT).release()
+            self.repo.config_writer().set_value("user", "name", cfg.git_user).release()
+            self.repo.config_writer().set_value("user", "email", cfg.git_email).release()
 
     def __init_existing_repo(self):
         """
@@ -122,7 +123,7 @@ class WikiRepoManager:
         The repo could be local or remote; in the latter case, local changes are pushed.
         """
         self.flask_app.logger.info(f"Creating 'main' branch ...")
-        self.repo.git.branch("-M", MAIN_BRANCH_NAME_DEFAULT)
+        self.repo.git.branch("-M", cfg.main_branch_name)
         self.__git_commit("First init commit")
         if self.sync_with_remote:
             self.__git_push()
