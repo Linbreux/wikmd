@@ -48,6 +48,38 @@ Maybe you need to install pandoc on your system before this works.
 sudo apt-get update && sudo apt-get install pandoc
 ```
 
+### Runing the wiki as a service
+
+You can run the wiki as a service. Doing this, will allow the wiki to boot at startup.
+
+```
+[Unit]
+Description=Wikmd
+After=network.target
+
+[Service]
+User=brecht
+WorkingDirectory=<path to the wiki>
+Environment=FLASK_APP=wiki.py
+ExecStart=<path to the wiki>/env/bin/python3 wiki.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+```
+
+Put this file in ```/etc/systemd/system/``` as ```wiki.service```.
+
+Run the following commands to enable and start the serivce
+
+```
+systemctl daemon-reload
+systemctl enable wiki.service
+systemctl start wiki.service
+```
+
+
 ## Windows
 
 You should install [pandoc](https://pandoc.org/installing.html) on your windows system. Now you should be able to start
