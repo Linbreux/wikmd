@@ -1,5 +1,8 @@
 #!/usr/bin/with-contenv bash
 export WIKI_DATA='/wiki'
 export WIKMD_LOGGING_FILE='/var/log/wikmd.log'
-exec s6-setuidgid abc python3 /app/wikmd/wiki.py
+
+cd /app/wikmd/
+
+exec s6-setuidgid abc python3 wiki.py
 
