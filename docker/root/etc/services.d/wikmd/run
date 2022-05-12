@@ -2,7 +2,5 @@
 export WIKI_DATA='/wiki'
 export WIKMD_LOGGING_FILE='/var/log/wikmd.log'
 
-cd /app/wikmd/
-
-exec s6-setuidgid abc python3 wiki.py
+exec s6-setuidgid abc python3 /app/wikmd/wiki.py
 

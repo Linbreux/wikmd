@@ -32,8 +32,11 @@ class WikmdConfig:
         Each configuration parameter is stored into a class attribute.
         Env. vars take precedence.
         """
+        __location__ = os.path.realpath(
+            os.path.join(os.getcwd(), os.path.dirname(__file__)))
+
         # .yaml config file
-        with open(WIKMD_CONFIG_FILE) as f:
+        with open(os.path.join(__location__,WIKMD_CONFIG_FILE)) as f:
             yaml_config = yaml.safe_load(f)
 
         # Load config parameters from env. vars, yaml or default values (the firsts take precedence)
