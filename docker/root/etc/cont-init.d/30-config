@@ -2,6 +2,7 @@
 
 touch /var/log/wikmd.log
 chown abc:abc /var/log/wikmd.log
+chown -R abc:abc /wiki
 
 # if /wiki isn't mounted create it and populate it with the examples
 if [ ! -d "/wiki" ]
@@ -13,6 +14,7 @@ then
   cp /app/wikmd/wiki/*.md /wiki/.
 
   # permissions
-  chown abc:abc /wiki /wiki/*
+  chown -R abc:abc /wiki
+  chown -R abc:abc /app
 fi
 
