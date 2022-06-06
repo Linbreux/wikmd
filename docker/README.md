@@ -32,6 +32,7 @@ services:
       - HOMEPAGE=homepage.md #optional
       - HOMEPAGE_TITLE=homepage.md #optional
       - WIKMD_LOGGING=1 #optional
+      - WIKI_DIRECTORY=/wiki
     volumes:
       - /path/to/wiki:/wiki
     ports:
@@ -50,6 +51,7 @@ docker run -d \
   -e HOMEPAGE=homepage.md `#optional` \
   -e HOMEPAGE_TITLE=homepage.md `#optional` \
   -e WIKMD_LOGGING=1 `#optional` \
+  -e WIKI_DIRECTORY=/wiki \
   -p 5000:5000 \
   -v /path/to/wiki:/wiki \
   --restart unless-stopped \
