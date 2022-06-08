@@ -53,7 +53,7 @@ docker run -d \
   -p 5000:5000 \
   -v /path/to/wiki:/wiki \
   --restart unless-stopped \
-  wiki-md:latest
+  linbreux/wikmd:latest
 ```
 
 ## Parameters
