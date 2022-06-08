@@ -13,7 +13,7 @@ Here are some example snippets to help you get started creating a container.
 Build the image,
 
 ```bash
-docker build -t linbreux/wikmd:latest .
+docker build -t linbreux/wikmd:latest -f docker/Dockerfile .
 ```
 
 ### docker-compose (recommended, [click here for more info](https://docs.linuxserver.io/general/docker-compose))
@@ -32,7 +32,6 @@ services:
       - HOMEPAGE=homepage.md #optional
       - HOMEPAGE_TITLE=homepage.md #optional
       - WIKMD_LOGGING=1 #optional
-      - WIKI_DIRECTORY=/wiki
     volumes:
       - /path/to/wiki:/wiki
     ports:
@@ -51,11 +50,10 @@ docker run -d \
   -e HOMEPAGE=homepage.md `#optional` \
   -e HOMEPAGE_TITLE=homepage.md `#optional` \
   -e WIKMD_LOGGING=1 `#optional` \
-  -e WIKI_DIRECTORY=/wiki \
   -p 5000:5000 \
   -v /path/to/wiki:/wiki \
   --restart unless-stopped \
-  wiki-md:latest
+  linbreux/wikmd:latest
 ```
 
 ## Parameters
