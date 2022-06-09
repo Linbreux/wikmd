@@ -17,6 +17,7 @@ nav_order: 1
 - dark theme
 - codemirror for editing
 - knowledge graph
+- basic password protection
 
 ## What is it?
 It’s a file-based wiki that aims to simplicity. The documents are completely written in Markdown which is an easy markup language that you can learn in 60 sec.
