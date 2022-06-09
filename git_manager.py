@@ -123,7 +123,7 @@ class WikiRepoManager:
         The repo could be local or remote; in the latter case, local changes are pushed.
         """
         self.flask_app.logger.info(f"Creating 'main' branch ...")
-        self.repo.git.branch("-M", cfg.main_branch_name)
+        self.repo.git.checkout("-b", cfg.main_branch_name)
         self.__git_commit("First init commit")
         if self.sync_with_remote:
             self.__git_push()
