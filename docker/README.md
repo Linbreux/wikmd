@@ -13,7 +13,7 @@ Here are some example snippets to help you get started creating a container.
 Build the image,
 
 ```bash
-docker build -t linbreux/wikmd:latest .
+docker build -t linbreux/wikmd:latest -f docker/Dockerfile .
 ```
 
 ### docker-compose (recommended, [click here for more info](https://docs.linuxserver.io/general/docker-compose))
@@ -53,7 +53,7 @@ docker run -d \
   -p 5000:5000 \
   -v /path/to/wiki:/wiki \
   --restart unless-stopped \
-  wiki-md:latest
+  linbreux/wikmd:latest
 ```
 
 ## Parameters
