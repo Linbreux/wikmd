@@ -1,15 +1,19 @@
 import os
+from shutil import ExecError
 import time
 import re
 import logging
 import uuid
 import pypandoc
 import knowledge_graph
+import random
+import string
 
-from flask import Flask, render_template, request, redirect, url_for, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, send_from_directory, make_response
 from werkzeug.utils import secure_filename
 from random import randint
 from threading import Thread
+from hashlib import sha256
 
 from config import WikmdConfig
 from git_manager import WikiRepoManager
@@ -21,6 +25,8 @@ SYSTEM_SETTINGS = {
     "darktheme": False,
     "listsortMTime": False,
 }
+
+SESSIONS = []
 
 cfg = WikmdConfig()
 UPLOAD_FOLDER = f"{cfg.wiki_directory}/{cfg.images_route}"
@@ -214,6 +220,8 @@ def index():
 
 @app.route('/add_new', methods=['POST', 'GET'])
 def add_new():
+    if(bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS)):
+        return login("/add_new")
     if request.method == 'POST':
         page_name = fetch_page_name()
         save(page_name)
@@ -227,6 +235,9 @@ def add_new():
 
 @app.route('/edit/homepage', methods=['POST', 'GET'])
 def edit_homepage():
+    if(bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS)):
+        return login("/edit/homepage")
+
     if request.method == 'POST':
         page_name = fetch_page_name()
         save(page_name)
@@ -245,6 +256,10 @@ def edit_homepage():
 
 @app.route('/remove/<path:page>', methods=['GET'])
 def remove(page):
+    app.logger.info(request.cookies.get('session_wikmd'))
+    if(bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS)):
+        return redirect(url_for("file_page", file_page=page))
+
     filename = os.path.join(cfg.wiki_directory, page + '.md')
     os.remove(filename)
     git_sync_thread = Thread(target=wrm.git_sync, args=(page, "Remove"))
@@ -254,6 +269,8 @@ def remove(page):
 
 @app.route('/edit/<path:page>', methods=['POST', 'GET'])
 def edit(page):
+    if(bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS)):
+        return login(page)
     filename = os.path.join(cfg.wiki_directory, page + '.md')
     if request.method == 'POST':
         page_name = fetch_page_name()
@@ -313,6 +330,25 @@ def graph():
     global links
     links = knowledge_graph.find_links()
     return render_template("knowledge-graph.html", links=links, system=SYSTEM_SETTINGS)
+
+
+@app.route('/login', methods=['GET','POST'])
+def login(page):
+    if request.method == "POST":
+        password = request.form["password"]
+        sha_string = sha256(password.encode('utf-8')).hexdigest()
+        if sha_string == cfg.password_in_sha_256.lower():
+            app.logger.info("User successfully logged in")
+            resp = make_response(redirect(page))
+            session = ''.join(random.choice(string.ascii_lowercase) for i in range(231))
+            resp.set_cookie("session_wikmd",session)
+            SESSIONS.append(session)
+            return resp
+        else:
+            app.logger.info("Login failed!")
+    else:
+        app.logger.info("Display login page")
+    return render_template("login.html", system=SYSTEM_SETTINGS)
 
 # Translate id to page path
 

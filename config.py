@@ -21,6 +21,9 @@ IMAGES_ROUTE_DEFAULT = "img"
 HOMEPAGE_DEFAULT = "homepage.md"
 HOMEPAGE_TITLE_DEFAULT = "homepage"
 
+PROTECT_EDIT_BY_PASSWORD = 0
+PASSWORD_IN_SHA_256 = "0E9C700FAB2D5B03B0581D080E74A2D7428758FC82BD423824C6C11D6A7F155E" #pw: wikmd
+
 
 class WikmdConfig:
     """
@@ -56,3 +59,6 @@ class WikmdConfig:
         self.images_route = os.getenv("IMAGES_ROUTE") or yaml_config["images_route"] or IMAGES_ROUTE_DEFAULT
         self.homepage = os.getenv("HOMEPAGE") or yaml_config["homepage"] or HOMEPAGE_DEFAULT
         self.homepage_title = os.getenv("HOMEPAGE_TITLE") or yaml_config["homepage_title"] or HOMEPAGE_TITLE_DEFAULT
+
+        self.protect_edit_by_password = os.getenv("PROTECT_EDIT_BY_PASSWORD") or yaml_config["protect_edit_by_password"] or PROTECT_EDIT_BY_PASSWORD
+        self.password_in_sha_256 = os.getenv("PASSWORD_IN_SHA_256") or yaml_config["password_in_sha_256"] or PASSWORD_IN_SHA_256
