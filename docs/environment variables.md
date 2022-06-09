@@ -47,6 +47,17 @@ It's possible to add a custom picture upload path. This is done by adding a `IMA
 export IMAGES_ROUTE="media/pictures"
 ```
 
+## Password protect
+
+It's possible to password protect changing and removing of files. This can be done using the following parameters:
+
+```
+export PROTECT_EDIT_BY_PASSWORD = 1
+export PASSWORD_IN_SHA_256 = <your password in sha 256>
+```
+
+You can generate it via the console or just us a website (ex.[https://emn178.github.io/online-tools/sha256.html](https://emn178.github.io/online-tools/sha256.html)).
+
 ## Change logging file
 
 In case you need to rename the log file you can use `WIKMD_LOGGING_FILE`.
