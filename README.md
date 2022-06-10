@@ -22,6 +22,7 @@ To view the documents in the browser, the document is converted to html.
 - file based
 - dark theme
 - codemirror for editing
+- password protection
 
 ## Installation
 

@@ -29,3 +29,9 @@ nav_order: 3
 ## Dark theme
 
 ![dark theme](images/black.png)
+
+![light theme](images/lightmode.png)
+
+## Password protect
+
+![password protect](images/password_protect.png)
