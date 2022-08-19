@@ -17,14 +17,10 @@ from hashlib import sha256
 
 from config import WikmdConfig
 from git_manager import WikiRepoManager
+from web_dependencies import get_web_deps
 
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-
-SYSTEM_SETTINGS = {
-    "darktheme": False,
-    "listsortMTime": False,
-}
 
 SESSIONS = []
 
@@ -43,6 +39,11 @@ logger.setLevel(logging.ERROR)
 
 wrm = WikiRepoManager(flask_app=app)
 
+SYSTEM_SETTINGS = {
+    "darktheme": False,
+    "listsortMTime": False,
+    "web_deps": get_web_deps(cfg.local_mode, app.logger)
+}
 
 def save(page_name):
     """

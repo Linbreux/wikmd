@@ -3,7 +3,7 @@
 
 {%block head%}
     <link href="/static/css/filepond.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/codemirror.min.css" rel="stylesheet">
+    <link href="{{ system.web_deps["codemirror.min.css"] }}" rel="stylesheet">
     <link href="/static/css/codemirror.custom.css" rel="stylesheet">
 
     <!-- Add dark css if dark theme is toggled -->
@@ -32,8 +32,8 @@
         <button type="submit" class="btn btn-success mb-2">Save</button>
     </form>
 
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/codemirror.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/mode/markdown/markdown.min.js"></script>
+    <script type="text/javascript" src="{{ system.web_deps["codemirror.min.js"] }}"></script>
+    <script type="text/javascript" src="{{ system.web_deps["markdown.min.js"] }}"></script>
     <script type="text/javascript" src="/static/js/filepond.js"></script>
 
     <script>
