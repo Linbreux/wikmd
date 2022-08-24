@@ -65,4 +65,4 @@ class WikmdConfig:
         self.protect_edit_by_password = os.getenv("PROTECT_EDIT_BY_PASSWORD") or yaml_config["protect_edit_by_password"] or PROTECT_EDIT_BY_PASSWORD
         self.password_in_sha_256 = os.getenv("PASSWORD_IN_SHA_256") or yaml_config["password_in_sha_256"] or PASSWORD_IN_SHA_256
 
-        self.local_mode = (os.getenv("LOCAL_MODE").lower() in ["true", "yes"]) or yaml_config["local_mode"] or LOCAL_MODE
+        self.local_mode = (os.getenv("LOCAL_MODE") in ["True", "true", "Yes", "yes"]) or yaml_config["local_mode"] or LOCAL_MODE
