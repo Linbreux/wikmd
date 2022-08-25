@@ -15,6 +15,6 @@ pandocfilters==1.4.3
 psutil==5.7.3
 pypandoc==1.5
 PyYAML==6.0
-requests==2.28.1
+requests==2.27.1
 smmap==3.0.4
 Werkzeug==1.0.1
