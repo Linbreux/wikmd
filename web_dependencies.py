@@ -52,6 +52,14 @@ WEB_DEPENDENCIES = {
     "vis-network.min.js": WebDependency(
         local="/static/js/vis-network.min.js",
         external="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"
+    ),
+    "filepond.js": WebDependency(
+        local="/static/js/filepond.js",
+        external="https://unpkg.com/filepond/dist/filepond.js"
+    ),
+    "filepond.css": WebDependency(
+        local="/static/css/filepond.css",
+        external="https://unpkg.com/filepond/dist/filepond.css"
     )
 }
 

@@ -2,7 +2,7 @@
 
 
 {%block head%}
-    <link href="/static/css/filepond.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ system.web_deps["filepond.css"] }}">
     <link href="{{ system.web_deps["codemirror.min.css"] }}" rel="stylesheet">
     <link href="/static/css/codemirror.custom.css" rel="stylesheet">
 
@@ -34,7 +34,7 @@
 
     <script type="text/javascript" src="{{ system.web_deps["codemirror.min.js"] }}"></script>
     <script type="text/javascript" src="{{ system.web_deps["markdown.min.js"] }}"></script>
-    <script type="text/javascript" src="/static/js/filepond.js"></script>
+    <script type="text/javascript" src="{{ system.web_deps["filepond.js"] }}"></script>
 
     <script>
     function copy_fun(mes){
