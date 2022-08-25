@@ -24,6 +24,8 @@ HOMEPAGE_TITLE_DEFAULT = "homepage"
 PROTECT_EDIT_BY_PASSWORD = 0
 PASSWORD_IN_SHA_256 = "0E9C700FAB2D5B03B0581D080E74A2D7428758FC82BD423824C6C11D6A7F155E" #pw: wikmd
 
+# if False: Uses external CDNs to serve some files
+LOCAL_MODE = False
 
 class WikmdConfig:
     """
@@ -62,3 +64,5 @@ class WikmdConfig:
 
         self.protect_edit_by_password = os.getenv("PROTECT_EDIT_BY_PASSWORD") or yaml_config["protect_edit_by_password"] or PROTECT_EDIT_BY_PASSWORD
         self.password_in_sha_256 = os.getenv("PASSWORD_IN_SHA_256") or yaml_config["password_in_sha_256"] or PASSWORD_IN_SHA_256
+
+        self.local_mode = (os.getenv("LOCAL_MODE") in ["True", "true", "Yes", "yes"]) or yaml_config["local_mode"] or LOCAL_MODE

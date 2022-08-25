@@ -32,7 +32,9 @@ homepage: "homepage.md"
 homepage_title: "homepage"
 
 protect_edit_by_password: 0
-password_in_sha_256: "0E9C700FAB2D5B03B0581D080E74A2D7428758FC82BD423824C6C11D6A7F155E" #ps: wikmd 
+password_in_sha_256: "0E9C700FAB2D5B03B0581D080E74A2D7428758FC82BD423824C6C11D6A7F155E" #ps: wikmd
+
+local_mode: false
 ```
 
 Please, refer to [environment variables](environment%20variables.md) for further parameters explanation.

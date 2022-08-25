@@ -58,6 +58,17 @@ export PASSWORD_IN_SHA_256 = <your password in sha 256>
 
 You can generate it via the console or just us a website (ex.[https://emn178.github.io/online-tools/sha256.html](https://emn178.github.io/online-tools/sha256.html)).
 
+## Local Mode
+
+If enabled wikmd will serve all `css` and `js` files itself.
+Otherwise the CDNs jsdelivr, cloudflare, polyfill and unpkg will be used.
+
+`Default = False`
+
+```
+export LOCAL_MODE=True
+```
+
 ## Change logging file
 
 In case you need to rename the log file you can use `WIKMD_LOGGING_FILE`.
