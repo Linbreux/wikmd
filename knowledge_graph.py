@@ -26,7 +26,7 @@ def find_links():
     # walk trough all files
     for root, subfolder, files in os.walk(cfg.wiki_directory):
         for item in files:
-            pagename = item.split(".")[0]
+            pagename, _ = os.path.splitext(item)
             path = os.path.join(root, item)
             value = {
                 "id": id,
