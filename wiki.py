@@ -4,6 +4,7 @@ import time
 import re
 import logging
 import uuid
+from lxml.html.clean import clean_html
 import pypandoc
 import knowledge_graph
 import random
@@ -186,7 +187,7 @@ def file_page(file_page):
                 app.logger.info(f"Converting to HTML with pandoc >>> '{md_file_path}' ...")
                 html = pypandoc.convert_file(md_file_path, "html5",
                                              format='md', extra_args=["--mathjax"], filters=['pandoc-xnos'])
-
+                html = clean_html(html)
                 mod = "Last modified: %s" % time.ctime(os.path.getmtime(md_file_path))
                 folder = file_page.split("/")
                 file_page = folder[-1:][0]
@@ -212,6 +213,7 @@ def index():
             html = pypandoc.convert_file(
                 os.path.join(cfg.wiki_directory, cfg.homepage), "html5", format='md', extra_args=["--mathjax"],
                 filters=['pandoc-xnos'])
+            html = clean_html(html)
 
         except Exception as e:
             app.logger.error(f"Conversion to HTML failed >>> {str(e)}")
