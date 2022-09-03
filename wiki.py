@@ -18,6 +18,7 @@ from hashlib import sha256
 
 from config import WikmdConfig
 from git_manager import WikiRepoManager
+from search import Search
 from web_dependencies import get_web_deps
 
 
@@ -71,45 +72,28 @@ def search():
     """
     search_term = request.form['ss']
     escaped_search_term = re.escape(search_term)
-    found = []
 
     app.logger.info(f"Searching >>> '{search_term}' ...")
+    search = Search()
 
-    for root, subfolder, files in os.walk(cfg.wiki_directory):
-        for item in files:
-            path = os.path.join(root, item)
-            if os.path.join(cfg.wiki_directory, '.git') in str(path):
-                # We don't want to search there
-                app.logger.debug(f"Skipping {path} is git file")
-                continue
-            if os.path.join(cfg.wiki_directory, cfg.images_route) in str(path):
-                # Nothing interesting there too
-                continue
-            with open(root + '/' + item, encoding="utf8", errors='ignore') as f:
-                fin = f.read()
-                try:
-                    if (re.search(escaped_search_term, root + '/' + item, re.IGNORECASE) or
-                            re.search(escaped_search_term, fin, re.IGNORECASE) is not None):
-                        # Stripping 'wiki/' part of path before serving as a search result
-                        folder = root[len(cfg.wiki_directory + "/"):]
-                        if folder == "":
-                            url = os.path.splitext(
-                                root[len(cfg.wiki_directory + "/"):] + "/" + item)[0]
-                        else:
-                            url = "/" + \
-                                  os.path.splitext(
-                                      root[len(cfg.wiki_directory + "/"):] + "/" + item)[0]
+    if search.newly_created:
+        app.logger.info("Initial search index creation, doing a full index...")
+        items = []
+        for root, subfolder, files in os.walk(cfg.wiki_directory):
+            for item in files:
+                path = os.path.join(root, item)
+                ignored = (
+                    os.path.join(cfg.wiki_directory, '.git'),
+                    os.path.join(cfg.wiki_directory, cfg.images_route)
+                )
 
-                        info = {'doc': item,
-                                'url': url,
-                                'folder': folder,
-                                'folder_url': root[len(cfg.wiki_directory + "/"):]}
-                        found.append(info)
-                        app.logger.info(f"Found '{search_term}' in '{item}'")
-                except Exception as e:
-                    app.logger.error(f"Error while searching >>> {str(e)}")
+                if path in ignored:
+                    continue
+                items.append((path, item))
+        search.index_all(items)
 
-    return render_template('search.html', zoekterm=found, system=SYSTEM_SETTINGS)
+    results = search.search(escaped_search_term)
+    return render_template('search.html', zoekterm=results, system=SYSTEM_SETTINGS)
 
 
 def fetch_page_name() -> str:
