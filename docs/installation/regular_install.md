@@ -9,7 +9,7 @@ nav_order: 1
 ! It's tested on windows and linux based systems.
 ! Runs on flask server
 
-Clone te repository
+Clone the repository
 ```
 git clone https://github.com/Linbreux/wikmd.git
 ```
@@ -47,6 +47,41 @@ Maybe you need to install pandoc on your system before this works.
 ```
 sudo apt-get update && sudo apt-get install pandoc
 ```
+You may experience an issue when running `pip install -r requirements.txt` where you receive the following error:
+```
+  psutil/_psutil_common.c:9:10: fatal error: Python.h: No such file or directory
+      9 | #include <Python.h>
+        |          ^~~~~~~~~~
+  compilation terminated.
+  error: command '/usr/lib64/ccache/gcc' failed with exit code 1
+  ----------------------------------------
+  ERROR: Failed building wheel for psutil
+ ```
+
+You can fix this by installing the python 3 dev package.
+
+Ubuntu, Debian:
+```
+sudo apt-get install python3-dev
+```
+Fedora:
+```
+sudo dnf install python3-devel
+```
+For other distros, you can search up `[distro] install python 3 dev`.
+
+You may experience an error when running `pip install -r requirements.txt` where it asks you to install `gcc python3-dev`. Example:
+```
+  unable to execute 'x86_64-linux-gnu-gcc': No such file or directory
+  C compiler or Python headers are not installed on this system. Try to run:
+  sudo apt-get install gcc python3-dev
+  error: command 'x86_64-linux-gnu-gcc' failed with exit status 1
+  ----------------------------------------
+  ERROR: Failed building wheel for psutil
+```
+
+Simply install `gcc python3-dev`.
+
 
 ### Runing the wiki as a service
 
