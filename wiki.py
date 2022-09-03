@@ -28,6 +28,7 @@ SESSIONS = []
 
 cfg = WikmdConfig()
 UPLOAD_FOLDER = f"{cfg.wiki_directory}/{cfg.images_route}"
+SEARCH_FOLDER = f"{cfg.wiki_directory}/_searchindex"
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -63,7 +64,7 @@ def save(page_name):
             os.makedirs(dirname)
         with open(filename, 'w') as f:
             f.write(content)
-        search = Search()
+        search = Search(SEARCH_FOLDER)
         search.delete(filename)
         search.index(filename, page_name, content)
     except Exception as e:
@@ -78,15 +79,18 @@ def search():
     escaped_search_term = re.escape(search_term)
 
     app.logger.info(f"Searching >>> '{search_term}' ...")
-    search = Search()
+    search = Search(SEARCH_FOLDER)
 
     if search.newly_created:
         app.logger.info("Initial search index creation, doing a full index...")
         items = []
         for root, subfolder, files in os.walk(cfg.wiki_directory):
             for item in files:
-                if root.startswith(os.path.join(cfg.wiki_directory, '.git')) or \
-                   root.startswith(os.path.join(cfg.wiki_directory, cfg.images_route)):
+                if (
+                    root.startswith(os.path.join(cfg.wiki_directory, '.git')) or
+                    root.startswith(os.path.join(cfg.wiki_directory, cfg.images_route)) or
+                    root.startswith(SEARCH_FOLDER)
+                ):
                     continue
                 page_name, _ = os.path.splitext(item)
                 path = os.path.join(root, item)
@@ -125,12 +129,11 @@ def list_wiki(folderpath):
         for item in files:
             path = os.path.join(root, item)
             mtime = os.path.getmtime(os.path.join(root, item))
-            if os.path.join(cfg.wiki_directory, '.git') in str(path):
-                # We don't want to search there
-                app.logger.debug(f"skipping {path}: is git file")
-                continue
-            if os.path.join(cfg.wiki_directory, cfg.images_route) in str(path):
-                # Nothing interesting there too
+            if (
+                root.startswith(os.path.join(cfg.wiki_directory, '.git')) or
+                root.startswith(os.path.join(cfg.wiki_directory, cfg.images_route)) or
+                root.startswith(SEARCH_FOLDER)
+            ):
                 continue
 
             folder = root[len(cfg.wiki_directory + "/"):]
@@ -258,7 +261,7 @@ def remove(page):
     os.remove(filename)
     git_sync_thread = Thread(target=wrm.git_sync, args=(page, "Remove"))
     git_sync_thread.start()
-    search = Search()
+    search = Search(SEARCH_FOLDER)
     search.delete(filename)
     return redirect("/")
 

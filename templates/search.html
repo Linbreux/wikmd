@@ -41,8 +41,11 @@
 {% block content %}
     <h2>Found {{ zoekterm|length }} result(s)</h2>
     <ul id="list">
-        {% for i in zoekterm %}
-            <li><a href="/{{ i.title }}">{{ i.title }}<a></li>
+        {% for i in zoekterm|sort(attribute="score", reverse=True) %}
+            <li>
+                <p><a href="/{{ i.title }}">{{ i.title }}<a></p>
+                <p>{{ i.highlights|safe }}</p>
+            </li>
         {% endfor %}
     </ul>
 {% endblock %}
