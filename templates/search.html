@@ -42,7 +42,7 @@
     <h2>Found {{ zoekterm|length }} result(s)</h2>
     <ul id="list">
         {% for i in zoekterm %}
-            <li><a href="{{ i.title }}">{{ i.title }}<a></li>
+            <li><a href="/{{ i.title }}">{{ i.title }}<a></li>
         {% endfor %}
     </ul>
 {% endblock %}

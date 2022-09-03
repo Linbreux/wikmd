@@ -47,6 +47,7 @@ SYSTEM_SETTINGS = {
     "web_deps": get_web_deps(cfg.local_mode, app.logger)
 }
 
+
 def save(page_name):
     """
     Function that saves a *.md page.
@@ -62,6 +63,9 @@ def save(page_name):
             os.makedirs(dirname)
         with open(filename, 'w') as f:
             f.write(content)
+        search = Search()
+        search.delete(filename)
+        search.index(filename, page_name, content)
     except Exception as e:
         app.logger.error(f"Error while saving '{page_name}' >>> {str(e)}")
 
@@ -81,16 +85,14 @@ def search():
         items = []
         for root, subfolder, files in os.walk(cfg.wiki_directory):
             for item in files:
-                path = os.path.join(root, item)
-                ignored = (
-                    os.path.join(cfg.wiki_directory, '.git'),
-                    os.path.join(cfg.wiki_directory, cfg.images_route)
-                )
-
-                if path in ignored:
+                if root.startswith(os.path.join(cfg.wiki_directory, '.git')) or \
+                   root.startswith(os.path.join(cfg.wiki_directory, cfg.images_route)):
                     continue
-                items.append((path, item))
-        search.index_all(items)
+                page_name, _ = os.path.splitext(item)
+                path = os.path.join(root, item)
+                items.append((item, page_name))
+
+        search.index_all(cfg.wiki_directory, items)
 
     results = search.search(escaped_search_term)
     return render_template('search.html', zoekterm=results, system=SYSTEM_SETTINGS)
@@ -256,6 +258,8 @@ def remove(page):
     os.remove(filename)
     git_sync_thread = Thread(target=wrm.git_sync, args=(page, "Remove"))
     git_sync_thread.start()
+    search = Search()
+    search.delete(filename)
     return redirect("/")
 
 
@@ -263,6 +267,7 @@ def remove(page):
 def edit(page):
     if(bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS)):
         return login(page)
+
     filename = os.path.join(cfg.wiki_directory, page + '.md')
     if request.method == 'POST':
         page_name = fetch_page_name()

@@ -1,6 +1,5 @@
 import os
 from collections import namedtuple
-from datetime import datetime
 from typing import List, NamedTuple, Tuple
 
 from whoosh import index
@@ -9,10 +8,9 @@ from whoosh.qparser import QueryParser
 
 
 class SearchSchema(SchemaClass):
-    path: ID = ID(stored=True)
+    path: ID = ID(stored=True, unique=True)
     title: TEXT = TEXT(stored=True)
     content: TEXT = TEXT
-    updated: DATETIME = DATETIME
 
 
 SearchResult = namedtuple("Result", "path title")
@@ -42,25 +40,22 @@ class Search:
             ]
         return results
 
-    def index(self, path: str, title: str, content: str, updated: datetime):
+    def index(self, path: str, title: str, content: str):
         writer = self._index.writer()
-        writer.add_document(path=path, title=title, content=content, updated=updated)
-        writer.commit()
-
-    def update(self, path: str, title: str, content: str, updated: datetime):
-        writer = self._index.writer()
-        writer.update_document(path=path, title=title, content=content)
+        writer.add_document(path=path, title=title, content=content)
         writer.commit()
 
     def delete(self, path: str):
-        self._index.delete_by_term("path", path)
-        self._index.commit()
+        writer = self._index.writer()
+        writer.delete_by_term("path", path)
+        writer.commit()
 
-    def index_all(self, files: List[Tuple[str, str]]):
+    def index_all(self, wiki_directory: str, files: List[Tuple[str, str]]):
         writer = self._index.writer()
         for path, title in files:
-            with open(path) as content:
+            fpath = os.path.join(wiki_directory, path)
+            with open(fpath) as content:
                 writer.add_document(
-                    path=path, title=title, content=str(content), updated=datetime.now()
+                    path=path, title=title, content=str(content)
                 )
         writer.commit()
