@@ -5,7 +5,7 @@ from multiprocessing import Process
 from typing import List, NamedTuple, Tuple, Union
 
 from bs4 import BeautifulSoup
-from markdown import markdown
+from markdown import Markdown
 from watchdog.events import (
     FileSystemEventHandler,
     FileCreatedEvent,
@@ -16,7 +16,7 @@ from watchdog.observers import Observer
 from whoosh import index
 from whoosh.fields import SchemaClass, DATETIME, TEXT, ID
 from whoosh.highlight import SentenceFragmenter
-from whoosh.qparser import QueryParser
+from whoosh.qparser import MultifieldParser
 
 
 class SearchSchema(SchemaClass):
@@ -43,13 +43,13 @@ class Search:
             self._index = index.open_dir(index_path)
 
     def textify(self, text: str) -> str:
-        html = markdown(text)
+        md = Markdown(extensions=["meta", "extra"])
+        html = md.convert(text)
         soup = BeautifulSoup(html, "html.parser")
         return soup.get_text()
 
     def search(self, term: str) -> List[NamedTuple]:
-        query_parser = QueryParser("content", schema=self._schema)
-        query = query_parser.parse(term)
+        query = MultifieldParser(["title", "content"], schema=self._schema).parse(term)
         frag = SentenceFragmenter(maxchars=2000)
         with self._index.searcher() as searcher:
             res = searcher.search(query)
