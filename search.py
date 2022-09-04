@@ -39,14 +39,16 @@ class Search:
 
     def textify(self, text: str) -> str:
         html = markdown(text)
-        soup = BeautifulSoup(html)
+        soup = BeautifulSoup(html, "html.parser")
         return soup.get_text()
 
     def search(self, term: str) -> List[NamedTuple]:
         query_parser = QueryParser("content", schema=self._schema)
         query = query_parser.parse(term)
-        frag = SentenceFragmenter(maxchars=500)
+        frag = SentenceFragmenter(maxchars=2000)
         with self._index.searcher() as searcher:
+            res = searcher.search(query)
+            res.fragmenter = frag
             results = [
                 SearchResult(
                     r.get("path"),
@@ -54,7 +56,7 @@ class Search:
                     r.score,
                     r.highlights("content"),
                 )
-                for r in searcher.search(query)
+                for r in res
             ]
         return results
 
