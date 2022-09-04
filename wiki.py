@@ -63,9 +63,6 @@ def save(page_name):
             os.makedirs(dirname)
         with open(filename, 'w') as f:
             f.write(content)
-        search = Search(SEARCH_FOLDER)
-        search.delete(filename)
-        search.index(filename, page_name, content)
     except Exception as e:
         app.logger.error(f"Error while saving '{page_name}' >>> {str(e)}")
 
@@ -242,8 +239,6 @@ def remove(page):
     os.remove(filename)
     git_sync_thread = Thread(target=wrm.git_sync, args=(page, "Remove"))
     git_sync_thread.start()
-    search = Search(SEARCH_FOLDER)
-    search.delete(filename)
     return redirect("/")
 
 
@@ -361,7 +356,7 @@ def toggle_sort():
 
 
 def setup_search():
-    search = Search(SEARCH_FOLDER)
+    search = Search(SEARCH_FOLDER, create=True)
 
     app.logger.info("Initial search index creation, doing a full index...")
     items = []

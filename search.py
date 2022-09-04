@@ -26,11 +26,14 @@ class Search:
     _schema: SearchSchema
     newly_created: bool = False
 
-    def __init__(self, index_path: str):
+    def __init__(self, index_path: str, create: bool = False):
         self._schema = SearchSchema()
-        if not os.path.exists(index_path):
-            os.mkdir(index_path)
-        self._index = index.create_in(index_path, self._schema)
+        if create:
+            if not os.path.exists(index_path):
+                os.mkdir(index_path)
+            self._index = index.create_in(index_path, self._schema)
+        else:
+            self._index = index.open_dir(index_path)
 
     def search(self, term: str) -> List[NamedTuple]:
         query_parser = QueryParser("content", schema=self._schema)
@@ -65,6 +68,7 @@ class Search:
             fpath = os.path.join(wiki_directory, path)
             with open(fpath) as f:
                 content = f.read()
+            print(path, title)
             writer.add_document(path=path, title=title, content=content)
         writer.commit()
 
@@ -79,9 +83,10 @@ class WatchdogHandler(FileSystemEventHandler):
     def on_created(self, event):
         if os.path.splitext(event.src_path)[1] == ".md":
             filename = event.src_path.replace(f"{self.base_dir}/", "")
+            title, _ = os.path.splitext(filename)
             with open(event.src_path) as f:
                 content = f.read()
-            self.search.index(filename, filename, content)
+            self.search.index(filename, title, content)
 
     def on_deleted(self, event):
         if os.path.splitext(event.src_path)[1] == ".md":
