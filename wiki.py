@@ -79,24 +79,6 @@ def search():
 
     app.logger.info(f"Searching >>> '{search_term}' ...")
     search = Search(SEARCH_FOLDER)
-
-    if search.newly_created:
-        app.logger.info("Initial search index creation, doing a full index...")
-        items = []
-        for root, subfolder, files in os.walk(cfg.wiki_directory):
-            for item in files:
-                if (
-                    root.startswith(os.path.join(cfg.wiki_directory, '.git')) or
-                    root.startswith(os.path.join(cfg.wiki_directory, cfg.images_route)) or
-                    root.startswith(SEARCH_FOLDER)
-                ):
-                    continue
-                page_name, _ = os.path.splitext(item)
-                path = os.path.join(root, item)
-                items.append((item, page_name))
-
-        search.index_all(cfg.wiki_directory, items)
-
     results = search.search(escaped_search_term)
     return render_template('search.html', zoekterm=results, system=SYSTEM_SETTINGS)
 
