@@ -7,7 +7,10 @@ from typing import List, NamedTuple, Tuple, Union
 from bs4 import BeautifulSoup
 from markdown import markdown
 from watchdog.events import (
-    FileSystemEventHandler, FileCreatedEvent, FileDeletedEvent, FileModifiedEvent
+    FileSystemEventHandler,
+    FileCreatedEvent,
+    FileDeletedEvent,
+    FileModifiedEvent,
 )
 from watchdog.observers import Observer
 from whoosh import index
@@ -85,9 +88,7 @@ class Search:
 
 
 def watchdog(base_dir: str, search_path: str):
-
     class WatchdogHandler(FileSystemEventHandler):
-
         def __init__(self):
             self.base_dir = base_dir
             self.search = Search(search_path)
