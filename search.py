@@ -2,11 +2,13 @@ import os
 import time
 from collections import namedtuple
 from multiprocessing import Process
-from typing import List, NamedTuple, Tuple
+from typing import List, NamedTuple, Tuple, Union
 
 from bs4 import BeautifulSoup
 from markdown import markdown
-from watchdog.events import FileSystemEventHandler
+from watchdog.events import (
+    FileSystemEventHandler, FileCreatedEvent, FileDeletedEvent, FileModifiedEvent
+)
 from watchdog.observers import Observer
 from whoosh import index
 from whoosh.fields import SchemaClass, DATETIME, TEXT, ID
@@ -82,31 +84,6 @@ class Search:
         writer.commit()
 
 
-class WatchdogHandler(FileSystemEventHandler):
-
-    def __init__(self, *, base_dir: str, search_path: str):
-        self.base_dir = base_dir
-        self.search = Search(search_path)
-        super().__init__()
-
-    def on_created(self, event):
-        if os.path.splitext(event.src_path)[1] == ".md":
-            filename = event.src_path.replace(f"{self.base_dir}/", "")
-            title, _ = os.path.splitext(filename)
-            with open(event.src_path) as f:
-                content = f.read()
-            self.search.index(filename, title, content)
-
-    def on_deleted(self, event):
-        if os.path.splitext(event.src_path)[1] == ".md":
-            filename = event.src_path.replace(f"{self.base_dir}/", "")
-            self.search.delete(filename)
-
-    def on_modified(self, event):
-        self.on_deleted(event)
-        self.on_created(event)
-
-
 def watchdog(base_dir: str, search_path: str):
 
     class WatchdogHandler(FileSystemEventHandler):
@@ -116,7 +93,7 @@ def watchdog(base_dir: str, search_path: str):
             self.search = Search(search_path)
             super().__init__()
 
-        def on_created(self, event):
+        def on_created(self, event: Union[FileCreatedEvent, FileDeletedEvent]):
             if os.path.splitext(event.src_path)[1] == ".md":
                 filename = event.src_path.replace(f"{base_dir}/", "")
                 title, _ = os.path.splitext(filename)
@@ -124,12 +101,12 @@ def watchdog(base_dir: str, search_path: str):
                     content = f.read()
                 self.search.index(filename, title, content)
 
-        def on_deleted(self, event):
+        def on_deleted(self, event: Union[FileCreatedEvent, FileDeletedEvent]):
             if os.path.splitext(event.src_path)[1] == ".md":
                 filename = event.src_path.replace(f"{base_dir}/", "")
                 self.search.delete(filename)
 
-        def on_modified(self, event):
+        def on_modified(self, event: FileModifiedEvent):
             self.on_deleted(event)
             self.on_created(event)
 
