@@ -108,4 +108,4 @@ wiki/src/*
 !wiki/src
 
 temp/*
-_searchindex/*
+wiki/_searchindex/*
