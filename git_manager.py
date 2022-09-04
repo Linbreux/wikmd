@@ -144,7 +144,8 @@ class WikiRepoManager:
         :param message: commit message.
         """
         try:
-            self.repo.git.add("--all")  # git add --all
+            search_index = f"{cfg.wiki_directory}/_searchindex"
+            self.repo.git.add(f"--all -- ':!{search_index}/*'")  # git add --all
             self.repo.git.commit('-m', message)  # git commit -m
             self.flask_app.logger.info(f"New git commit >>> {message}")
         except Exception as e:
