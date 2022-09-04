@@ -85,7 +85,9 @@ Simply install `gcc python3-dev`.
 
 ### Runing the wiki as a service
 
-You can run the wiki as a service. Doing this, will allow the wiki to boot at startup.
+You can run the wiki as a service. Doing this will allow the wiki to boot at startup.
+
+First, create the following file as `wiki.service` in `/etc/systemd/system`, and replace the placeholder entries.
 
 ```
 [Unit]
@@ -93,7 +95,7 @@ Description=Wikmd
 After=network.target
 
 [Service]
-User=brecht
+User=<user>
 WorkingDirectory=<path to the wiki>
 Environment=FLASK_APP=wiki.py
 ExecStart=<path to the wiki>/env/bin/python3 wiki.py
@@ -104,8 +106,6 @@ WantedBy=multi-user.target
 
 ```
 
-Put this file in ```/etc/systemd/system/``` as ```wiki.service```.
-
 Run the following commands to enable and start the serivce
 
 ```
@@ -113,6 +113,23 @@ systemctl daemon-reload
 systemctl enable wiki.service
 systemctl start wiki.service
 ```
+
+If the wiki opens, but does not display any text, run `systemctl status wiki.service`.
+
+You may see the following error:
+```
+ERROR in wiki: Conversion to HTML failed >>> Pandoc died with exitcode "83" during conversion: b'Error running filter pandoc-xnos:\nCould not find executable pandoc-xnos\n'
+```
+To fix, run the following commands:
+```
+sudo su
+cd ~
+umask 022
+pip install -r <path to the wiki>/requirements.txt
+```
+This will install the python packages system-wide, allowing the wiki service to access it.
+
+Run `systemctl restart wiki.service` and it should be working.
 
 
 ## Windows
