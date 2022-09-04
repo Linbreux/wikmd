@@ -1,7 +1,11 @@
 import os
+import time
 from collections import namedtuple
+from multiprocessing import Process
 from typing import List, NamedTuple, Tuple
 
+from watchdog.events import FileSystemEventHandler
+from watchdog.observers import Observer
 from whoosh import index
 from whoosh.fields import SchemaClass, DATETIME, TEXT, ID
 from whoosh.highlight import SentenceFragmenter
@@ -26,15 +30,13 @@ class Search:
         self._schema = SearchSchema()
         if not os.path.exists(index_path):
             os.mkdir(index_path)
-            self._index = index.create_in(index_path, self._schema)
-            self.newly_created = True
-        else:
-            self._index = index.open_dir(index_path)
+        self._index = index.create_in(index_path, self._schema)
 
     def search(self, term: str) -> List[NamedTuple]:
         query_parser = QueryParser("content", schema=self._schema)
         query = query_parser.parse(term)
         frag = SentenceFragmenter(maxchars=500)
+        print(term)
         with self._index.searcher() as searcher:
             results = [
                 SearchResult(
@@ -65,3 +67,51 @@ class Search:
                 content = f.read()
             writer.add_document(path=path, title=title, content=content)
         writer.commit()
+
+
+class WatchdogHandler(FileSystemEventHandler):
+
+    def __init__(self, *, base_dir: str, search_path: str):
+        self.base_dir = base_dir
+        self.search = Search(search_path)
+        super().__init__()
+
+    def on_created(self, event):
+        if os.path.splitext(event.src_path)[1] == ".md":
+            filename = event.src_path.replace(f"{self.base_dir}/", "")
+            with open(event.src_path) as f:
+                content = f.read()
+            self.search.index(filename, filename, content)
+
+    def on_deleted(self, event):
+        if os.path.splitext(event.src_path)[1] == ".md":
+            filename = event.src_path.replace(f"{self.base_dir}/", "")
+            self.search.delete(filename)
+
+    def on_modified(self, event):
+        self.on_deleted(event)
+        self.on_created(event)
+
+
+def watchdog(base_dir: str, search_path: str):
+    event_handler = WatchdogHandler(base_dir=base_dir, search_path=search_path)
+    observer = Observer()
+    observer.schedule(event_handler, base_dir, recursive=True)
+    observer.daemon = True
+    observer.start()
+    try:
+        while observer.is_alive():
+            observer.join(1)
+            time.sleep(1)
+    finally:
+        observer.stop()
+        observer.join()
+
+
+def start_watchdog(base_dir: str, search_path: str):
+    try:
+        p = Process(target=watchdog, args=(base_dir, search_path))
+        p.daemon = True
+        p.start()
+    except KeyboardInterrupt:
+        p.terminate()

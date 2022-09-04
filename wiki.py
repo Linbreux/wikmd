@@ -15,10 +15,9 @@ from werkzeug.utils import secure_filename
 from random import randint
 from threading import Thread
 from hashlib import sha256
-
 from config import WikmdConfig
 from git_manager import WikiRepoManager
-from search import Search
+from search import Search, start_watchdog
 from web_dependencies import get_web_deps
 
 
@@ -379,6 +378,26 @@ def toggle_sort():
     return redirect("/list")
 
 
+def setup_search():
+    search = Search(SEARCH_FOLDER)
+
+    app.logger.info("Initial search index creation, doing a full index...")
+    items = []
+    for root, subfolder, files in os.walk(cfg.wiki_directory):
+        for item in files:
+            if (
+                root.startswith(os.path.join(cfg.wiki_directory, '.git')) or
+                root.startswith(os.path.join(cfg.wiki_directory, cfg.images_route)) or
+                root.startswith(SEARCH_FOLDER)
+            ):
+                continue
+            page_name, _ = os.path.splitext(item)
+            path = os.path.join(root, item)
+            items.append((item, page_name))
+
+    search.index_all(cfg.wiki_directory, items)
+
+
 def run_wiki():
     """
     Function that runs the wiki as a Flask app.
@@ -386,6 +405,8 @@ def run_wiki():
     if int(cfg.wikmd_logging) == 1:
         logging.basicConfig(filename=cfg.wikmd_logging_file, level=logging.INFO)
 
+    setup_search()
+    start_watchdog(cfg.wiki_directory, SEARCH_FOLDER)
     app.run(host=cfg.wikmd_host, port=cfg.wikmd_port, debug=True, use_reloader=False)
 
 
