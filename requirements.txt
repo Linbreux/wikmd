@@ -7,6 +7,7 @@ MarkupSafe==1.1.1
 PyYAML==6.0
 Werkzeug==1.0.1
 Whoosh==2.7.4
+beautifulsoup4==4.11.1
 click==7.1.2
 gitdb==4.0.5
 idna==3.3

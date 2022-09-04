@@ -4,6 +4,8 @@ from collections import namedtuple
 from multiprocessing import Process
 from typing import List, NamedTuple, Tuple
 
+from bs4 import BeautifulSoup
+from markdown import markdown
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 from whoosh import index
@@ -35,6 +37,11 @@ class Search:
         else:
             self._index = index.open_dir(index_path)
 
+    def textify(self, text: str) -> str:
+        html = markdown(text)
+        soup = BeautifulSoup(html)
+        return soup.get_text()
+
     def search(self, term: str) -> List[NamedTuple]:
         query_parser = QueryParser("content", schema=self._schema)
         query = query_parser.parse(term)
@@ -53,6 +60,7 @@ class Search:
 
     def index(self, path: str, title: str, content: str):
         writer = self._index.writer()
+        content = self.textify(content)
         writer.add_document(path=path, title=title, content=content)
         writer.commit()
 
@@ -67,6 +75,7 @@ class Search:
             fpath = os.path.join(wiki_directory, path)
             with open(fpath) as f:
                 content = f.read()
+            content = self.textify(content)
             writer.add_document(path=path, title=title, content=content)
         writer.commit()
 
