@@ -127,12 +127,12 @@ def list_full_wiki():
 @app.route('/list/<path:folderpath>/', methods=['GET'])
 def list_wiki(folderpath):
     folder_list = []
-    app.logger.info("Showing >>> 'all files'")
-    safe_folder = cfg.wiki_directory
+    safe_folder = os.path.realpath(cfg.wiki_directory)
     requested_path = os.path.join(cfg.wiki_directory,folderpath) 
-    print(requested_path)
-    if os.path.commonprefix((os.path.realpath(requested_path),os.path.realpath(safe_folder))) != os.path.realpath(safe_folder): 
+    if os.path.commonprefix((os.path.realpath(requested_path),safe_folder)) != safe_folder: 
+        app.logger.info("Requesting unsafe path >> showing homepage")
         return index()
+    app.logger.info("Showing >>> 'all files'")
     for root, subfolder, files in os.walk(requested_path):
         if root[-1] == '/':
             root = root[:-1]
