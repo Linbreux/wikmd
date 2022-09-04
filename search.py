@@ -95,7 +95,7 @@ def watchdog(base_dir: str, search_path: str):
             super().__init__()
 
         def on_created(self, event: Union[FileCreatedEvent, FileDeletedEvent]):
-            if os.path.splitext(event.src_path)[1] == ".md":
+            if os.path.splitext(event.src_path)[1].lower() == ".md":
                 filename = event.src_path.replace(f"{base_dir}/", "")
                 title, _ = os.path.splitext(filename)
                 with open(event.src_path) as f:
@@ -103,7 +103,7 @@ def watchdog(base_dir: str, search_path: str):
                 self.search.index(filename, title, content)
 
         def on_deleted(self, event: Union[FileCreatedEvent, FileDeletedEvent]):
-            if os.path.splitext(event.src_path)[1] == ".md":
+            if os.path.splitext(event.src_path)[1].lower() == ".md":
                 filename = event.src_path.replace(f"{base_dir}/", "")
                 self.search.delete(filename)
 
