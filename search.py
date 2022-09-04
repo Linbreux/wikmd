@@ -97,23 +97,46 @@ class WatchdogHandler(FileSystemEventHandler):
 
 
 def watchdog(base_dir: str, search_path: str):
-    event_handler = WatchdogHandler(base_dir=base_dir, search_path=search_path)
-    observer = Observer()
-    observer.schedule(event_handler, base_dir, recursive=True)
-    observer.daemon = True
-    observer.start()
-    try:
-        while observer.is_alive():
-            observer.join(1)
-            time.sleep(1)
-    finally:
-        observer.stop()
-        observer.join()
 
+    class WatchdogHandler(FileSystemEventHandler):
 
-def start_watchdog(base_dir: str, search_path: str):
+        def __init__(self):
+            self.base_dir = base_dir
+            self.search = Search(search_path)
+            super().__init__()
+
+        def on_created(self, event):
+            if os.path.splitext(event.src_path)[1] == ".md":
+                filename = event.src_path.replace(f"{base_dir}/", "")
+                title, _ = os.path.splitext(filename)
+                with open(event.src_path) as f:
+                    content = f.read()
+                self.search.index(filename, title, content)
+
+        def on_deleted(self, event):
+            if os.path.splitext(event.src_path)[1] == ".md":
+                filename = event.src_path.replace(f"{base_dir}/", "")
+                self.search.delete(filename)
+
+        def on_modified(self, event):
+            self.on_deleted(event)
+            self.on_created(event)
+
+    def _watchdog():
+        event_handler = WatchdogHandler()
+        observer = Observer()
+        observer.schedule(event_handler, base_dir, recursive=True)
+        observer.start()
+        try:
+            while observer.is_alive():
+                observer.join(1)
+                time.sleep(1)
+        finally:
+            observer.stop()
+            observer.join()
+
     try:
-        p = Process(target=watchdog, args=(base_dir, search_path))
+        p = Process(target=_watchdog)
         p.daemon = True
         p.start()
     except KeyboardInterrupt:

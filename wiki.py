@@ -17,7 +17,7 @@ from threading import Thread
 from hashlib import sha256
 from config import WikmdConfig
 from git_manager import WikiRepoManager
-from search import Search, start_watchdog
+from search import Search, watchdog
 from web_dependencies import get_web_deps
 
 
@@ -383,7 +383,7 @@ def run_wiki():
         logging.basicConfig(filename=cfg.wikmd_logging_file, level=logging.INFO)
 
     setup_search()
-    start_watchdog(cfg.wiki_directory, SEARCH_FOLDER)
+    watchdog(cfg.wiki_directory, SEARCH_FOLDER)
     app.run(host=cfg.wikmd_host, port=cfg.wikmd_port, debug=True, use_reloader=False)
 
 
