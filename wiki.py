@@ -72,12 +72,14 @@ def search():
     Function that searches for a term and shows the results.
     """
     search_term = request.form['ss']
-    escaped_search_term = re.escape(search_term)
+    search_term = re.escape(search_term)
 
     app.logger.info(f"Searching >>> '{search_term}' ...")
     search = Search(SEARCH_FOLDER)
-    results = search.search(escaped_search_term)
-    return render_template('search.html', search_term=search_term, results=results, system=SYSTEM_SETTINGS)
+    results = search.search(search_term)
+    return render_template(
+        'search.html', search_term=search_term, results=results, system=SYSTEM_SETTINGS
+    )
 
 
 def fetch_page_name() -> str:
