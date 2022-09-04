@@ -360,7 +360,7 @@ def toggle_sort():
 def setup_search():
     search = Search(SEARCH_FOLDER, create=True)
 
-    app.logger.info("Initial search index creation, doing a full index...")
+    app.logger.info("Search index creation...")
     items = []
     for root, subfolder, files in os.walk(cfg.wiki_directory):
         for item in files:
@@ -385,6 +385,7 @@ def run_wiki():
         logging.basicConfig(filename=cfg.wikmd_logging_file, level=logging.INFO)
 
     setup_search()
+    app.logger.info("Spawning search indexer watchdog")
     watchdog(cfg.wiki_directory, SEARCH_FOLDER)
     app.run(host=cfg.wikmd_host, port=cfg.wikmd_port, debug=True, use_reloader=False)
 
