@@ -77,7 +77,7 @@ def search():
     app.logger.info(f"Searching >>> '{search_term}' ...")
     search = Search(SEARCH_FOLDER)
     results = search.search(escaped_search_term)
-    return render_template('search.html', zoekterm=results, system=SYSTEM_SETTINGS)
+    return render_template('search.html', search_term=search_term, results=results, system=SYSTEM_SETTINGS)
 
 
 def fetch_page_name() -> str:

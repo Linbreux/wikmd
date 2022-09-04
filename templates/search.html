@@ -39,12 +39,12 @@
 {% endblock %}
 
 {% block content %}
-    <h2>Found {{ zoekterm|length }} result(s)</h2>
+    <h2>Found {{ results|length }} result(s) for '{{ search_term }}'</h2>
     <ul id="list">
-        {% for i in zoekterm|sort(attribute="score", reverse=True) %}
+        {% for res in results|sort(attribute="score", reverse=True) %}
             <li>
-                <p><a href="/{{ i.title }}">{{ i.title }}<a></p>
-                <p>{{ i.highlights|safe }}</p>
+                <p><a href="/{{ res.title }}">{{ res.title }}<a></p>
+                <p>{{ res.highlights|safe }}</p>
             </li>
         {% endfor %}
     </ul>

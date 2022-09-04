@@ -39,7 +39,6 @@ class Search:
         query_parser = QueryParser("content", schema=self._schema)
         query = query_parser.parse(term)
         frag = SentenceFragmenter(maxchars=500)
-        print(term)
         with self._index.searcher() as searcher:
             results = [
                 SearchResult(
@@ -68,7 +67,6 @@ class Search:
             fpath = os.path.join(wiki_directory, path)
             with open(fpath) as f:
                 content = f.read()
-            print(path, title)
             writer.add_document(path=path, title=title, content=content)
         writer.commit()
 
