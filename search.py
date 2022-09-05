@@ -77,14 +77,14 @@ class Search:
         writer.delete_by_term("path", path)
         writer.commit()
 
-    def index_all(self, wiki_directory: str, files: List[Tuple[str, str]]):
+    def index_all(self, wiki_directory: str, files: List[Tuple[str, str, str]]):
         writer = self._index.writer()
-        for path, title in files:
-            fpath = os.path.join(wiki_directory, path)
+        for path, title, relpath in files:
+            fpath = os.path.join(wiki_directory, relpath, path)
             with open(fpath) as f:
                 content = f.read()
             content = self.textify(content)
-            writer.add_document(path=path, title=title, content=content)
+            writer.add_document(path=relpath, title=title, content=content)
         writer.commit()
 
     def close(self):

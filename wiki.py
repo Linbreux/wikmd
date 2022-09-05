@@ -374,8 +374,8 @@ def setup_search():
             ):
                 continue
             page_name, _ = os.path.splitext(item)
-            path = os.path.join(root, item)
-            items.append((item, page_name))
+            path = os.path.relpath(root,cfg.wiki_directory)
+            items.append((item, page_name, path))
 
     search.index_all(cfg.wiki_directory, items)
 
