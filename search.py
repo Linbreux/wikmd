@@ -31,7 +31,6 @@ SearchResult = namedtuple("Result", "path title score highlights")
 class Search:
     _index: index
     _schema: SearchSchema
-    newly_created: bool = False
 
     def __init__(self, index_path: str, create: bool = False):
         self._schema = SearchSchema()
@@ -48,7 +47,7 @@ class Search:
         soup = BeautifulSoup(html, "html.parser")
         return soup.get_text()
 
-    def search(self, term: str) -> List[NamedTuple]:
+    def search(self, term: str) -> Tuple[List[NamedTuple], List[str]]:
         query = MultifieldParser(["title", "content"], schema=self._schema).parse(term)
         frag = SentenceFragmenter(maxchars=2000)
         with self._index.searcher() as searcher:
@@ -63,7 +62,9 @@ class Search:
                 )
                 for r in res
             ]
-        return results
+            corrector = searcher.corrector("content")
+            suggestions = corrector.suggest(term)
+        return results, suggestions
 
     def index(self, path: str, title: str, content: str):
         writer = self._index.writer()
@@ -85,6 +86,9 @@ class Search:
             content = self.textify(content)
             writer.add_document(path=path, title=title, content=content)
         writer.commit()
+
+    def close(self):
+        self._index.close()
 
 
 def watchdog(base_dir: str, search_path: str):

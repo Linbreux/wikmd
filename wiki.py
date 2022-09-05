@@ -67,18 +67,21 @@ def save(page_name):
         app.logger.error(f"Error while saving '{page_name}' >>> {str(e)}")
 
 
-def search():
+def search(search_term: str):
     """
     Function that searches for a term and shows the results.
     """
-    search_term = request.form['ss']
     search_term = re.escape(search_term)
 
     app.logger.info(f"Searching >>> '{search_term}' ...")
     search = Search(SEARCH_FOLDER)
-    results = search.search(search_term)
+    results, suggestions = search.search(search_term)
     return render_template(
-        'search.html', search_term=search_term, results=results, system=SYSTEM_SETTINGS
+        'search.html',
+        search_term=search_term,
+        suggestions=suggestions,
+        results=results,
+        system=SYSTEM_SETTINGS,
     )
 
 
@@ -143,10 +146,10 @@ def list_wiki(folderpath):
     return render_template('list_files.html', list=folder_list, folder=folderpath, system=SYSTEM_SETTINGS)
 
 
-@app.route('/<path:file_page>', methods=['POST', 'GET'])
+@app.route('/<path:file_page>', methods=['GET'])
 def file_page(file_page):
-    if request.method == 'POST':
-        return search()
+    if request.args.get("q"):
+        return search(request.args.get("q"))
     else:
         html = ""
         mod = ""
@@ -175,10 +178,10 @@ def file_page(file_page):
                                system=SYSTEM_SETTINGS)
 
 
-@app.route('/', methods=['POST', 'GET'])
+@app.route('/', methods=['GET'])
 def index():
-    if request.method == 'POST':
-        return search()
+    if request.args.get("q"):
+        return search(request.args.get("q"))
     else:
         html = ""
         app.logger.info("Showing HTML page >>> 'homepage'")

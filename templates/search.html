@@ -40,6 +40,12 @@
 
 {% block content %}
     <h2>Found {{ results|length }} result(s) for '{{ search_term }}'</h2>
+    <p>
+        Did you mean?: 
+        {% for term in suggestions %}
+        <a href="/?q={{ term }}">{{ term }}</a>
+        {% if not loop.last %}, {% endif %}
+    {% endfor %}
     <ul id="list">
         {% for res in results|sort(attribute="score", reverse=True) %}
             <li>
