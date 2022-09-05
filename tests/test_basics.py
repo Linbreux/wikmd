@@ -1,3 +1,4 @@
+import wiki
 import pytest
 import pypandoc
 import os
@@ -49,6 +50,7 @@ def test_create_file_in_folder():
     
 # checks if the search response with searchterm = Features    
 def test_search():
+     wiki.setup_search()
      rv = app.test_client().get("/?q=Features")
      assert rv.status_code == 200
      assert b'Found' in rv.data
