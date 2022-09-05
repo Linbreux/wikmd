@@ -386,23 +386,7 @@ def toggle_sort():
 
 def setup_search():
     search = Search(SEARCH_FOLDER, create=True)
-    # make sure we use the same python version, otherwise regenerate.
-    versionfolder = os.path.join(SEARCH_FOLDER,"version")
-    # check if version doc exist and 
-    if os.path.isfile(versionfolder):
-        f = open(versionfolder, "r+")
-        if f.read().rstrip() == platform.python_version():
-            app.logger.info("Python version correct!")
-        else:
-            app.logger.info("Python version incompatible with index >>> refreshing...")
-            shutil.rmtree(os.path.join(SEARCH_FOLDER))
-            search = Search(SEARCH_FOLDER, create=True)
-        f.close()
-    else:
-        f = open(versionfolder, "w+")
-        f.write(str(platform.python_version()))
-        f.close()
-    
+
     app.logger.info("Search index creation...")
     items = []
     for root, subfolder, files in os.walk(cfg.wiki_directory):
