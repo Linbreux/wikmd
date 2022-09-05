@@ -49,9 +49,7 @@ def test_create_file_in_folder():
     
 # checks if the search response with searchterm = Features    
 def test_search():
-     rv = app.test_client().post("/",data=dict(
-         ss="Features"
-     ))
+     rv = app.test_client().get("/?q=Features")
      assert rv.status_code == 200
      assert b'Found' in rv.data
      assert b'result(s)' in rv.data
