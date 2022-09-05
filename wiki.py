@@ -15,6 +15,7 @@ from werkzeug.utils import secure_filename
 from random import randint
 from threading import Thread
 from hashlib import sha256
+from cache import Cache
 from config import WikmdConfig
 from git_manager import WikiRepoManager
 from search import Search, watchdog
@@ -47,6 +48,7 @@ SYSTEM_SETTINGS = {
     "web_deps": get_web_deps(cfg.local_mode, app.logger)
 }
 
+cache = Cache(cfg.cache_dir)
 
 def save(page_name):
     """
@@ -155,24 +157,34 @@ def file_page(file_page):
         mod = ""
         folder = ""
 
-        if "favicon" not in file_page:  # if the GET request is not for the favicon
-            try:
-                md_file_path = os.path.join(cfg.wiki_directory, file_page + ".md")
-                # latex = pypandoc.convert_file("wiki/" + file_page + ".md", "tex", format="md")
-                # html = pypandoc.convert_text(latex,"html5",format='tex', extra_args=["--mathjax"])
+        if "favicon" in file_page:  # if the GET request is not for the favicon
+            return
 
-                app.logger.info(f"Converting to HTML with pandoc >>> '{md_file_path}' ...")
-                html = pypandoc.convert_file(md_file_path, "html5",
-                                             format='md', extra_args=["--mathjax"], filters=['pandoc-xnos'])
-                html = clean_html(html)
-                mod = "Last modified: %s" % time.ctime(os.path.getmtime(md_file_path))
-                folder = file_page.split("/")
-                file_page = folder[-1:][0]
-                folder = folder[:-1]
-                folder = "/".join(folder)
-                app.logger.info(f"Showing HTML page >>> '{file_page}'")
-            except Exception as a:
-                app.logger.info(a)
+        md_file_path = os.path.join(cfg.wiki_directory, file_page + ".md")
+        mod = "Last modified: %s" % time.ctime(os.path.getmtime(md_file_path))
+        folder = file_page.split("/")
+        file_page = folder[-1:][0]
+        folder = folder[:-1]
+        folder = "/".join(folder)
+
+        cached_entry = cache.get(md_file_path)
+        if cached_entry:
+            app.logger.info(f"Showing HTML page from cache >>> '{file_page}'")
+            return render_template(
+                'content.html', title=file_page, folder=folder, info=cached_entry, modif=mod,
+                system=SYSTEM_SETTINGS
+            )
+
+        try:
+            app.logger.info(f"Converting to HTML with pandoc >>> '{md_file_path}' ...")
+            html = pypandoc.convert_file(md_file_path, "html5",
+                                         format='md', extra_args=["--mathjax"], filters=['pandoc-xnos'])
+            html = clean_html(html)
+            cache.set(md_file_path, html)
+
+            app.logger.info(f"Showing HTML page >>> '{file_page}'")
+        except Exception as a:
+            app.logger.info(a)
 
         return render_template('content.html', title=file_page, folder=folder, info=html, modif=mod,
                                system=SYSTEM_SETTINGS)
@@ -185,12 +197,22 @@ def index():
     else:
         html = ""
         app.logger.info("Showing HTML page >>> 'homepage'")
+
+        md_file_path = os.path.join(cfg.wiki_directory, cfg.homepage)
+        cached_entry = cache.get(md_file_path)
+        if cached_entry:
+            app.logger.info("Showing HTML page from cache >>> 'homepage'")
+            return render_template(
+                'index.html', homepage=cached_entry, system=SYSTEM_SETTINGS
+            )
+
         try:
             app.logger.info("Converting to HTML with pandoc >>> 'homepage' ...")
             html = pypandoc.convert_file(
-                os.path.join(cfg.wiki_directory, cfg.homepage), "html5", format='md', extra_args=["--mathjax"],
+                md_file_path, "html5", format='md', extra_args=["--mathjax"],
                 filters=['pandoc-xnos'])
             html = clean_html(html)
+            cache.set(md_file_path, html)
 
         except Exception as e:
             app.logger.error(f"Conversion to HTML failed >>> {str(e)}")

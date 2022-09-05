@@ -69,6 +69,17 @@ Otherwise the CDNs jsdelivr, cloudflare, polyfill and unpkg will be used.
 export LOCAL_MODE=True
 ```
 
+## Caching
+
+By default wikmd will cache wiki pages to `/dev/shm/wikmd`, changing this option changes
+the directory that cached files will be stored in.
+
+`Default = "/dev/shm/wikmd"`
+
+```
+export CACHE_DIR="/some/other/path"
+```
+
 ## Change logging file
 
 In case you need to rename the log file you can use `WIKMD_LOGGING_FILE`.

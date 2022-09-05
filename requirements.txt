@@ -27,3 +27,4 @@ idna==3.3
 lxml==4.9.1
 Whoosh==2.7.4
 watchdog==2.1.9
+cachelib==0.6.0
