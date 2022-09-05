@@ -400,7 +400,7 @@ def setup_search():
         f.close()
     else:
         f = open(versionfolder, "w+")
-        f.write(platform.python_version())
+        f.write(str(platform.python_version()))
         f.close()
     
     app.logger.info("Search index creation...")
