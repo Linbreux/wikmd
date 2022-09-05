@@ -1,4 +1,5 @@
 import os
+from shutil import rmtree
 from typing import Optional
 
 import cachelib
@@ -8,8 +9,9 @@ class Cache:
     cache: cachelib.FileSystemCache
 
     def __init__(self, path: str):
-        if not os.path.exists(path):
-            os.makedirs(path)
+        if os.path.exists(path):
+            rmtree(path)  # delete an existing cache on start/restart
+        os.makedirs(path)
         self.cache = cachelib.FileSystemCache(path)
 
     def get(self, key: str) -> Optional[str]:
