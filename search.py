@@ -13,14 +13,16 @@ from watchdog.events import (
     FileModifiedEvent,
 )
 from watchdog.observers import Observer
-from whoosh import index
+from whoosh import index, query
 from whoosh.fields import SchemaClass, DATETIME, TEXT, ID
 from whoosh.highlight import SentenceFragmenter
 from whoosh.qparser import MultifieldParser
+from whoosh.writing import AsyncWriter
 
 
 class SearchSchema(SchemaClass):
     path: ID = ID(stored=True, unique=True)
+    filename: ID = ID(stored=True)
     title: TEXT = TEXT(stored=True)
     content: TEXT = TEXT(stored=True)
 
@@ -66,59 +68,78 @@ class Search:
             suggestions = corrector.suggest(term)
         return results, suggestions
 
-    def index(self, path: str, title: str, content: str):
-        writer = self._index.writer()
+    def index(self, path: str, filename: str, title: str, content: str):
+        writer = AsyncWriter(self._index)
         content = self.textify(content)
-        writer.add_document(path=path, title=title, content=content)
+        writer.add_document(path=path, filename=filename, title=title, content=content)
         writer.commit()
 
-    def delete(self, path: str):
-        writer = self._index.writer()
-        writer.delete_by_term("path", path)
+    def delete(self, path: str, filename: str):
+        writer = AsyncWriter(self._index)
+        q = query.And([query.Term("path", path), query.Term("filename", filename)])
+        writer.delete_by_query(q)
         writer.commit()
 
     def index_all(self, wiki_directory: str, files: List[Tuple[str, str, str]]):
-        writer = self._index.writer()
+        writer = AsyncWriter(self._index)
         for path, title, relpath in files:
             fpath = os.path.join(wiki_directory, relpath, path)
             with open(fpath) as f:
                 content = f.read()
             content = self.textify(content)
-            writer.add_document(path=relpath, title=title, content=content)
+            writer.add_document(
+                path=relpath, filename=path, title=title, content=content
+            )
         writer.commit()
 
     def close(self):
         self._index.close()
 
 
-def watchdog(base_dir: str, search_path: str):
-    class WatchdogHandler(FileSystemEventHandler):
-        def __init__(self):
-            self.base_dir = base_dir
-            self.search = Search(search_path)
-            super().__init__()
+class Watchdog(FileSystemEventHandler):
+    wiki_directory: str
+    search_directory: str
+    search: Search
+    proc: Process
 
-        def on_created(self, event: Union[FileCreatedEvent, FileDeletedEvent]):
-            if os.path.splitext(event.src_path)[1].lower() == ".md":
-                filename = event.src_path.replace(f"{base_dir}/", "")
-                title, _ = os.path.splitext(filename)
-                with open(event.src_path) as f:
-                    content = f.read()
-                self.search.index(filename, title, content)
+    def on_created(self, event: Union[FileCreatedEvent, FileDeletedEvent]):
+        if not os.path.splitext(event.src_path)[1].lower() == ".md":
+            return
+        base_path, filename = os.path.split(event.src_path)
+        path_segs = base_path.split(os.sep)
+        if len(path_segs) == 1:
+            path = "."
+        else:
+            path = f"{os.sep}".join(path[1:])
+        title, _ = os.path.splitext(filename)
+        with open(event.src_path) as f:
+            content = f.read()
+        self.search.index(path, filename, title, content)
 
-        def on_deleted(self, event: Union[FileCreatedEvent, FileDeletedEvent]):
-            if os.path.splitext(event.src_path)[1].lower() == ".md":
-                filename = event.src_path.replace(f"{base_dir}/", "")
-                self.search.delete(filename)
+    def on_deleted(self, event: Union[FileCreatedEvent, FileDeletedEvent]):
+        if not os.path.splitext(event.src_path)[1].lower() == ".md":
+            return
+        base_path, filename = os.path.split(event.src_path)
+        path_segs = base_path.split(os.sep)
+        if len(path_segs) == 1:
+            path = "."
+        else:
+            path = f"{os.sep}".join(path[1:])
+        self.search.delete(path, filename)
 
-        def on_modified(self, event: FileModifiedEvent):
-            self.on_deleted(event)
-            self.on_created(event)
+    def on_modified(self, event: FileModifiedEvent):
+        self.on_deleted(event)
+        self.on_created(event)
 
-    def _watchdog():
-        event_handler = WatchdogHandler()
+    def __init__(self, wiki_directory: str, search_directory: str):
+        self.wiki_directory = wiki_directory
+        self.search_directory = search_directory
+        self.search = Search(self.search_directory)
+
+    def watchdog(self):
+        event_handler = self
         observer = Observer()
-        observer.schedule(event_handler, base_dir, recursive=True)
+        observer.schedule(self, self.wiki_directory, recursive=True)
         observer.start()
         try:
             while observer.is_alive():
@@ -128,9 +149,14 @@ def watchdog(base_dir: str, search_path: str):
             observer.stop()
             observer.join()
 
-    try:
-        p = Process(target=_watchdog)
-        p.daemon = True
-        p.start()
-    except KeyboardInterrupt:
-        p.terminate()
+    def start(self):
+        try:
+            self.proc = Process(target=self.watchdog)
+            self.proc.daemon = True
+            self.proc.start()
+        except KeyboardInterrupt:
+            self.proc.terminate()
+
+    def stop(self):
+        if self.proc.is_alive():
+            self.proc.terminate()

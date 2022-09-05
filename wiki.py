@@ -20,7 +20,7 @@ from hashlib import sha256
 from cache import Cache
 from config import WikmdConfig
 from git_manager import WikiRepoManager
-from search import Search, watchdog
+from search import Search, Watchdog
 from web_dependencies import get_web_deps
 
 
@@ -413,7 +413,8 @@ def run_wiki():
 
     setup_search()
     app.logger.info("Spawning search indexer watchdog")
-    watchdog(cfg.wiki_directory, SEARCH_FOLDER)
+    watchdog = Watchdog(cfg.wiki_directory, SEARCH_FOLDER)
+    watchdog.start()
     app.run(host=cfg.wikmd_host, port=cfg.wikmd_port, debug=True, use_reloader=False)
 
 
