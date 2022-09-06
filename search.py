@@ -27,7 +27,7 @@ class SearchSchema(SchemaClass):
     content: TEXT = TEXT(stored=True)
 
 
-SearchResult = namedtuple("Result", "path title score highlights")
+SearchResult = namedtuple("Result", "path filename title score highlights")
 
 
 class Search:
@@ -58,6 +58,7 @@ class Search:
             results = [
                 SearchResult(
                     r.get("path"),
+                    r.get("filename"),
                     r.get("title"),
                     r.score,
                     r.highlights("content"),
@@ -102,6 +103,11 @@ class Watchdog(FileSystemEventHandler):
     search: Search
     proc: Process
 
+    def __init__(self, wiki_directory: str, search_directory: str):
+        self.wiki_directory = wiki_directory
+        self.search_directory = search_directory
+        self.search = Search(self.search_directory)
+
     def on_created(self, event: Union[FileCreatedEvent, FileDeletedEvent]):
         if not os.path.splitext(event.src_path)[1].lower() == ".md":
             return
@@ -130,11 +136,6 @@ class Watchdog(FileSystemEventHandler):
     def on_modified(self, event: FileModifiedEvent):
         self.on_deleted(event)
         self.on_created(event)
-
-    def __init__(self, wiki_directory: str, search_directory: str):
-        self.wiki_directory = wiki_directory
-        self.search_directory = search_directory
-        self.search = Search(self.search_directory)
 
     def watchdog(self):
         event_handler = self
