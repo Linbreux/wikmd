@@ -110,7 +110,7 @@ class Watchdog(FileSystemEventHandler):
         if len(path_segs) == 1:
             path = "."
         else:
-            path = f"{os.sep}".join(path[1:])
+            path = f"{os.sep}".join(path_segs[1:])
         title, _ = os.path.splitext(filename)
         with open(event.src_path) as f:
             content = f.read()
@@ -124,7 +124,7 @@ class Watchdog(FileSystemEventHandler):
         if len(path_segs) == 1:
             path = "."
         else:
-            path = f"{os.sep}".join(path[1:])
+            path = f"{os.sep}".join(path_segs[1:])
         self.search.delete(path, filename)
 
     def on_modified(self, event: FileModifiedEvent):
