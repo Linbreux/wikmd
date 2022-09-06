@@ -71,13 +71,27 @@ export LOCAL_MODE=True
 
 ## Caching
 
-By default wikmd will cache wiki pages to `/dev/shm/wikmd`, changing this option changes
+By default wikmd will cache wiki pages to `/dev/shm/wikmd/cache`, changing this option changes
 the directory that cached files will be stored in.
 
-`Default = "/dev/shm/wikmd"`
+Do not change this location to be within your Markdown documents directory.
+
+`Default = "/dev/shm/wikmd/cache"`
 
 ```
 export CACHE_DIR="/some/other/path"
+```
+
+## Search index location
+By default wikmd will store it's search index in `/dev/shm/wikmd/searchindex`, changing this option changes
+the directory that the search index will be stored in.
+
+Do not change this location to be within your Markdown documents directory.
+
+`Default = "/dev/shm/wikmd/searchindex"`
+
+```
+export SEARCH_DIR="/some/other/path"
 ```
 
 ## Change logging file

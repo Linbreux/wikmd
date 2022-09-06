@@ -13,7 +13,6 @@ def extend_ids(links):
             for i in links:
                 if i["path"] == l["filename"]:
                     l["id"] = i["id"]
-    
     return links
 
 
@@ -36,9 +35,6 @@ def find_links():
             }
             id += 1
             if os.path.join(cfg.wiki_directory, '.git') in str(path):
-                # We don't want to search there
-                continue
-            if os.path.join(cfg.wiki_directory, "_searchindex") in str(path):
                 # We don't want to search there
                 continue
             if os.path.join(cfg.wiki_directory, cfg.images_route) in str(path):

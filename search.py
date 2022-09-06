@@ -38,7 +38,7 @@ class Search:
         self._schema = SearchSchema()
         if create:
             if not os.path.exists(index_path):
-                os.mkdir(index_path)
+                os.makedirs(index_path)
             self._index = index.create_in(index_path, self._schema)
         else:
             self._index = index.open_dir(index_path)

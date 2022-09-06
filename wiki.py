@@ -30,7 +30,6 @@ SESSIONS = []
 
 cfg = WikmdConfig()
 UPLOAD_FOLDER = f"{cfg.wiki_directory}/{cfg.images_route}"
-SEARCH_FOLDER = f"{cfg.wiki_directory}/_searchindex"
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -78,7 +77,7 @@ def search(search_term: str):
     search_term = re.escape(search_term)
 
     app.logger.info(f"Searching >>> '{search_term}' ...")
-    search = Search(SEARCH_FOLDER)
+    search = Search(cfg.search_dir)
     results, suggestions = search.search(search_term)
     return render_template(
         'search.html',
@@ -118,8 +117,7 @@ def list_wiki(folderpath):
             mtime = os.path.getmtime(os.path.join(root, item))
             if (
                 root.startswith(os.path.join(cfg.wiki_directory, '.git')) or
-                root.startswith(os.path.join(cfg.wiki_directory, cfg.images_route)) or
-                root.startswith(SEARCH_FOLDER)
+                root.startswith(os.path.join(cfg.wiki_directory, cfg.images_route))
             ):
                 continue
 
@@ -385,7 +383,7 @@ def toggle_sort():
 
 
 def setup_search():
-    search = Search(SEARCH_FOLDER, create=True)
+    search = Search(cfg.search_dir, create=True)
 
     app.logger.info("Search index creation...")
     items = []
@@ -393,11 +391,12 @@ def setup_search():
         for item in files:
             if (
                 root.startswith(os.path.join(cfg.wiki_directory, '.git')) or
-                root.startswith(os.path.join(cfg.wiki_directory, cfg.images_route)) or
-                root.startswith(SEARCH_FOLDER)
+                root.startswith(os.path.join(cfg.wiki_directory, cfg.images_route))
             ):
                 continue
-            page_name, _ = os.path.splitext(item)
+            page_name, ext = os.path.splitext(item)
+            if ext.lower() != ".md":
+                continue
             path = os.path.relpath(root,cfg.wiki_directory)
             items.append((item, page_name, path))
 
@@ -413,7 +412,7 @@ def run_wiki():
 
     setup_search()
     app.logger.info("Spawning search indexer watchdog")
-    watchdog = Watchdog(cfg.wiki_directory, SEARCH_FOLDER)
+    watchdog = Watchdog(cfg.wiki_directory, cfg.search_dir)
     watchdog.start()
     app.run(host=cfg.wikmd_host, port=cfg.wikmd_port, debug=True, use_reloader=False)
 
