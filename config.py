@@ -27,7 +27,8 @@ PASSWORD_IN_SHA_256 = "0E9C700FAB2D5B03B0581D080E74A2D7428758FC82BD423824C6C11D6
 # if False: Uses external CDNs to serve some files
 LOCAL_MODE = False
 
-CACHE_DIR = "/dev/shm/wikmd"
+CACHE_DIR = "/dev/shm/wikmd/cache"
+SEARCH_DIR = "/dev/shm/wikmd/searchindex"
 
 
 class WikmdConfig:
@@ -70,3 +71,4 @@ class WikmdConfig:
 
         self.local_mode = (os.getenv("LOCAL_MODE") in ["True", "true", "Yes", "yes"]) or yaml_config["local_mode"] or LOCAL_MODE
         self.cache_dir = os.getenv("CACHE_DIR") or yaml_config["cache_dir"] or CACHE_DIR
+        self.search_dir = os.getenv("SEARCH_DIR") or yaml_config["search_dir"] or SEARCH_DIR

@@ -1,5 +1,7 @@
 import os
 from shutil import ExecError
+import shutil
+import platform
 import time
 import re
 import logging
@@ -15,10 +17,10 @@ from werkzeug.utils import secure_filename
 from random import randint
 from threading import Thread
 from hashlib import sha256
-
 from cache import Cache
 from config import WikmdConfig
 from git_manager import WikiRepoManager
+from search import Search, Watchdog
 from web_dependencies import get_web_deps
 
 
@@ -49,7 +51,6 @@ SYSTEM_SETTINGS = {
 
 cache = Cache(cfg.cache_dir)
 
-
 def save(page_name):
     """
     Function that saves a *.md page.
@@ -69,51 +70,22 @@ def save(page_name):
         app.logger.error(f"Error while saving '{page_name}' >>> {str(e)}")
 
 
-def search():
+def search(search_term: str):
     """
     Function that searches for a term and shows the results.
     """
-    search_term = request.form['ss']
-    escaped_search_term = re.escape(search_term)
-    found = []
+    search_term = re.escape(search_term)
 
     app.logger.info(f"Searching >>> '{search_term}' ...")
-
-    for root, subfolder, files in os.walk(cfg.wiki_directory):
-        for item in files:
-            path = os.path.join(root, item)
-            if os.path.join(cfg.wiki_directory, '.git') in str(path):
-                # We don't want to search there
-                app.logger.debug(f"Skipping {path} is git file")
-                continue
-            if os.path.join(cfg.wiki_directory, cfg.images_route) in str(path):
-                # Nothing interesting there too
-                continue
-            with open(root + '/' + item, encoding="utf8", errors='ignore') as f:
-                fin = f.read()
-                try:
-                    if (re.search(escaped_search_term, root + '/' + item, re.IGNORECASE) or
-                            re.search(escaped_search_term, fin, re.IGNORECASE) is not None):
-                        # Stripping 'wiki/' part of path before serving as a search result
-                        folder = root[len(cfg.wiki_directory + "/"):]
-                        if folder == "":
-                            url = os.path.splitext(
-                                root[len(cfg.wiki_directory + "/"):] + "/" + item)[0]
-                        else:
-                            url = "/" + \
-                                  os.path.splitext(
-                                      root[len(cfg.wiki_directory + "/"):] + "/" + item)[0]
-
-                        info = {'doc': item,
-                                'url': url,
-                                'folder': folder,
-                                'folder_url': root[len(cfg.wiki_directory + "/"):]}
-                        found.append(info)
-                        app.logger.info(f"Found '{search_term}' in '{item}'")
-                except Exception as e:
-                    app.logger.error(f"Error while searching >>> {str(e)}")
-
-    return render_template('search.html', zoekterm=found, system=SYSTEM_SETTINGS)
+    search = Search(cfg.search_dir)
+    results, suggestions = search.search(search_term)
+    return render_template(
+        'search.html',
+        search_term=search_term,
+        suggestions=suggestions,
+        results=results,
+        system=SYSTEM_SETTINGS,
+    )
 
 
 def fetch_page_name() -> str:
@@ -143,12 +115,10 @@ def list_wiki(folderpath):
         for item in files:
             path = os.path.join(root, item)
             mtime = os.path.getmtime(os.path.join(root, item))
-            if os.path.join(cfg.wiki_directory, '.git') in str(path):
-                # We don't want to search there
-                app.logger.debug(f"skipping {path}: is git file")
-                continue
-            if os.path.join(cfg.wiki_directory, cfg.images_route) in str(path):
-                # Nothing interesting there too
+            if (
+                root.startswith(os.path.join(cfg.wiki_directory, '.git')) or
+                root.startswith(os.path.join(cfg.wiki_directory, cfg.images_route))
+            ):
                 continue
 
             folder = root[len(cfg.wiki_directory + "/"):]
@@ -178,10 +148,10 @@ def list_wiki(folderpath):
     return render_template('list_files.html', list=folder_list, folder=folderpath, system=SYSTEM_SETTINGS)
 
 
-@app.route('/<path:file_page>', methods=['POST', 'GET'])
+@app.route('/<path:file_page>', methods=['GET'])
 def file_page(file_page):
-    if request.method == 'POST':
-        return search()
+    if request.args.get("q"):
+        return search(request.args.get("q"))
     else:
         html = ""
         mod = ""
@@ -220,10 +190,10 @@ def file_page(file_page):
                                system=SYSTEM_SETTINGS)
 
 
-@app.route('/', methods=['POST', 'GET'])
+@app.route('/', methods=['GET'])
 def index():
-    if request.method == 'POST':
-        return search()
+    if request.args.get("q"):
+        return search(request.args.get("q"))
     else:
         html = ""
         app.logger.info("Showing HTML page >>> 'homepage'")
@@ -303,6 +273,7 @@ def remove(page):
 def edit(page):
     if(bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS)):
         return login(page)
+
     filename = os.path.join(cfg.wiki_directory, page + '.md')
     if request.method == 'POST':
         page_name = fetch_page_name()
@@ -411,6 +382,27 @@ def toggle_sort():
     return redirect("/list")
 
 
+def setup_search():
+    search = Search(cfg.search_dir, create=True)
+
+    app.logger.info("Search index creation...")
+    items = []
+    for root, subfolder, files in os.walk(cfg.wiki_directory):
+        for item in files:
+            if (
+                root.startswith(os.path.join(cfg.wiki_directory, '.git')) or
+                root.startswith(os.path.join(cfg.wiki_directory, cfg.images_route))
+            ):
+                continue
+            page_name, ext = os.path.splitext(item)
+            if ext.lower() != ".md":
+                continue
+            path = os.path.relpath(root,cfg.wiki_directory)
+            items.append((item, page_name, path))
+
+    search.index_all(cfg.wiki_directory, items)
+
+
 def run_wiki():
     """
     Function that runs the wiki as a Flask app.
@@ -418,6 +410,10 @@ def run_wiki():
     if int(cfg.wikmd_logging) == 1:
         logging.basicConfig(filename=cfg.wikmd_logging_file, level=logging.INFO)
 
+    setup_search()
+    app.logger.info("Spawning search indexer watchdog")
+    watchdog = Watchdog(cfg.wiki_directory, cfg.search_dir)
+    watchdog.start()
     app.run(host=cfg.wikmd_host, port=cfg.wikmd_port, debug=True, use_reloader=False)
 
 

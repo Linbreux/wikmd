@@ -11,10 +11,8 @@ def extend_ids(links):
     for link in links:
         for l in link["links"]:
             for i in links:
-                print(i["path"] + " : " + l["filename"])
                 if i["path"] == l["filename"]:
                     l["id"] = i["id"]
-    
     return links
 
 
