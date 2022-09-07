@@ -2,16 +2,12 @@ import os
 import time
 from collections import namedtuple
 from multiprocessing import Process
+from pathlib import Path
 from typing import List, NamedTuple, Tuple, Union
 
 from bs4 import BeautifulSoup
 from markdown import Markdown
-from watchdog.events import (
-    FileSystemEventHandler,
-    FileCreatedEvent,
-    FileDeletedEvent,
-    FileModifiedEvent,
-)
+from watchdog.events import FileSystemEventHandler, FileSystemEvent
 from watchdog.observers import Observer
 from whoosh import index, query
 from whoosh.fields import SchemaClass, DATETIME, TEXT, ID
@@ -104,36 +100,47 @@ class Watchdog(FileSystemEventHandler):
     proc: Process
 
     def __init__(self, wiki_directory: str, search_directory: str):
-        self.wiki_directory = wiki_directory
+        self.wiki_directory = Path(wiki_directory).absolute()
         self.search_directory = search_directory
         self.search = Search(self.search_directory)
 
-    def on_created(self, event: Union[FileCreatedEvent, FileDeletedEvent]):
-        if not os.path.splitext(event.src_path)[1].lower() == ".md":
-            return
-        base_path, filename = os.path.split(event.src_path)
-        path_segs = base_path.split(os.sep)
-        if len(path_segs) == 1:
-            path = "."
+    def rel_path(self, path: str):
+        base_path = Path(path)
+        rel_path = base_path.relative_to(self.wiki_directory)
+        if len(rel_path.parts) == 0:
+            return "."
         else:
-            path = f"{os.sep}".join(path_segs[1:])
+            return str(rel_path)
+
+    def on_created(self, event: FileSystemEvent):
+        # Switch to dest_path if it exists because it means move
+        file_path = event.src_path
+        if hasattr(event, "dest_path"):
+            file_path = event.dest_path
+
+        if not os.path.splitext(file_path)[1].lower() == ".md":
+            return
+
+        base_path, filename = os.path.split(file_path)
+        rel_path = self.rel_path(base_path)
         title, _ = os.path.splitext(filename)
-        with open(event.src_path) as f:
+        with open(file_path) as f:
             content = f.read()
-        self.search.index(path, filename, title, content)
+        self.search.index(rel_path, filename, title, content)
 
-    def on_deleted(self, event: Union[FileCreatedEvent, FileDeletedEvent]):
+    def on_deleted(self, event: FileSystemEvent):
         if not os.path.splitext(event.src_path)[1].lower() == ".md":
             return
-        base_path, filename = os.path.split(event.src_path)
-        path_segs = base_path.split(os.sep)
-        if len(path_segs) == 1:
-            path = "."
-        else:
-            path = f"{os.sep}".join(path_segs[1:])
-        self.search.delete(path, filename)
 
-    def on_modified(self, event: FileModifiedEvent):
+        base_path, filename = os.path.split(event.src_path)
+        rel_path = self.rel_path(base_path)
+        self.search.delete(rel_path, filename)
+
+    def on_moved(self, event: FileSystemEvent):
+        self.on_deleted(event)
+        self.on_created(event)
+
+    def on_modified(self, event: FileSystemEvent):
         self.on_deleted(event)
         self.on_created(event)
 
