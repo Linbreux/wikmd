@@ -89,6 +89,7 @@ def test_watchdog():
     time.sleep(1)
     res, _ = s.search("index")
     assert len(res) == 1
+    assert res[0].path == "."
     assert "index" in res[0].highlights
 
     # test update
@@ -102,9 +103,51 @@ def test_watchdog():
 
     res, _ = s.search("something")
     assert len(res) == 1
+    assert res[0].path == "."
+    assert "something" in res[0].highlights
+
+    # test move
+    os.rename(os.path.join(tmpd, "a.md"), os.path.join(tmpd, "b.md"))
+    time.sleep(1)
+    res, _ = s.search("something")
+    assert len(res) == 1
+    assert res[0].path == "."
+    assert res[0].filename == "b.md"
     assert "something" in res[0].highlights
 
     # test remove
+    os.remove(os.path.join(tmpd, "b.md"))
+    time.sleep(1)
+    res, _ = s.search("index")
+    assert len(res) == 0
+
+    res, _ = s.search("something")
+    assert len(res) == 0
+
+    # test index subdir
+    sub_dir = os.path.join(tmpd, "subdir")
+    os.makedirs(sub_dir)
+    fpath = os.path.join(sub_dir, "t.md")
+    with open(fpath, "w") as f:
+        content2 = "\n".join(("something", "else", "entirely"))
+        f.write(content2)
+
+    time.sleep(1)
+    res, _ = s.search("something")
+    assert len(res) == 1
+    assert res[0].path == "subdir"
+
+    # test move subdir
+    os.rename(os.path.join(sub_dir, "t.md"), os.path.join(tmpd, "z.md"))
+    time.sleep(1)
+    res, _ = s.search("something")
+    assert len(res) == 1
+    assert res[0].path == "."
+    assert res[0].filename == "z.md"
+    assert "something" in res[0].highlights
+
+    # test remove subdir
+    os.rename(os.path.join(tmpd, "z.md"), os.path.join(sub_dir, "t.md"))
     os.remove(fpath)
     time.sleep(1)
     res, _ = s.search("index")

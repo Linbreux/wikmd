@@ -144,7 +144,7 @@ class WikiRepoManager:
         :param message: commit message.
         """
         try:
-            self.repo.git.add(spec)  # git add --all
+            self.repo.git.add("--all")  # git add --all
             self.repo.git.commit('-m', message)  # git commit -m
             self.flask_app.logger.info(f"New git commit >>> {message}")
         except Exception as e:
