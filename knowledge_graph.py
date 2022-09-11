@@ -21,7 +21,7 @@ def find_links():
     # regex for links (excluding images)
     pattern = r'[^!]\[(.+?)\]\((.+?)\)'
     id = 1
-    # walk trough all files
+    # walk through all files
     for root, subfolder, files in os.walk(cfg.wiki_directory):
         for item in files:
             pagename, _ = os.path.splitext(item)
@@ -40,7 +40,7 @@ def find_links():
             if os.path.join(cfg.wiki_directory, cfg.images_route) in str(path):
                 # Nothing interesting there too
                 continue
-            with open(root + '/' + item, encoding="utf8", errors='ignore') as f:
+            with open(os.path.join(root, item), encoding="utf8", errors='ignore') as f:
                 fin = f.read()
                 print("--------------------")
                 print("filename: ", pagename)
@@ -51,7 +51,7 @@ def find_links():
                         if url.startswith("/"):
                             url = url[1:]
                         url = unquote(url)
-                        if os.path.exists(cfg.wiki_directory+"/"+url+".md"):
+                        if os.path.exists(os.path.join(cfg.wiki_directory, f"{url}.md")):
                             info = {
                                 "filename": url,
                             }

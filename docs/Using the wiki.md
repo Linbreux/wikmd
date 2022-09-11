@@ -56,7 +56,7 @@ The advantage is that u can use the commandline to process some data. For exampl
 ```
 pandoc -f markdown -t latex homepage.md How\ to\ use\ the\ wiki.md -o file.pdf --pdf-engine=xelatex
 ```
-This creates a nice pdf version of your article.  Its possible you have to create a yml header on top of your document to set the margins etc better
+This creates a nice pdf version of your article.  Its possible you have to create a yml header on top of your document to set for example the margins better.
 ```
 ---
 title: titlepage

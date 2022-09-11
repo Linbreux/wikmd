@@ -10,7 +10,7 @@ def move_all_files(src_dir: str, dest_dir: str):
     :param dest_dir: destination directory
     """
     if not os.path.isdir(dest_dir):
-        os.mkdir(dest_dir)  # make the dir if it doesn't exists
+        os.mkdir(dest_dir)  # make the dir if it doesn't exist
 
     src_files = os.listdir(src_dir)
     dest_files = os.listdir(dest_dir)
