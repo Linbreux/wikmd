@@ -9,8 +9,7 @@ import uuid
 from lxml.html.clean import clean_html
 import pypandoc
 import knowledge_graph
-import random
-import string
+import secrets
 
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory, make_response
 from werkzeug.utils import secure_filename
@@ -343,7 +342,7 @@ def login(page):
         if sha_string == cfg.password_in_sha_256.lower():
             app.logger.info("User successfully logged in")
             resp = make_response(redirect(page))
-            session = ''.join(random.choice(string.ascii_lowercase) for i in range(231))
+            session = secrets.token_urlsafe(1024 // 8)
             resp.set_cookie("session_wikmd",session)
             SESSIONS.append(session)
             return resp
