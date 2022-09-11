@@ -3,7 +3,7 @@
 {%block head%}
     <script type="text/javascript" src="{{ system.web_deps["vis-network.min.js"] }}"></script>
 
-    <style type="text/css">
+    <style>
         #mynetwork {
             width: auto;
             height: 800px;
@@ -72,7 +72,7 @@
     var network = new vis.Network(container, data, options);
     network.on("doubleClick", function (params) {
         if (params.nodes[0] != undefined){
-            window.location.href = '/nav/'+params.nodes[0];params.nodes[0]
+            window.location.href = '/nav/'+params.nodes[0];
         }
       });
 </script>

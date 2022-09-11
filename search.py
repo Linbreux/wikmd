@@ -3,14 +3,14 @@ import time
 from collections import namedtuple
 from multiprocessing import Process
 from pathlib import Path
-from typing import List, NamedTuple, Tuple, Union
+from typing import List, NamedTuple, Tuple
 
 from bs4 import BeautifulSoup
 from markdown import Markdown
 from watchdog.events import FileSystemEventHandler, FileSystemEvent
 from watchdog.observers import Observer
 from whoosh import index, query
-from whoosh.fields import SchemaClass, DATETIME, TEXT, ID
+from whoosh.fields import SchemaClass, TEXT, ID
 from whoosh.highlight import SentenceFragmenter
 from whoosh.qparser import MultifieldParser
 from whoosh.writing import AsyncWriter

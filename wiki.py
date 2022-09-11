@@ -29,7 +29,7 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 SESSIONS = []
 
 cfg = WikmdConfig()
-UPLOAD_FOLDER = f"{cfg.wiki_directory}/{cfg.images_route}"
+UPLOAD_FOLDER = os.path.join(cfg.wiki_directory, cfg.images_route)
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -292,7 +292,7 @@ def edit(page):
                                system=SYSTEM_SETTINGS)
 
 
-@app.route('/' + cfg.images_route, methods=['POST', 'DELETE'])
+@app.route(f"/{cfg.images_route}", methods=['POST', 'DELETE'])
 def upload_file():
     app.logger.info(f"Uploading new image ...")
     # Upload image when POST
@@ -409,6 +409,10 @@ def run_wiki():
     """
     if int(cfg.wikmd_logging) == 1:
         logging.basicConfig(filename=cfg.wikmd_logging_file, level=logging.INFO)
+
+    if not os.path.exists(UPLOAD_FOLDER):
+        app.logger.info(f"Creating upload folder >>> {UPLOAD_FOLDER}")
+        os.mkdir(UPLOAD_FOLDER)
 
     setup_search()
     app.logger.info("Spawning search indexer watchdog")

@@ -28,7 +28,7 @@
             <textarea style="display: none" class="form-control" id="content" rows="25" name="CT">{{content}}</textarea>
         </div>
         <input type="file" multiple>
-        <p id="message"></p>
+        <p id="messages"></p>
         <button type="submit" class="btn btn-success mb-2">Save</button>
     </form>
 
@@ -37,40 +37,23 @@
     <script type="text/javascript" src="{{ system.web_deps["filepond.js"] }}"></script>
 
     <script>
-    function copy_fun(mes){
-        var tempInput = document.createElement("input");
-        tempInput.style = "position: absolute; left: -1000px; top: -1000px";
-        tempInput.value = mes;
-        document.body.appendChild(tempInput);
-        tempInput.select();
-        document.execCommand("copy");
-        document.body.removeChild(tempInput);
-    }
-
-    let filename = "";
-    let messages = [];
+    const messagesElement = document.getElementById("messages");
     const inputElement = document.querySelector('input[type="file"]');
-    const pond = FilePond.create( inputElement  );
+    FilePond.create( inputElement  );
     FilePond.setOptions({
-            server:{
-                url:'/',
-                process:{
-                    url: './{{upload_path}}',
-                    onload: (response) => {
-                                let filename=response;
-                                messages.push(filename);
-                                let mes = "";
-                                for (i in messages){
-                                    md = "![caption](/{{upload_path}}/" + messages[i] + ")";
-                                    m = "<li>Use <b>"+md+"</b> inside your markdown file <a id='myLink' href='#' onclick=\"copy_fun('"+md+"')\">Copy</a> </li>";
-                                    mes = mes +m
-                                }
-                                document.getElementById("message").innerHTML=mes;
-                            }
-
-                        }
-                    },
-            });
+        server: {
+            url:"/",
+            process: {
+                url: './{{upload_path}}',
+                onload: (filename) => {
+                    const md = `![caption](/{{upload_path}}/${filename})`;
+                    let message = document.createElement("li");
+                    message.innerHTML = `Use <b>${md}</b> inside your markdown file <a href="#" onclick=navigator.clipboard.writeText("${md}")>Copy</a>`;
+                    messagesElement.appendChild(message);
+                }
+            }
+        },
+    });
     </script>
 
     <script>
@@ -92,13 +75,11 @@
             if (e.ctrlKey && e.key === "s"){
                 e.preventDefault();
                 document.getElementById("content").value = editor.getValue();
-                var form = document.getElementById("form");
-                var id = document.getElementById("name").value;
-                var data = new FormData(form);
-                var xmlhttp = new XMLHttpRequest();
+                const form = document.getElementById("form");
+                const data = new FormData(form);
+                let xmlhttp = new XMLHttpRequest();
                 xmlhttp.open("POST", window.location.href,true);
                 xmlhttp.send(data);
-
             }
         });
 
