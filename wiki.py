@@ -3,7 +3,6 @@ from shutil import ExecError
 import shutil
 import platform
 import time
-import re
 import logging
 import uuid
 from lxml.html.clean import clean_html
@@ -73,8 +72,6 @@ def search(search_term: str):
     """
     Function that searches for a term and shows the results.
     """
-    search_term = re.escape(search_term)
-
     app.logger.info(f"Searching >>> '{search_term}' ...")
     search = Search(cfg.search_dir)
     results, suggestions = search.search(search_term)
