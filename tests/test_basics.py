@@ -29,7 +29,7 @@ def test_list():
 
 # creates a file and check if the content of the file is visible in the wiki
 def test_create_file_in_folder():
-    # create dir if it does not exists
+    # create dir if it does not exist
     if not os.path.exists("wiki/testing_folder_0123"):
         os.makedirs("wiki/testing_folder_0123")
 

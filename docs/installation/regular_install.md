@@ -39,7 +39,7 @@ python wiki.py
 
 Now visit localhost:5000 and you will see the wiki. With the 0.0.0.0. option it will show up everywhere on the network.
 
-If there are problems feel free to open an github issue you could post the output of wikmd.log to it.
+If there are problems feel free to open an issue on github. You can paste the output of `wikmd.log` in the issue.
 
 ## Linux
 

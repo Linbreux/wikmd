@@ -1,6 +1,6 @@
 # Simple markdown
 
-To see al the markdown syntax you can visit the [markdown cheatsheet](/Markdown%20cheatsheet)
+To see all the Markdown syntax you can visit the [Markdown cheatsheet](/Markdown%20cheatsheet)
 
 # Homepage
 
