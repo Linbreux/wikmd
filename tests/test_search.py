@@ -21,12 +21,28 @@ def test_index_and_search():
     content = "\n".join(("index", "search" "test"))
 
     s.index(tmp, fname, title, content)
-    res, _ = s.search("index")
+    res, total, pages, _ = s.search("index", 1)
+    assert total == 1
+    assert pages == 1
     assert res[0].path == tmp
     assert res[0].filename == fname
 
-    _, sug = s.search("ndex")
+    _, _, _, sug = s.search("ndex", 1)
     assert "index" in sug
+
+
+def test_pagination():
+    tmp = tempfile.mkdtemp()
+    s = Search(tmp, create=True)
+
+    for i in range(25):
+        fname, title = f"test_index_{i}.md", f"test index {i}"
+        content = "\n".join(("index", "search" "test"))
+        s.index(tmp, fname, title, content)
+
+    res, total, pages, _ = s.search("index", 1)
+    assert total == 25
+    assert pages == 3
 
 
 def test_index_and_delete():
@@ -36,11 +52,15 @@ def test_index_and_delete():
     content = "\n".join(("index", "search" "test"))
 
     s.index(tmp, fname, title, content)
-    res, _ = s.search("index")
+    res, total, pages, _ = s.search("index", 1)
+    assert total == 1
+    assert pages == 1
     assert res[0].filename == fname
 
     s.delete(tmp, fname)
-    res, _ = s.search("index")
+    res, total, pages, _ = s.search("index", 1)
+    assert total == 0
+    assert pages == 0
     assert len(res) == 0
 
 
@@ -61,7 +81,9 @@ def test_index_all():
     nf.append(("y.md", "y", "z"))
 
     s.index_all(tmpd, nf)
-    res, _ = s.search("index")
+    res, total, pages, _ = s.search("index", 1)
+    assert total == 3
+    assert pages == 1
     assert len(res) == 3
     a, b, z = res
     assert a.path == "."
@@ -78,7 +100,7 @@ def test_watchdog():
     w = Watchdog(tmpd, tmps)
     w.start()
 
-    assert s.search("index") == ([], [])
+    assert s.search("index", 1) == ([], 0, 0, [])
 
     # test index
     content = "\n".join(("index", "search" "test"))
@@ -86,8 +108,10 @@ def test_watchdog():
     with open(fpath, "w") as f:
         f.write(content)
 
-    time.sleep(1)
-    res, _ = s.search("index")
+    time.sleep(2)
+    res, total, pages, _ = s.search("index", 1)
+    assert total == 1
+    assert pages == 1
     assert len(res) == 1
     assert res[0].path == "."
     assert "index" in res[0].highlights
@@ -97,19 +121,25 @@ def test_watchdog():
         content2 = "\n".join(("something", "else", "entirely"))
         f.write(content2)
 
-    time.sleep(1)
-    res, _ = s.search("index")
+    time.sleep(2)
+    res, total, pages, _ = s.search("index", 1)
+    assert total == 0
+    assert pages == 0
     assert len(res) == 0
 
-    res, _ = s.search("something")
+    res, total, pages, _ = s.search("something", 1)
+    assert total == 1
+    assert pages == 1
     assert len(res) == 1
     assert res[0].path == "."
     assert "something" in res[0].highlights
 
     # test move
     os.rename(os.path.join(tmpd, "a.md"), os.path.join(tmpd, "b.md"))
-    time.sleep(1)
-    res, _ = s.search("something")
+    time.sleep(2)
+    res, total, pages, _ = s.search("something", 1)
+    assert total == 1
+    assert pages == 1
     assert len(res) == 1
     assert res[0].path == "."
     assert res[0].filename == "b.md"
@@ -117,13 +147,25 @@ def test_watchdog():
 
     # test remove
     os.remove(os.path.join(tmpd, "b.md"))
-    time.sleep(1)
-    res, _ = s.search("index")
+    time.sleep(2)
+    res, total, pages, _ = s.search("index", 1)
+    assert total == 0
+    assert pages == 0
     assert len(res) == 0
 
-    res, _ = s.search("something")
+    res, total, pages, _ = s.search("something", 1)
+    assert total == 0
+    assert pages == 0
     assert len(res) == 0
 
+
+def test_watchdog_subdirectory():
+    tmps, tmpd = tempfile.mkdtemp(), tempfile.mkdtemp()
+    s = Search(tmps, create=True)
+    w = Watchdog(tmpd, tmps)
+    w.start()
+
+    assert s.search("index", 1) == ([], 0, 0, [])
     # test index subdir
     sub_dir = os.path.join(tmpd, "subdir")
     os.makedirs(sub_dir)
@@ -132,15 +174,19 @@ def test_watchdog():
         content2 = "\n".join(("something", "else", "entirely"))
         f.write(content2)
 
-    time.sleep(1)
-    res, _ = s.search("something")
+    time.sleep(2)
+    res, total, pages, _ = s.search("something", 1)
+    assert total == 1
+    assert pages == 1
     assert len(res) == 1
     assert res[0].path == "subdir"
 
     # test move subdir
     os.rename(os.path.join(sub_dir, "t.md"), os.path.join(tmpd, "z.md"))
-    time.sleep(1)
-    res, _ = s.search("something")
+    time.sleep(2)
+    res, total, pages, _ = s.search("something", 1)
+    assert total == 1
+    assert pages == 1
     assert len(res) == 1
     assert res[0].path == "."
     assert res[0].filename == "z.md"
@@ -149,11 +195,10 @@ def test_watchdog():
     # test remove subdir
     os.rename(os.path.join(tmpd, "z.md"), os.path.join(sub_dir, "t.md"))
     os.remove(fpath)
-    time.sleep(1)
-    res, _ = s.search("index")
-    assert len(res) == 0
-
-    res, _ = s.search("something")
+    time.sleep(2)
+    res, total, pages, _ = s.search("something", 1)
+    assert total == 0
+    assert pages == 0
     assert len(res) == 0
 
     w.stop()

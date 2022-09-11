@@ -68,16 +68,20 @@ def save(page_name):
         app.logger.error(f"Error while saving '{page_name}' >>> {str(e)}")
 
 
-def search(search_term: str):
+def search(search_term: str, page: int):
     """
     Function that searches for a term and shows the results.
     """
     app.logger.info(f"Searching >>> '{search_term}' ...")
     search = Search(cfg.search_dir)
-    results, suggestions = search.search(search_term)
+    page = int(page)
+    results, num_results, num_pages, suggestions = search.search(search_term, page)
     return render_template(
         'search.html',
         search_term=search_term,
+        num_results=num_results,
+        num_pages=num_pages,
+        current_page=page,
         suggestions=suggestions,
         results=results,
         system=SYSTEM_SETTINGS,
@@ -147,7 +151,7 @@ def list_wiki(folderpath):
 @app.route('/<path:file_page>', methods=['GET'])
 def file_page(file_page):
     if request.args.get("q"):
-        return search(request.args.get("q"))
+        return search(request.args.get("q"), request.args.get("page", 1))
     else:
         html = ""
         mod = ""
@@ -189,7 +193,7 @@ def file_page(file_page):
 @app.route('/', methods=['GET'])
 def index():
     if request.args.get("q"):
-        return search(request.args.get("q"))
+        return search(request.args.get("q"), request.args.get("page", 1))
     else:
         html = ""
         app.logger.info("Showing HTML page >>> 'homepage'")
