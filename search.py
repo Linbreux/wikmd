@@ -3,14 +3,14 @@ import time
 from collections import namedtuple
 from multiprocessing import Process
 from pathlib import Path
-from typing import List, NamedTuple, Tuple, Union
+from typing import List, NamedTuple, Tuple
 
 from bs4 import BeautifulSoup
 from markdown import Markdown
 from watchdog.events import FileSystemEventHandler, FileSystemEvent
 from watchdog.observers import Observer
 from whoosh import index, query
-from whoosh.fields import SchemaClass, DATETIME, TEXT, ID
+from whoosh.fields import SchemaClass, TEXT, ID
 from whoosh.highlight import SentenceFragmenter
 from whoosh.qparser import MultifieldParser
 from whoosh.writing import AsyncWriter
@@ -45,11 +45,13 @@ class Search:
         soup = BeautifulSoup(html, "html.parser")
         return soup.get_text()
 
-    def search(self, term: str) -> Tuple[List[NamedTuple], List[str]]:
+    def search(
+        self, term: str, page: int
+    ) -> Tuple[List[NamedTuple], int, int, List[str]]:
         query = MultifieldParser(["title", "content"], schema=self._schema).parse(term)
         frag = SentenceFragmenter(maxchars=2000)
         with self._index.searcher() as searcher:
-            res = searcher.search(query)
+            res = searcher.search_page(query, page)
             res.fragmenter = frag
             results = [
                 SearchResult(
@@ -63,7 +65,7 @@ class Search:
             ]
             corrector = searcher.corrector("content")
             suggestions = corrector.suggest(term)
-        return results, suggestions
+        return results, res.total, res.pagecount, suggestions
 
     def index(self, path: str, filename: str, title: str, content: str):
         writer = AsyncWriter(self._index)
@@ -145,7 +147,6 @@ class Watchdog(FileSystemEventHandler):
         self.on_created(event)
 
     def watchdog(self):
-        event_handler = self
         observer = Observer()
         observer.schedule(self, self.wiki_directory, recursive=True)
         observer.start()
