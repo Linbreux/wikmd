@@ -35,11 +35,13 @@
     <script type="text/javascript" src="{{ system.web_deps["codemirror.min.js"] }}"></script>
     <script type="text/javascript" src="{{ system.web_deps["markdown.min.js"] }}"></script>
     <script type="text/javascript" src="{{ system.web_deps["filepond.js"] }}"></script>
+    <script type="text/javascript" src="{{ system.web_deps["filepond-plugin-file-validate-type.js"] }}"></script>
 
     <script>
+    FilePond.registerPlugin(FilePondPluginFileValidateType);
     const messagesElement = document.getElementById("messages");
     const inputElement = document.querySelector('input[type="file"]');
-    FilePond.create( inputElement  );
+    FilePond.create(inputElement, {acceptedFileTypes: {{ image_allowed_mime|safe }} }); // image_allowed_mime is provided by the config, so it is safe
     FilePond.setOptions({
         server: {
             url:"/",

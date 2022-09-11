@@ -9,6 +9,7 @@ from lxml.html.clean import clean_html
 import pypandoc
 import knowledge_graph
 import secrets
+import json
 
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory, make_response
 from werkzeug.utils import secure_filename
@@ -16,13 +17,12 @@ from random import randint
 from threading import Thread
 from hashlib import sha256
 from cache import Cache
+from cleanup import cleanup_images
 from config import WikmdConfig
 from git_manager import WikiRepoManager
 from search import Search, Watchdog
 from web_dependencies import get_web_deps
 
-
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 SESSIONS = []
 
@@ -232,7 +232,8 @@ def add_new():
 
         return redirect(url_for("file_page", file_page=page_name))
     else:
-        return render_template('new.html', upload_path=cfg.images_route, system=SYSTEM_SETTINGS)
+        return render_template('new.html', upload_path=cfg.images_route,
+                               image_allowed_mime=cfg.image_allowed_mime, system=SYSTEM_SETTINGS)
 
 
 @app.route('/edit/homepage', methods=['POST', 'GET'])
@@ -253,7 +254,7 @@ def edit_homepage():
 
             content = f.read()
         return render_template("new.html", content=content, title=cfg.homepage_title, upload_path=cfg.images_route,
-                               system=SYSTEM_SETTINGS)
+                               image_allowed_mime=cfg.image_allowed_mime, system=SYSTEM_SETTINGS)
 
 
 @app.route('/remove/<path:page>', methods=['GET'])
@@ -289,7 +290,7 @@ def edit(page):
         with open(filename, 'r', encoding="utf-8", errors='ignore') as f:
             content = f.read()
         return render_template("new.html", content=content, title=page, upload_path=cfg.images_route,
-                               system=SYSTEM_SETTINGS)
+                               image_allowed_mime=cfg.image_allowed_mime, system=SYSTEM_SETTINGS)
 
 
 @app.route(f"/{cfg.images_route}", methods=['POST', 'DELETE'])
@@ -414,6 +415,7 @@ def run_wiki():
         app.logger.info(f"Creating upload folder >>> {UPLOAD_FOLDER}")
         os.mkdir(UPLOAD_FOLDER)
 
+    cleanup_images(app)
     setup_search()
     app.logger.info("Spawning search indexer watchdog")
     watchdog = Watchdog(cfg.wiki_directory, cfg.search_dir)
