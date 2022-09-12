@@ -20,13 +20,18 @@ WIKI_DIRECTORY_DEFAULT = "wiki"
 HOMEPAGE_DEFAULT = "homepage.md"
 HOMEPAGE_TITLE_DEFAULT = "homepage"
 IMAGES_ROUTE_DEFAULT = "img"
-IMAGE_ALLOWED_MIME_DEFAULT = ["image/gif", "image/jpg", "image/png", "image/svg+xml", "image/webp"]
 
 PROTECT_EDIT_BY_PASSWORD = 0
 PASSWORD_IN_SHA_256 = "0E9C700FAB2D5B03B0581D080E74A2D7428758FC82BD423824C6C11D6A7F155E" #pw: wikmd
 
 # if False: Uses external CDNs to serve some files
 LOCAL_MODE = False
+
+
+IMAGE_ALLOWED_MIME_DEFAULT = ["image/gif", "image/jpg", "image/png", "image/svg+xml", "image/webp"]
+# you need to have cwebp installed for this to work
+OPTIMIZE_IMAGES_LOSSLESS = False
+OPTIMIZE_IMAGES_LOSSY = False
 
 CACHE_DIR = "/dev/shm/wikmd/cache"
 SEARCH_DIR = "/dev/shm/wikmd/searchindex"
