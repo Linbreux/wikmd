@@ -5,6 +5,8 @@ import tempfile
 from base64 import b32encode
 from hashlib import sha1
 
+from werkzeug.utils import secure_filename
+
 
 class ImageManager:
     """
@@ -17,6 +19,10 @@ class ImageManager:
         self.cfg = cfg
         self.images_path = os.path.join(self.cfg.wiki_directory, self.cfg.images_route)
         self.temp_dir = "/tmp/wikmd/images"
+        # Execute the needed programs to check if they are available. Exit code 0 means the programs were executed successfully
+        self.can_optimize = os.system("cwebp -version") == 0 and os.system("gif2webp -version") == 0
+        if not self.can_optimize and self.cfg.optimize_images in ["lossless", "lossy"]:
+            self.logger.error("To use image optimization webp and gif2webp need to be installed and in the $PATH. They could not be found.")
 
     def save_images(self, file):
         """
@@ -25,12 +31,15 @@ class ImageManager:
         This makes it possible to cache it indefinitely on the client side.
         """
         img_file = file["filepond"]
-        _, img_extension = os.path.splitext(img_file.filename)
+        original_file_name, img_extension = os.path.splitext(img_file.filename)
 
         temp_file_handle, temp_file_path = tempfile.mkstemp()
         img_file.save(temp_file_path)
 
-        # Does not matter if sha1 is secure or not, similar to git we do not overwrite files with the same hash
+        if self.cfg.optimize_images in ["lossless", "lossy"] and self.can_optimize:
+            temp_file_handle, temp_file_path, img_extension = self.__optimize_image(temp_file_path, img_file.content_type)
+
+        # Does not matter if sha1 is secure or not. If someone has the right to edit they can already delete all pages.
         hasher = sha1()
         with open(temp_file_handle, "rb") as f:
             data = f.read()
@@ -38,7 +47,7 @@ class ImageManager:
 
         # Using base32 instead of urlsafe base64, because the Windows file system is case-insensitive
         img_digest = b32encode(hasher.digest()).decode("utf-8").lower()[:-4]
-        hash_file_name = f"{img_digest}{img_extension}"
+        hash_file_name = secure_filename(f"{original_file_name}-{img_digest}{img_extension}")
         hash_file_path = os.path.join(self.images_path, hash_file_name)
 
         # We can skip writing the file if it already exists. It is the same file, because it has the same hash
@@ -52,8 +61,8 @@ class ImageManager:
 
     def cleanup_images(self):
         """Deletes images not used by any page"""
-        # Doesn't delete non image files, for example .gitignore
-        saved_images = {file for file in os.listdir(self.images_path)}
+        saved_images = set(os.listdir(self.images_path))
+        # Don't delete .gitignore
         saved_images.remove(".gitignore")
 
         # Matches [*](/img/*) it does not matter if images_route is "/img" or "img"
@@ -87,3 +96,32 @@ class ImageManager:
             os.remove(image_path)
         except IsADirectoryError | FileNotFoundError:
             self.logger.error(f"Could not delete '{image_path}'")
+
+    def __optimize_image(self, temp_file_path_original, content_type):
+        """
+        Optimizes gif, jpg and png by converting them to webp.
+        gif and png files are always converted lossless.
+        jpg files are either converted lossy or near lossless depending on cfg.optimize_images.
+
+        Uses the external binaries cwebp and gif2webp.
+        """
+
+        temp_file_handle, temp_file_path = tempfile.mkstemp()
+        if content_type in ["image/gif", "image/png"]:
+            self.logger.info(f"Compressing image lossless ...")
+            if content_type == "image/gif":
+                os.system(f"gif2webp -quiet -m 6 {temp_file_path_original} -o {temp_file_path}")
+            else:
+                os.system(f"cwebp -quiet -lossless -z 9 {temp_file_path_original} -o {temp_file_path}")
+            os.remove(temp_file_path_original)
+
+        elif content_type in ["image/jpeg"]:
+            if self.cfg.optimize_images == "lossless":
+                self.logger.info(f"Compressing image near lossless ...")
+                os.system(f"cwebp -quiet -near_lossless -m 6 {temp_file_path_original} -o {temp_file_path}")
+            elif self.cfg.optimize_images == "lossy":
+                self.logger.info(f"Compressing image lossy ...")
+                os.system(f"cwebp -quiet -m 6 {temp_file_path_original} -o {temp_file_path}")
+            os.remove(temp_file_path_original)
+
+        return temp_file_handle, temp_file_path, ".webp"

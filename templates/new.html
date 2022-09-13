@@ -50,7 +50,7 @@
                 onload: (filename) => {
                     const md = `![caption](/{{upload_path}}/${filename})`;
                     let message = document.createElement("li");
-                    message.innerHTML = `Use <b>${md}</b> inside your markdown file <a href="#" onclick=navigator.clipboard.writeText("${md}")>Copy</a>`;
+                    message.innerHTML = `Use <b><code>${md}</code></b> inside your markdown file <a href="#" onclick=navigator.clipboard.writeText("${md}")>Copy</a>`;
                     messagesElement.appendChild(message);
                 }
             }

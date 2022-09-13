@@ -69,6 +69,37 @@ Otherwise the CDNs jsdelivr, cloudflare, polyfill and unpkg will be used.
 export LOCAL_MODE=True
 ```
 
+## Optimize Images
+
+If enabled optimizes images by converting them to webp files.
+Allowed values are `no`, `lossless` and `lossy`.
+
+|     | `lossless`      | `lossy`  |
+|-----|-----------------|----------|
+| gif | lossless        | lossless |
+| jpg | _near_ lossless | lossy    |
+| png | lossless        | lossless |
+
+`Default = "no"`
+
+```
+export OPTIMIZE_IMAGES="lossy"
+```
+
+### How to install webp
+You need to have the programs `cwebp` and `gif2webp` installed to use this feature. 
+Everyone not listed below has to get the binaries themselves: https://developers.google.com/speed/webp/docs/precompiled
+
+| Operating System | How to install                 |
+|------------------|--------------------------------|
+| Arch & Manjaro   | `pacman -S libwebp`            |
+| Alpine           | `apk add libwebp-tools`        |
+| Debian & Ubuntu  | `apt install webp`             |
+| Fedora           | `dnf install libwebp-tools`    |
+| macOS homebrew   | `brew install webp`            |
+| macOS MacPorts   | `port install webp`            |
+| OpenSuse         | `zypper install libwebp-tools` |
+
 ## Caching
 
 By default wikmd will cache wiki pages to `/dev/shm/wikmd/cache`, changing this option changes
