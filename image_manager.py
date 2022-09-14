@@ -20,6 +20,7 @@ class ImageManager:
         self.images_path = os.path.join(self.cfg.wiki_directory, self.cfg.images_route)
         self.temp_dir = "/tmp/wikmd/images"
         # Execute the needed programs to check if they are available. Exit code 0 means the programs were executed successfully
+        self.logger.info("Checking if webp is available for image optimization ...")
         self.can_optimize = os.system("cwebp -version") == 0 and os.system("gif2webp -version") == 0
         if not self.can_optimize and self.cfg.optimize_images in ["lossless", "lossy"]:
             self.logger.error("To use image optimization webp and gif2webp need to be installed and in the $PATH. They could not be found.")
@@ -63,7 +64,7 @@ class ImageManager:
         """Deletes images not used by any page"""
         saved_images = set(os.listdir(self.images_path))
         # Don't delete .gitignore
-        saved_images.remove(".gitignore")
+        saved_images.discard(".gitignore")
 
         # Matches [*](/img/*) it does not matter if images_route is "/img" or "img"
         image_link_pattern = fr"\[(.*?)\]\(({os.path.join('/', self.cfg.images_route)}.+?)\)"
