@@ -10,19 +10,16 @@ import pypandoc
 import knowledge_graph
 import secrets
 
-from flask import Flask, render_template, request, redirect, url_for, send_from_directory, make_response
-from werkzeug.utils import secure_filename
-from random import randint
+from flask import Flask, render_template, request, redirect, url_for, make_response, safe_join, send_file
 from threading import Thread
 from hashlib import sha256
 from cache import Cache
+from image_manager import ImageManager
 from config import WikmdConfig
 from git_manager import WikiRepoManager
 from search import Search, Watchdog
 from web_dependencies import get_web_deps
 
-
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 SESSIONS = []
 
@@ -48,6 +45,8 @@ SYSTEM_SETTINGS = {
 }
 
 cache = Cache(cfg.cache_dir)
+
+im = ImageManager(app, cfg)
 
 def save(page_name):
     """
@@ -222,7 +221,7 @@ def index():
 
 @app.route('/add_new', methods=['POST', 'GET'])
 def add_new():
-    if(bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS)):
+    if bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS):
         return login("/add_new")
     if request.method == 'POST':
         page_name = fetch_page_name()
@@ -232,12 +231,13 @@ def add_new():
 
         return redirect(url_for("file_page", file_page=page_name))
     else:
-        return render_template('new.html', upload_path=cfg.images_route, system=SYSTEM_SETTINGS)
+        return render_template('new.html', upload_path=cfg.images_route,
+                               image_allowed_mime=cfg.image_allowed_mime, system=SYSTEM_SETTINGS)
 
 
 @app.route('/edit/homepage', methods=['POST', 'GET'])
 def edit_homepage():
-    if(bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS)):
+    if bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS):
         return login("/edit/homepage")
 
     if request.method == 'POST':
@@ -253,13 +253,12 @@ def edit_homepage():
 
             content = f.read()
         return render_template("new.html", content=content, title=cfg.homepage_title, upload_path=cfg.images_route,
-                               system=SYSTEM_SETTINGS)
+                               image_allowed_mime=cfg.image_allowed_mime, system=SYSTEM_SETTINGS)
 
 
 @app.route('/remove/<path:page>', methods=['GET'])
 def remove(page):
-    app.logger.info(request.cookies.get('session_wikmd'))
-    if(bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS)):
+    if bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS):
         return redirect(url_for("file_page", file_page=page))
 
     filename = os.path.join(cfg.wiki_directory, page + '.md')
@@ -271,7 +270,7 @@ def remove(page):
 
 @app.route('/edit/<path:page>', methods=['POST', 'GET'])
 def edit(page):
-    if(bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS)):
+    if bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS):
         return login(page)
 
     filename = os.path.join(cfg.wiki_directory, page + '.md')
@@ -289,42 +288,23 @@ def edit(page):
         with open(filename, 'r', encoding="utf-8", errors='ignore') as f:
             content = f.read()
         return render_template("new.html", content=content, title=page, upload_path=cfg.images_route,
-                               system=SYSTEM_SETTINGS)
+                               image_allowed_mime=cfg.image_allowed_mime, system=SYSTEM_SETTINGS)
 
 
-@app.route(f"/{cfg.images_route}", methods=['POST', 'DELETE'])
+@app.route(os.path.join("/", cfg.images_route), methods=['POST', 'DELETE'])
 def upload_file():
+    if bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS):
+        return login()
     app.logger.info(f"Uploading new image ...")
     # Upload image when POST
     if request.method == "POST":
-        file_names = []
-        for key in request.files:
-            file = request.files[key]
-            filename = secure_filename(file.filename)
-            # bug found by cat-0
-            while filename in os.listdir(os.path.join(cfg.wiki_directory, cfg.images_route)):
-                app.logger.info(
-                    "There is a duplicate, solving this by extending the filename...")
-                filename, file_extension = os.path.splitext(filename)
-                filename = filename + str(randint(1, 9999999)) + file_extension
-
-            file_names.append(filename)
-            try:
-                app.logger.info(f"Saving image >>> '{filename}' ...")
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            except Exception as e:
-                app.logger.error(f"Error while saving image >>> {str(e)}")
-        return filename
+        return im.save_images(request.files)
 
     # DELETE when DELETE
     if request.method == "DELETE":
-        # request data is in format "b'nameoffile.png" decode by utf-8
-        filename = request.data.decode("utf-8")
-        try:
-            app.logger.info(f"Removing >>> '{str(filename)}' ...")
-            os.remove((os.path.join(app.config['UPLOAD_FOLDER'], filename)))
-        except Exception as e:
-            app.logger.error(f"Could not remove {str(filename)}")
+        # request data is in format "b'nameoffile.png" decode to utf-8
+        file_name = request.data.decode("utf-8")
+        im.delete_image(file_name)
         return 'OK'
 
 
@@ -364,10 +344,14 @@ def nav_id_to_page(id):
     return redirect("/")
 
 
-@app.route('/' + cfg.images_route + '/<path:filename>')
-def display_image(filename):
-    # print('display_image filename: ' + filename)
-    return send_from_directory(UPLOAD_FOLDER, filename, as_attachment=False)
+@app.route(os.path.join("/", cfg.images_route, "<path:image_name>"))
+def display_image(image_name):
+    image_path = safe_join(UPLOAD_FOLDER, image_name)
+    app.logger.info(f"Showing image >>> '{image_path}'")
+    response = send_file(image_path)
+    # cache indefinitely
+    response.headers["Cache-Control"] = "max-age=31536000, immutable"
+    return response
 
 
 @app.route('/toggle-darktheme/', methods=['GET'])
@@ -414,6 +398,7 @@ def run_wiki():
         app.logger.info(f"Creating upload folder >>> {UPLOAD_FOLDER}")
         os.mkdir(UPLOAD_FOLDER)
 
+    im.cleanup_images()
     setup_search()
     app.logger.info("Spawning search indexer watchdog")
     watchdog = Watchdog(cfg.wiki_directory, cfg.search_dir)
