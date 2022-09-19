@@ -84,7 +84,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/toggle-darktheme">
+                        <a class="nav-link" href="/toggle-darktheme?return={{ url_for(request.endpoint, **request.view_args) }}">
                             <img src="/static/images/contrast-2-fill.svg" alt="toggle dark theme">
                         </a>
                     </li>
