@@ -57,7 +57,7 @@ def save(page_name):
     app.logger.info(f"Saving >>> '{page_name}' ...")
 
     try:
-        filename = os.path.join(cfg.wiki_directory, page_name + '.md')
+        filename = safe_join(cfg.wiki_directory, f"{page_name}.md")
         dirname = os.path.dirname(filename)
         if not os.path.exists(dirname):
             os.makedirs(dirname)
@@ -102,9 +102,8 @@ def list_full_wiki():
 @app.route('/list/<path:folderpath>/', methods=['GET'])
 def list_wiki(folderpath):
     folder_list = []
-    safe_folder = os.path.realpath(cfg.wiki_directory)
-    requested_path = os.path.join(cfg.wiki_directory,folderpath) 
-    if os.path.commonprefix((os.path.realpath(requested_path),safe_folder)) != safe_folder: 
+    requested_path = safe_join(cfg.wiki_directory, folderpath)
+    if requested_path is None:
         app.logger.info("Requesting unsafe path >> showing homepage")
         return index()
     app.logger.info("Showing >>> 'all files'")
@@ -159,7 +158,7 @@ def file_page(file_page):
         if "favicon" in file_page:  # if the GET request is not for the favicon
             return
 
-        md_file_path = os.path.join(cfg.wiki_directory, file_page + ".md")
+        md_file_path = safe_join(cfg.wiki_directory, f"{file_page}.md")
         mod = "Last modified: %s" % time.ctime(os.path.getmtime(md_file_path))
         folder = file_page.split("/")
         file_page = folder[-1:][0]
@@ -261,7 +260,7 @@ def remove(page):
     if bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS):
         return redirect(url_for("file_page", file_page=page))
 
-    filename = os.path.join(cfg.wiki_directory, page + '.md')
+    filename = safe_join(cfg.wiki_directory, f"{page}.md")
     os.remove(filename)
     git_sync_thread = Thread(target=wrm.git_sync, args=(page, "Remove"))
     git_sync_thread.start()
@@ -273,7 +272,7 @@ def edit(page):
     if bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS):
         return login(page)
 
-    filename = os.path.join(cfg.wiki_directory, page + '.md')
+    filename = safe_join(cfg.wiki_directory, f"{page}.md")
     if request.method == 'POST':
         page_name = fetch_page_name()
         if page_name != page:

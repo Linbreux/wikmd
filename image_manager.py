@@ -5,6 +5,7 @@ import tempfile
 from base64 import b32encode
 from hashlib import sha1
 
+from flask import safe_join
 from werkzeug.utils import secure_filename
 
 
@@ -91,7 +92,7 @@ class ImageManager:
             self.delete_image(not_used_image)
 
     def delete_image(self, image_name):
-        image_path = os.path.join(self.images_path, image_name)
+        image_path = safe_join(self.images_path, image_name)
         self.logger.info(f"Deleting file >>> {image_path}")
         try:
             os.remove(image_path)
