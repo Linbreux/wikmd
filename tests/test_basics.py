@@ -1,3 +1,4 @@
+import wiki
 import pytest
 import pypandoc
 import os
@@ -28,7 +29,7 @@ def test_list():
 
 # creates a file and check if the content of the file is visible in the wiki
 def test_create_file_in_folder():
-    # create dir if it does not exists
+    # create dir if it does not exist
     if not os.path.exists("wiki/testing_folder_0123"):
         os.makedirs("wiki/testing_folder_0123")
 
@@ -49,9 +50,8 @@ def test_create_file_in_folder():
     
 # checks if the search response with searchterm = Features    
 def test_search():
-     rv = app.test_client().post("/",data=dict(
-         ss="Features"
-     ))
+     wiki.setup_search()
+     rv = app.test_client().get("/?q=Features")
      assert rv.status_code == 200
      assert b'Found' in rv.data
      assert b'result(s)' in rv.data

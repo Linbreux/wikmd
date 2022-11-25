@@ -1,0 +1,25 @@
+:root {
+    /* Backgrounds */
+    --bg-light: white;
+    --bg-dark: #181a1c;
+
+    --txt-light: #212529;
+    --txt-dark: whitesmoke;
+
+    --bg-codeblock-light: whitesmoke;
+    --bg-codeblock-dark: #27272a;
+
+    --bg-modal-light: white;
+    --bg-modal-dark: #343a40;
+
+    --quotes-color: orange;
+
+    /* CodeMirror */
+    --linenumber-dark-color: #77797c;
+
+    /* FilePond */
+    --bg-filepond-dark: #303033;
+
+    /* Default primary */
+    --prmry-color: #b8daff;
+}

@@ -1,0 +1,19 @@
+@import "wiki.colors.css";
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--txt-dark);
+}
+
+.modal-content {
+    background-color: var(--bg-modal-dark);
+    color: var(--txt-dark);
+}
+
+pre {
+    background-color: var(--bg-codeblock-dark);
+}
+
+.hljs {
+    background-color: var(--bg-codeblock-dark);
+}
