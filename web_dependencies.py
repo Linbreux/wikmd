@@ -68,10 +68,6 @@ WEB_DEPENDENCIES = {
     "notyf.min.js": WebDependency(
         local="/static/js/notyf.min.js",
         external="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"
-    ),
-    "copypaste.js": WebDependency(
-        local="/static/js/copypaste.js"
-        external=""
     )
 }
 
