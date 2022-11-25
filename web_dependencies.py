@@ -71,6 +71,7 @@ WEB_DEPENDENCIES = {
     ),
     "copypaste.js": WebDependency(
         local="/static/js/copypaste.js"
+        external=""
     )
 }
 
