@@ -140,8 +140,11 @@
     <!-- Highlight -->
     <script src="{{ system.web_deps["highlight.min.js"] }}"></script>
     <script>hljs.highlightAll();</script>
-    <script src="{{ system.web_deps["notyf.min.js"] }}"></script>
-    <script src="/static/js/copypaste.js"></script>
+
+    {% block scripts %}
+
+    {% endblock %}
+
 </body>
 
 </html>
