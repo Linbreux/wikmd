@@ -8,6 +8,7 @@ WIKMD_HOST_DEFAULT = "0.0.0.0"
 WIKMD_PORT_DEFAULT = 5000
 WIKMD_LOGGING_DEFAULT = 1
 WIKMD_LOGGING_FILE_DEFAULT = "wikmd.log"
+WIKMD_BASE_URL_DEFAULT = ""
 
 GIT_EMAIL_DEFAULT = "wikmd@no-mail.com"
 GIT_USER_DEFAULT = "wikmd"
@@ -71,6 +72,7 @@ class WikmdConfig:
         self.wikmd_port = os.getenv("WIKMD_PORT") or yaml_config["wikmd_port"] or WIKMD_PORT_DEFAULT
         self.wikmd_logging = os.getenv("WIKMD_LOGGING") or yaml_config["wikmd_logging"] or WIKMD_LOGGING_DEFAULT
         self.wikmd_logging_file = os.getenv("WIKMD_LOGGING_FILE") or yaml_config["wikmd_logging_file"] or WIKMD_LOGGING_FILE_DEFAULT
+        self.wikmd_base_url = os.getenv("WIKMD_BASE_URL") or yaml_config["wikmd_base_url"] or WIKMD_BASE_URL_DEFAULT
 
         self.git_user = os.getenv("GIT_USER") or yaml_config["git_user"] or GIT_USER_DEFAULT
         self.git_email = os.getenv("GIT_EMAIL") or yaml_config["git_email"] or GIT_EMAIL_DEFAULT

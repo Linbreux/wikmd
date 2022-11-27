@@ -10,7 +10,7 @@ import pypandoc
 import knowledge_graph
 import secrets
 
-from flask import Flask, render_template, request, redirect, url_for, make_response, safe_join, send_file
+from flask import Flask, render_template, request, redirect, url_for, make_response, safe_join, send_file, Blueprint
 from threading import Thread
 from hashlib import sha256
 from cache import Cache
@@ -28,6 +28,10 @@ UPLOAD_FOLDER = os.path.join(cfg.wiki_directory, cfg.images_route)
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+wb = Blueprint('wb', __name__,
+                template_folder='templates',
+                url_prefix=cfg.wikmd_base_url)
 
 # console logger
 app.logger.setLevel(logging.INFO)
@@ -94,12 +98,12 @@ def fetch_page_name() -> str:
     return page_name
 
 
-@app.route('/list/', methods=['GET'])
+@wb.route('/list/', methods=['GET'])
 def list_full_wiki():
     return list_wiki("")
 
 
-@app.route('/list/<path:folderpath>/', methods=['GET'])
+@wb.route('/list/<path:folderpath>/', methods=['GET'])
 def list_wiki(folderpath):
     folder_list = []
     requested_path = safe_join(cfg.wiki_directory, folderpath)
@@ -124,11 +128,10 @@ def list_wiki(folderpath):
                 if item == cfg.homepage:
                     continue
                 url = os.path.splitext(
-                    root[len(cfg.wiki_directory + "/"):] + "/" + item)[0]
+                    root[len(cfg.wiki_directory + "/"):] + item)[0]
             else:
-                url = "/" + \
-                    os.path.splitext(
-                        root[len(cfg.wiki_directory + "/"):] + "/" + item)[0]
+                url = os.path.splitext(
+                        root[len(cfg.wiki_directory + "/"):] + "/" +item)[0]
 
             info = {'doc': item,
                     'url': url,
@@ -146,7 +149,7 @@ def list_wiki(folderpath):
     return render_template('list_files.html', list=folder_list, folder=folderpath, system=SYSTEM_SETTINGS)
 
 
-@app.route('/<path:file_page>', methods=['GET'])
+@wb.route('/<path:file_page>', methods=['GET'])
 def file_page(file_page):
     if request.args.get("q"):
         return search(request.args.get("q"), request.args.get("page", 1))
@@ -154,6 +157,7 @@ def file_page(file_page):
         html = ""
         mod = ""
         folder = ""
+        fullFolderPath = ""
 
         if "favicon" in file_page:  # if the GET request is not for the favicon
             return
@@ -164,6 +168,12 @@ def file_page(file_page):
         file_page = folder[-1:][0]
         folder = folder[:-1]
         folder = "/".join(folder)
+
+        if folder == "":
+            fullFolderPath = file_page
+        else:
+            fullFolderPath = folder + "/" +file_page
+            
 
         cached_entry = cache.get(md_file_path)
         if cached_entry:
@@ -185,10 +195,10 @@ def file_page(file_page):
             app.logger.info(a)
 
         return render_template('content.html', title=file_page, folder=folder, info=html, modif=mod,
-                               system=SYSTEM_SETTINGS)
+                                fullFolderPath=fullFolderPath, system=SYSTEM_SETTINGS)
 
 
-@app.route('/', methods=['GET'])
+@wb.route('/', methods=['GET'])
 def index():
     if request.args.get("q"):
         return search(request.args.get("q"), request.args.get("page", 1))
@@ -218,7 +228,7 @@ def index():
         return render_template('index.html', homepage=html, system=SYSTEM_SETTINGS)
 
 
-@app.route('/add_new', methods=['POST', 'GET'])
+@wb.route('/add_new', methods=['POST', 'GET'])
 def add_new():
     if bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS):
         return login("/add_new")
@@ -228,13 +238,13 @@ def add_new():
         git_sync_thread = Thread(target=wrm.git_sync, args=(page_name, "Add"))
         git_sync_thread.start()
 
-        return redirect(url_for("file_page", file_page=page_name))
+        return redirect(url_for("wb.file_page", file_page=page_name))
     else:
         return render_template('new.html', upload_path=cfg.images_route,
                                image_allowed_mime=cfg.image_allowed_mime, system=SYSTEM_SETTINGS)
 
 
-@app.route('/edit/homepage', methods=['POST', 'GET'])
+@wb.route('/edit/homepage', methods=['POST', 'GET'])
 def edit_homepage():
     if bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS):
         return login("/edit/homepage")
@@ -255,7 +265,7 @@ def edit_homepage():
                                image_allowed_mime=cfg.image_allowed_mime, system=SYSTEM_SETTINGS)
 
 
-@app.route('/remove/<path:page>', methods=['GET'])
+@wb.route('/remove/<path:page>', methods=['GET'])
 def remove(page):
     if bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS):
         return redirect(url_for("file_page", file_page=page))
@@ -264,10 +274,10 @@ def remove(page):
     os.remove(filename)
     git_sync_thread = Thread(target=wrm.git_sync, args=(page, "Remove"))
     git_sync_thread.start()
-    return redirect("/")
+    return redirect(url_for('wb.index'))
 
 
-@app.route('/edit/<path:page>', methods=['POST', 'GET'])
+@wb.route('/edit/<path:page>', methods=['POST', 'GET'])
 def edit(page):
     if bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS):
         return login(page)
@@ -290,7 +300,7 @@ def edit(page):
                                image_allowed_mime=cfg.image_allowed_mime, system=SYSTEM_SETTINGS)
 
 
-@app.route(os.path.join("/", cfg.images_route), methods=['POST', 'DELETE'])
+@wb.route(os.path.join("/", cfg.images_route), methods=['POST', 'DELETE'])
 def upload_file():
     if bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS):
         return login()
@@ -307,14 +317,14 @@ def upload_file():
         return 'OK'
 
 
-@app.route('/knowledge-graph', methods=['GET'])
+@wb.route('/knowledge-graph', methods=['GET'])
 def graph():
     global links
     links = knowledge_graph.find_links()
     return render_template("knowledge-graph.html", links=links, system=SYSTEM_SETTINGS)
 
 
-@app.route('/login', methods=['GET','POST'])
+@wb.route('/login', methods=['GET','POST'])
 def login(page):
     if request.method == "POST":
         password = request.form["password"]
@@ -335,7 +345,7 @@ def login(page):
 # Translate id to page path
 
 
-@app.route('/nav/<path:id>/', methods=['GET'])
+@wb.route('/nav/<path:id>/', methods=['GET'])
 def nav_id_to_page(id):
     for i in links:
         if i["id"] == int(id):
@@ -343,7 +353,7 @@ def nav_id_to_page(id):
     return redirect("/")
 
 
-@app.route(os.path.join("/", cfg.images_route, "<path:image_name>"))
+@wb.route(os.path.join("/", cfg.images_route, "<path:image_name>"))
 def display_image(image_name):
     image_path = safe_join(UPLOAD_FOLDER, image_name)
     app.logger.info(f"Showing image >>> '{image_path}'")
@@ -353,13 +363,13 @@ def display_image(image_name):
     return response
 
 
-@app.route('/toggle-darktheme/', methods=['GET'])
+@wb.route('/toggle-darktheme/', methods=['GET'])
 def toggle_darktheme():
     SYSTEM_SETTINGS['darktheme'] = not SYSTEM_SETTINGS['darktheme']
     return redirect(request.args.get("return", "/"))  # redirect to the same page URL
 
 
-@app.route('/toggle-sorting/', methods=['GET'])
+@wb.route('/toggle-sorting/', methods=['GET'])
 def toggle_sort():
     SYSTEM_SETTINGS['listsortMTime'] = not SYSTEM_SETTINGS['listsortMTime']
     return redirect("/list")
@@ -402,7 +412,12 @@ def run_wiki():
     app.logger.info("Spawning search indexer watchdog")
     watchdog = Watchdog(cfg.wiki_directory, cfg.search_dir)
     watchdog.start()
+
+    # allow to change the baseurl
+    app.register_blueprint(wb)
+
     app.run(host=cfg.wikmd_host, port=cfg.wikmd_port, debug=True, use_reloader=False)
+
 
 
 if __name__ == '__main__':
