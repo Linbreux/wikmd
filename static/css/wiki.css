@@ -25,16 +25,18 @@ pre {
     background-color: var(--bg-codeblock-light);
     padding: 6px;
     border-radius: 6px;
+    position: relative;
 }
 
 pre button {
-  position: relative;
+  position: absolute;
   top: 5px;
   right: 5px;
-
+  margin-top: 5px;
+  margin-right: 5px;
   font-size: 0.9rem;
   padding: 0.15rem;
-  background-color: #828282;
+  background-color: #FFFFFF;
 
   border: ridge 1px #7b7b7c;
   border-radius: 5px;
