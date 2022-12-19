@@ -3,7 +3,7 @@ var codeblocks = document.getElementsByTagName("PRE");
 var block;
 
 for (block = 0; block < codeblocks.length; block++) {
-    codeblocks[block].innerHTML += "<button id= \"copybutton" + block + "\" onclick=\"copyCodeBlock(" + block + ")\">📋</button>"
+    codeblocks[block].innerHTML += "<button id= \"copybutton" + block + "\" onclick=\"copyCodeBlock(" + block + ")\" title=\"Copy to clipboard\"> 📋 </button>"
 }
 
 function copyCodeBlock() {
