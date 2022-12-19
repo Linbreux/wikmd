@@ -26,6 +26,7 @@ pre {
     padding: 6px;
     border-radius: 6px;
     position: relative;
+    white-space: pre-wrap;
 }
 
 pre button {
