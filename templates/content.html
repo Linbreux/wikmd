@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
 
+{% block head %}
+    <link rel="stylesheet" href="{{ system.web_deps["notyf.min.css"] }}">
+{% endblock %}
+
 {% block content %}
     <h1>{% if folder %}
         <a style="{% if system.darktheme %}color:whitesmoke {% else %} color:#222326{% endif %}"
@@ -57,4 +61,9 @@
         </div>
     </div>
 
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ system.web_deps["notyf.min.js"] }}"></script>
+    <script src="/static/js/copypaste.js"></script>
 {% endblock %}

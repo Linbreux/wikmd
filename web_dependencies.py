@@ -64,6 +64,14 @@ WEB_DEPENDENCIES = {
     "filepond-plugin-file-validate-type.js": WebDependency(
         local="/static/js/filepond-plugin-file-validate-type.js",
         external="https://unpkg.com/filepond-plugin-file-validate-type@1.2.8/dist/filepond-plugin-file-validate-type.js"
+    ),
+    "notyf.min.js": WebDependency(
+        local="/static/js/notyf.min.js",
+        external="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"
+    ),
+    "notyf.min.css": WebDependency(
+        local="/static/css/notyf.min.css",
+        external="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css"
     )
 }
 
