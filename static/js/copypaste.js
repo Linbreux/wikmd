@@ -2,8 +2,17 @@ const notyf = new Notyf({duration: 2000, ripple: false, position: { x: 'center',
 var codeblocks = document.getElementsByTagName("PRE");
 var block;
 
+const pathToCopyIcon = darktheme == "False" ? "file-copy.svg" : "file-copy-white.svg"
+console.log(darktheme)
+
 for (block = 0; block < codeblocks.length; block++) {
-    codeblocks[block].innerHTML += "<button id= \"copybutton" + block + "\" onclick=\"copyCodeBlock(" + block + ")\" title=\"Copy to clipboard\"> 📋 </button>"
+    codeblocks[block].innerHTML += 
+        "<img id=\"copybutton" 
+        + block 
+        + "\" onclick=\"copyCodeBlock(" 
+        + block 
+        + ")\" title=\"Copy to clipboard\" src=\"/static/images/" + pathToCopyIcon + "\""
+        + "></img>"
 }
 
 function copyCodeBlock() {
