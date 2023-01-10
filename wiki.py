@@ -120,6 +120,9 @@ def list_wiki(folderpath):
                 continue
 
             folder = root[len(cfg.wiki_directory + "/"):]
+            if folder in cfg.hide_folder_in_wiki:
+                continue
+
             if folder == "":
                 if item == cfg.homepage:
                     continue
