@@ -41,7 +41,7 @@ logger.setLevel(logging.ERROR)
 wrm = WikiRepoManager(flask_app=app)
 
 # plugins
-plugins = PluginLoader(flask_app=app, config=cfg, plugins=["draw"]).get_plugins()
+plugins = PluginLoader(flask_app=app, config=cfg, plugins=cfg.plugins).get_plugins()
 
 SYSTEM_SETTINGS = {
     "darktheme": False,
@@ -185,7 +185,7 @@ def file_page(file_page):
 
             for plugin in plugins:
                 if ("process_html" in dir(plugin)):
-                    app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_md >>> {file_page}")
+                    app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_html >>> {file_page}")
                     cached_entry = plugin.process_html(cached_entry)
 
             return render_template(
@@ -341,7 +341,7 @@ def communicate_plugins():
     if request.method == "POST":
         for plugin in plugins:
             if ("communicate_plugin" in dir(plugin)):
-                plugin.communicate_plugin(request)
+                return plugin.communicate_plugin(request)
     return "nothing to do"
 
 
