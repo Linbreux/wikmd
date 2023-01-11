@@ -1,26 +1,23 @@
-# Simple markdown
-
-To see all the Markdown syntax you can visit the [Markdown cheatsheet](/Markdown%20cheatsheet)
-
-# Homepage
+## Homepage
 
 The homepage is default the "homepage.md" file, this can't be changed. If this file doesn't exist create it in de wiki folder.
 
-# Static images
+## Plugins (beta)
 
-If you have images that you don't want to be available on the internet, you can put them inside the folder **"static/images/"** for example **"testfile.png"**, now you can link to **"/static/images/testfile.png"**
+You can add interactive drawings to your markdown file by using the `draw` tag.  
+A tag looks as follows: `[[<tag>]]`
 
-# Latex
+## Latex
 
 It's possible to use latex syntax inside your markdown because the markdown is first converted to latex and after that to html. This means you have a lot more flexibility.
 
-## Change image size
+### Change image size
 ```
 ![](https://i.ibb.co/Dzp0SfC/download.jpg){width="50%"}
 ```
 ![](https://i.ibb.co/Dzp0SfC/download.jpg){width="50%"}
 
-## Image references
+### Image references
 ```
 ![\label{test}](https://i.ibb.co/Dzp0SfC/download.jpg){width="50%"}
 
@@ -31,7 +28,7 @@ Inside picture \ref{landscape picture} you can see a nice mountain.
 
 Clickable reference in picture \ref{landscape picture}.
 
-## Math
+### Math
 ```
 \begin{align}
 y(x) &= \int_0^\infty x^{2n} e^{-a x^2}\,dx\\
@@ -54,7 +51,7 @@ You can also use $inline$ math to show $a=2$ and $b=8$
 
 And many other latex functions.
 
-# Converting the files
+## Converting the files
 
 Open the wiki folder of your instance.  
 
