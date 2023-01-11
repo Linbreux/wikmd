@@ -41,7 +41,7 @@ logger.setLevel(logging.ERROR)
 wrm = WikiRepoManager(flask_app=app)
 
 # plugins
-plugins = PluginLoader(["plugins.draw"]).get_plugins()
+plugins = PluginLoader(flask_app=app, config=cfg, plugins=["draw"]).get_plugins()
 
 SYSTEM_SETTINGS = {
     "darktheme": False,
@@ -61,7 +61,9 @@ def save(page_name):
     content = request.form['CT']
 
     for plugin in plugins:
-        content = plugin.process_markdown(content)
+        if ("process_md" in dir(plugin)):
+            app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_md >>> {page_name}")
+            content = plugin.process_md(content)
 
     app.logger.info(f"Saving >>> '{page_name}' ...")
 
@@ -179,7 +181,9 @@ def file_page(file_page):
             app.logger.info(f"Showing HTML page from cache >>> '{file_page}'")
 
             for plugin in plugins:
-                cached_entry = plugin.process_html(cached_entry)
+                if ("process_html" in dir(plugin)):
+                    app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_md >>> {file_page}")
+                    cached_entry = plugin.process_html(cached_entry)
 
             return render_template(
                 'content.html', title=file_page, folder=folder, info=cached_entry, modif=mod,
@@ -197,6 +201,7 @@ def file_page(file_page):
             cache.set(md_file_path, html)
 
             for plugin in plugins:
+                app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_html >>> {file_page}")
                 html = plugin.process_html(html)
 
 
@@ -326,24 +331,15 @@ def upload_file():
         im.delete_image(file_name)
         return 'OK'
 
-@app.route("/com", methods=['POST'])
-def upload_draw():
+@app.route("/plug_com", methods=['POST'])
+def communicate_plugins():
     if bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS):
         return login()
-    app.logger.info(f"Uploading drawing")
-    # Upload image when POST
     if request.method == "POST":
-        id = request.form['id']
-        image = request.form['image']
-        
-        # look for folder
-        location = os.path.join(cfg.wiki_directory, "draw", id)
-        if os.path.exists(location):
-            file = open(location, "w")
-            file.write(image)
-            file.close()
-
-        return "ok"
+        for plugin in plugins:
+            if ("communicate_plugin" in dir(plugin)):
+                plugin.communicate_plugin(request)
+    return "nothing to do"
 
 
 @app.route('/knowledge-graph', methods=['GET'])

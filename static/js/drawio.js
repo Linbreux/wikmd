@@ -145,7 +145,7 @@ DiagramEditor.prototype.setElementData = function(elem, data)
 
 	const form = document.createElement('form');
 	form.method = "post";
-	form.action = "com";
+	form.action = "/plug_com";
 
 
 	var object = {
