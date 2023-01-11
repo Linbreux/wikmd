@@ -23,6 +23,8 @@ IMAGES_ROUTE_DEFAULT = "img"
 
 HIDE_FOLDER_IN_WIKI = []
 
+PLUGINS = []
+
 PROTECT_EDIT_BY_PASSWORD = 0
 PASSWORD_IN_SHA_256 = "0E9C700FAB2D5B03B0581D080E74A2D7428758FC82BD423824C6C11D6A7F155E" #pw: wikmd
 
@@ -87,6 +89,8 @@ class WikmdConfig:
         self.images_route = os.getenv("IMAGES_ROUTE") or yaml_config["images_route"] or IMAGES_ROUTE_DEFAULT
 
         self.hide_folder_in_wiki = os.getenv("hide_folder_in_wiki")or yaml_config["hide_folder_in_wiki"] or HIDE_FOLDER_IN_WIKI
+
+        self.plugins = os.getenv("WIKI_PLUGINS")or yaml_config["plugins"] or PLUGINS
 
         self.protect_edit_by_password = os.getenv("PROTECT_EDIT_BY_PASSWORD") or yaml_config["protect_edit_by_password"] or PROTECT_EDIT_BY_PASSWORD
         self.password_in_sha_256 = os.getenv("PASSWORD_IN_SHA_256") or yaml_config["password_in_sha_256"] or PASSWORD_IN_SHA_256

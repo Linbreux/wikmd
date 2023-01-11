@@ -14,6 +14,7 @@ To view the documents in the browser, the document is converted to html.
 
 ## Features
 - knowledge graph
+- drawio integration (**NEW**)
 - git support (version control)
 - image support including sizing and referencing
 - math/latex
