@@ -17,6 +17,7 @@ homepage: "homepage.md"
 homepage_title: "homepage"
 images_route: "img"
 image_allowed_mime: ["image/gif", "image/jpeg", "image/png", "image/svg+xml", "image/webp"]
+hide_folder_in_wiki: [".obsidian"]
 
 protect_edit_by_password: 0
 password_in_sha_256: "0E9C700FAB2D5B03B0581D080E74A2D7428758FC82BD423824C6C11D6A7F155E" #ps: wikmd 
