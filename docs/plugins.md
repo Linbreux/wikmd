@@ -44,3 +44,7 @@ This method will be called before saving the markdown file. The returned string 
 #### process_html(md: str) -> str *optional*
 
 This method will be called before showing the html page. The returned string is the content of the html file that will be shown.
+
+#### communicate_plugin(request) -> str *optional*
+
+The parameter `request` is the `POST` request thats returned by `/plug_com` (plugin communication).
