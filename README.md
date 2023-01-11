@@ -1,4 +1,5 @@
-# wikmd
+# wikmd 
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/linbreux/wikmd/docker.yml?style=flat-square) ![GitHub Repo stars](https://img.shields.io/github/stars/linbreux/wikmd?style=flat-square) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/linbreux/wikmd?style=flat-square) ![GitLab](https://img.shields.io/gitlab/license/linbreux/wikmd?style=flat-square)
 > :information_source: **Information** can be found in the docs: [https://linbreux.github.io/wikmd/](https://linbreux.github.io/wikmd/)
 
 ## What is it?
