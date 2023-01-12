@@ -9,6 +9,7 @@ from lxml.html.clean import clean_html
 import pypandoc
 import knowledge_graph
 import secrets
+import re
 
 from flask import Flask, render_template, request, redirect, url_for, make_response, safe_join, send_file
 from threading import Thread
@@ -19,6 +20,7 @@ from config import WikmdConfig
 from git_manager import WikiRepoManager
 from search import Search, Watchdog
 from web_dependencies import get_web_deps
+from plugins.load_plugins import PluginLoader
 
 
 SESSIONS = []
@@ -38,6 +40,9 @@ logger.setLevel(logging.ERROR)
 
 wrm = WikiRepoManager(flask_app=app)
 
+# plugins
+plugins = PluginLoader(flask_app=app, config=cfg, plugins=cfg.plugins).get_plugins()
+
 SYSTEM_SETTINGS = {
     "darktheme": False,
     "listsortMTime": False,
@@ -54,6 +59,12 @@ def save(page_name):
     :param page_name: name of the page
     """
     content = request.form['CT']
+
+    for plugin in plugins:
+        if ("process_md" in dir(plugin)):
+            app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_md >>> {page_name}")
+            content = plugin.process_md(content)
+
     app.logger.info(f"Saving >>> '{page_name}' ...")
 
     try:
@@ -171,6 +182,12 @@ def file_page(file_page):
         cached_entry = cache.get(md_file_path)
         if cached_entry:
             app.logger.info(f"Showing HTML page from cache >>> '{file_page}'")
+
+            for plugin in plugins:
+                if ("process_html" in dir(plugin)):
+                    app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_html >>> {file_page}")
+                    cached_entry = plugin.process_html(cached_entry)
+
             return render_template(
                 'content.html', title=file_page, folder=folder, info=cached_entry, modif=mod,
                 system=SYSTEM_SETTINGS
@@ -178,10 +195,18 @@ def file_page(file_page):
 
         try:
             app.logger.info(f"Converting to HTML with pandoc >>> '{md_file_path}' ...")
+
             html = pypandoc.convert_file(md_file_path, "html5",
-                                         format='md', extra_args=["--mathjax"], filters=['pandoc-xnos'])
+                                format='md', extra_args=["--mathjax"], filters=['pandoc-xnos'])
+            
             html = clean_html(html)
+
             cache.set(md_file_path, html)
+
+            for plugin in plugins:
+                app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_html >>> {file_page}")
+                html = plugin.process_html(html)
+
 
             app.logger.info(f"Showing HTML page >>> '{file_page}'")
         except Exception as a:
@@ -308,6 +333,16 @@ def upload_file():
         file_name = request.data.decode("utf-8")
         im.delete_image(file_name)
         return 'OK'
+
+@app.route("/plug_com", methods=['POST'])
+def communicate_plugins():
+    if bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS):
+        return login()
+    if request.method == "POST":
+        for plugin in plugins:
+            if ("communicate_plugin" in dir(plugin)):
+                return plugin.communicate_plugin(request)
+    return "nothing to do"
 
 
 @app.route('/knowledge-graph', methods=['GET'])
