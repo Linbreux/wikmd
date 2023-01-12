@@ -25,3 +25,4 @@ then
   chown -R abc:abc /wiki/*
 fi
 
+chown -R abc:abc /app/wikmd/plugins
