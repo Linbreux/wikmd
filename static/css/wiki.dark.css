@@ -10,6 +10,11 @@ body {
     color: var(--txt-dark);
 }
 
+code, pre {
+    background-color: var(--bg-codeblock-dark);
+    color: #d88;
+}
+
 pre {
     background-color: var(--bg-codeblock-dark);
 }

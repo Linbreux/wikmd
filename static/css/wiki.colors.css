@@ -1,13 +1,15 @@
 :root {
     /* Backgrounds */
     --bg-light: white;
-    --bg-dark: #181a1c;
+    /* old colors --bg-dark: #181a1c; */
+    --bg-dark: #222529;
 
     --txt-light: #212529;
     --txt-dark: whitesmoke;
 
     --bg-codeblock-light: whitesmoke;
-    --bg-codeblock-dark: #27272a;
+    /* old colors --bg-codeblock-dark: #27272a;*/
+    --bg-codeblock-dark: #1c1c1c;
 
     --bg-modal-light: white;
     --bg-modal-dark: #343a40;

@@ -1,5 +1,10 @@
 @import "wiki.colors.css";
 
+@import url('https://fonts.googleapis.com/css2?family=Gothic+A1:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Helvetica:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
 body {
     background-color: var(--bg-light);
     color: var(--txt-light);
@@ -11,13 +16,23 @@ body {
 }
 
 blockquote {
-    padding: 0 50px;
-    margin-left: 0;
+    padding: 5px 50px;
+    margin-left: 0px;
     border-left: 4px solid var(--quotes-color);
+    background-color: var(--bg-codeblock-light);
+}
+
+blockquote p{
+    margin-top:10px;
+    font-weight: 300;
 }
 
 code, pre {
     font-family: monospace;
+    background-color: var(--bg-codeblock-light);
+    color: #800;
+    border-radius: 5px;
+    padding: 4px;
     font-size: 14px
 }
 
@@ -73,4 +88,39 @@ th {
 td {
     padding: 12px;
     border-top: 1px solid #dee2e6;
+}
+
+h1{
+    font-size: 2em;
+    font-family: "quicksand";
+}
+
+h1.title{
+    font-size: 2.5em;
+    font-family: "Helvetica";
+}
+
+h2 {
+    font-size: 1.8em;
+    font-family: "quicksand";
+}
+
+h3 {
+    font-size: 1.5em;
+    font-family: "quicksand";
+}
+
+
+h4{
+    font-size: 1.3em;
+    font-family: "quicksand";
+}
+
+body {
+    font-family: "Gothic A1";
+}
+
+.folder{
+    font-family: 'Gothic A1', sans-serif;
+    font-weight: 700;
 }

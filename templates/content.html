@@ -9,8 +9,8 @@
 {% endblock %}
 
 {% block content %}
-    <h1>{% if folder %}
-        <a style="{% if system.darktheme %}color:whitesmoke {% else %} color:#222326{% endif %}"
+    <h1 class="title">{% if folder %}
+        <a class="folder" style="{% if system.darktheme %} color:whitesmoke {% else %} color:#222326 {% endif %}"
            href="/list/{{ folder }}">{{ folder }}</a>/
     {% endif %}
         {{ title }}
@@ -34,8 +34,6 @@
         </a>
 
     </h1>
-
-    <hr>
     {{ info|safe }}
     <hr>
     <p>{{ modif }}</p>
