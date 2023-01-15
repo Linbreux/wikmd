@@ -81,11 +81,14 @@ class ImageManager:
                 continue
             for filename in files:
                 path = os.path.join(root, filename)
-                with open(path, "r", encoding="utf-8", errors="ignore") as f:
-                    content = f.read()
-                    matches = image_link_regex.findall(content)
-                    for _caption, image_path in matches:
-                        used_images.add(os.path.basename(image_path))
+                try:
+                    with open(path, "r", encoding="utf-8", errors="ignore") as f:
+                        content = f.read()
+                        matches = image_link_regex.findall(content)
+                        for _caption, image_path in matches:
+                            used_images.add(os.path.basename(image_path))
+                except:
+                    self.logger.info(f"ignoring {path}")
 
         not_used_images = saved_images.difference(used_images)
         for not_used_image in not_used_images:
