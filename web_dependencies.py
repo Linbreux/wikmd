@@ -21,6 +21,10 @@ WEB_DEPENDENCIES = {
         local="/static/js/bootstrap.bundle.min.js",
         external="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
     ),
+    "bootstrap-icons.css": WebDependency(
+        local="/static/css/bootstrap-icons.css",
+        external="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css"
+    ),
     "jquery.slim.min.js": WebDependency(
         local="/static/js/jquery.slim.min.js",
         external="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.slim.min.js"

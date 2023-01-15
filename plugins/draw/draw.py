@@ -79,7 +79,7 @@ class Plugin:
         search for [[draw]] and replace with draw_<uniqueid>
         """
         filename = "draw_" + str(uuid.uuid4())
-        result = re.sub("\[\[draw\]\]", "[[" + filename + "]]", file)
+        result = re.sub("^\[\[draw\]\]", "[[" + filename + "]]", file)
         self.create_draw_file(filename)
         return result
 

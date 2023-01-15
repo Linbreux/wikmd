@@ -11,8 +11,11 @@ To view the documents in the browser, the document is converted to html.
 
 ## Plugins (beta)
 
-Wikmd supports plugins. For now there is only one, diagrams (drawio).  
-U can add interactive drawings to your markdown file by using the `draw` tag. A tag looks as follows: `[[<tag>]]` 
+The plugins are used to extend the functionality of the wiki. Most of them are accessible through the use of `tags`.
+For now there are only a few supported.  
+
+- `[[draw]]` Allows you to add an **interactive drawio drawing** to the wiki.  
+- `[[info]]`, `[[warning]]`, `[[danger]]`, `[[success]]` Adds a nice **alert message**.
 
 ### Image support
 ![](https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Markdown-mark.svg/208px-Markdown-mark.svg.png)

@@ -1,12 +1,20 @@
 ---
 layout: default
-title: Pluginns
+title: Plugins
 nav_order: 10
 ---
 
 # Plugins
 
 The plugin system is still in **beta** for now.
+
+## Supported Plugins
+
+The plugins are used to extend the functionality of the wiki. Most of them are accessible through the use of `tags`.
+For now there are only a few supported.  
+
+- `[[draw]]` Allows you to add an **interactive drawio drawing** to the wiki.  
+- `[[info]]`, `[[warning]]`, `[[danger]]`, `[[success]]` Adds a nice **alert message**.
 
 ## Adding a plugin
 

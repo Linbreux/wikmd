@@ -124,3 +124,9 @@ body {
     font-family: 'Gothic A1', sans-serif;
     font-weight: 700;
 }
+
+.alert i[class^="bi-"]{
+    font-size: 1.5em;
+    line-height: 1;
+    margin-right: 10px;
+  }

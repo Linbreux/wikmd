@@ -201,11 +201,17 @@ def file_page(file_page):
             
             html = clean_html(html)
 
+            for plugin in plugins:
+                if ("process_before_cache_html" in dir(plugin)):
+                    app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_before_cache_html >>> {file_page}")
+                    html = plugin.process_before_cache_html(html)
+
             cache.set(md_file_path, html)
 
             for plugin in plugins:
-                app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_html >>> {file_page}")
-                html = plugin.process_html(html)
+                if ("process_html" in dir(plugin)):
+                    app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_html >>> {file_page}")
+                    html = plugin.process_html(html)
 
 
             app.logger.info(f"Showing HTML page >>> '{file_page}'")
