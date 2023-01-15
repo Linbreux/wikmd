@@ -36,10 +36,6 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/Paris
-      - HOMEPAGE=homepage.md #optional
-      - HOMEPAGE_TITLE=homepage.md #optional
-      - WIKMD_LOGGING=1 #optional
-      - WIKI_DIRECTORY=/wiki
     volumes:
       - /path/to/wiki:/wiki
     ports:
@@ -55,10 +51,7 @@ docker run -d \
   -e TZ=Europe/Paris \
   -e PUID=1000 \
   -e PGID=1000 \
-  -e HOMEPAGE=homepage.md `#optional` \
-  -e HOMEPAGE_TITLE=homepage.md `#optional` \
   -e WIKMD_LOGGING=1 `#optional` \
-  -e WIKI_DIRECTORY=/wiki \
   -p 5000:5000 \
   -v /path/to/wiki:/wiki \
   --restart unless-stopped \
