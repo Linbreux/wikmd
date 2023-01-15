@@ -79,7 +79,8 @@ class Plugin:
         search for [[draw]] and replace with draw_<uniqueid>
         """
         filename = "draw_" + str(uuid.uuid4())
-        result = re.sub("^\[\[draw\]\]", "[[" + filename + "]]", file)
+        result = re.sub(r"^\[\[draw\]\]", "[[" + filename + "]]", file, flags=re.MULTILINE)
+        print(file)
         self.create_draw_file(filename)
         return result
 
@@ -87,10 +88,10 @@ class Plugin:
         """
         search for [[draw_<unique_id>]] in "file" and replace it with the content of a corresponding drawfile
         """
-        draws = re.findall("\[\[(draw_.*)\]\]", file)
+        draws = re.findall(r"\[\[(draw_.*)\]\]", file)
         result = file
         for draw in draws:
-            result = re.sub("\[\["+draw+"\]\]", self.look_for_existing_drawid(draw), result)
+            result = re.sub(r"\[\["+draw+r"\]\]", self.look_for_existing_drawid(draw), result)
         return result
 
 
