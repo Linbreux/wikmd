@@ -22,3 +22,14 @@ pre {
 .hljs {
     background-color: var(--bg-codeblock-dark);
 }
+
+#list a.folder{
+    border-bottom: 1px solid var(--txt-dark);
+    font-weight: 800;
+}
+
+
+.container a{
+    color:var(--txt-dark);
+    border-bottom: 1px solid var(--txt-dark);
+}
