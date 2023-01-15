@@ -21,7 +21,7 @@ def test_process_md():
     assert md == before
 
 def test_draw_md():
-    before = "#test this is test\n [[draw]] \n next line"
+    before = "#test this is test\n[[draw]] \n next line"
     md = before
     for plugin in wiki.plugins:
         if ("process_md" in dir(plugin)):
