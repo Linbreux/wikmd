@@ -150,3 +150,7 @@ body {
     border-bottom: 1px solid black;
     padding-bottom: 2px;
 }
+
+.mermaid {
+    text-align: center;
+}
