@@ -24,11 +24,9 @@
     {% if system.darktheme == True %}
         <link rel="stylesheet" type="text/css" href="/static/css/wiki.dark.css">
     {% endif %}
-
-    {% block head %}
-
-    {% endblock %}
-
+    {% block head %}{% endblock %}
+    {% for plug in system.plugins %}{% if plug.import_head is defined %}{{plug.import_head()|safe}}
+    {% endif%}{%endfor%}
     <!-- favicon -->
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 
@@ -145,6 +143,8 @@
     {% block scripts %}
 
     {% endblock %}
+
+    {% for plug in system.plugins %}{% if plug.add_script is defined %}{{plug.add_script()|safe}}{% endif%}{%endfor%}
 
 </body>
 
