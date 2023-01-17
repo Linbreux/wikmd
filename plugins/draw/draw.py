@@ -6,12 +6,16 @@ from flask import Flask
 from config import WikmdConfig
 
 class Plugin:
-    def __init__(self, flask_app: Flask, config: WikmdConfig ):
+    def import_head(self):
+        return "<script type='text/javascript' src='/static/js/drawio.js'></script>"
+
+    def __init__(self, flask_app: Flask, config: WikmdConfig, web_dep):
         self.name = "DrawIO integration"
         self.plugname = "draw"
         self.flask_app = flask_app
         self.config = config
         self.this_location = os.path.dirname(__file__)
+        self.web_dep = web_dep
 
     def get_plugin_name(self) -> str:
         """

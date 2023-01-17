@@ -11,7 +11,7 @@ import knowledge_graph
 import secrets
 import re
 
-from flask import Flask, render_template, request, redirect, url_for, make_response, safe_join, send_file
+from flask import Flask, render_template, request, redirect, url_for, make_response, safe_join, send_file, send_from_directory
 from threading import Thread
 from hashlib import sha256
 from cache import Cache
@@ -40,13 +40,16 @@ logger.setLevel(logging.ERROR)
 
 wrm = WikiRepoManager(flask_app=app)
 
+web_deps = get_web_deps(cfg.local_mode, app.logger)
+
 # plugins
-plugins = PluginLoader(flask_app=app, config=cfg, plugins=cfg.plugins).get_plugins()
+plugins = PluginLoader(flask_app=app, config=cfg, plugins=cfg.plugins, web_deps=web_deps).get_plugins()
 
 SYSTEM_SETTINGS = {
     "darktheme": False,
     "listsortMTime": False,
-    "web_deps": get_web_deps(cfg.local_mode, app.logger)
+    "web_deps": web_deps,
+    "plugins": plugins
 }
 
 cache = Cache(cfg.cache_dir)
@@ -408,6 +411,10 @@ def toggle_sort():
     SYSTEM_SETTINGS['listsortMTime'] = not SYSTEM_SETTINGS['listsortMTime']
     return redirect("/list")
 
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 def setup_search():
     search = Search(cfg.search_dir, create=True)
