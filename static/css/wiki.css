@@ -154,3 +154,7 @@ body {
 .mermaid {
     text-align: center;
 }
+
+.bg-dark {
+    color: var(--txt-dark)
+}

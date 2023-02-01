@@ -92,15 +92,12 @@
             </div>
         </div>
     </nav>
-
     <!-- Page -->
     <div>
-
         <!-- Content -->
-        <div class="container mt-3">
-                {% block content %}
-
-                {% endblock %}
+        {% if sidebars %}<div class="container-fluid">{%else%}<div class="container">{%endif%}
+        {% block content %}
+        {% endblock %}
         </div>
 
         <!-- Footer -->
@@ -116,7 +113,7 @@
                     </a>
                 </li>
                 <li class="ms-2">
-                     <span class="text-muted">© 2022 wikmd</span>
+                     <span class="text-muted">© 2023 wikmd</span>
                 </li>
             </ul>
         </footer>
