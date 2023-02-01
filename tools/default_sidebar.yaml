@@ -1,0 +1,20 @@
+menu:
+- item: Home
+  link: /
+
+- item: A menu is great
+  link: /
+
+- item: Nested
+  sub:
+  - item: nest1
+    link: /
+    sub:
+    - item: testing
+    - item: woops
+  - item: nest2
+    link: /
+
+- item: normal
+  link: /
+  

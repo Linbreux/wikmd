@@ -17,6 +17,7 @@ from hashlib import sha256
 from cache import Cache
 from image_manager import ImageManager
 from config import WikmdConfig
+from tools.sidebar import Sidebar
 from git_manager import WikiRepoManager
 from search import Search, Watchdog
 from web_dependencies import get_web_deps
@@ -49,7 +50,8 @@ SYSTEM_SETTINGS = {
     "darktheme": False,
     "listsortMTime": False,
     "web_deps": web_deps,
-    "plugins": plugins
+    "plugins": plugins,
+    "sidebar": Sidebar().read_sidebar_yaml()
 }
 
 cache = Cache(cfg.cache_dir)
