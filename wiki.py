@@ -109,6 +109,7 @@ def fetch_page_name() -> str:
 
 def new_page_name() -> str:
     page_name = request.args.get('path')
+    app.logger.info("Page name: " + page_name)
     if page_name == None:
         page_name = ""
     return page_name
