@@ -108,7 +108,7 @@ def fetch_page_name() -> str:
     return page_name
 
 def new_page_name() -> str:
-    page_name = request.args['path']
+    page_name = request.args.get('path')
     return page_name
 
 
