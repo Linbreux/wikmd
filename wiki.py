@@ -179,54 +179,58 @@ def file_page(file_page):
         if "favicon" in file_page:  # if the GET request is not for the favicon
             return
 
-        md_file_path = safe_join(cfg.wiki_directory, f"{file_page}.md")
-        mod = "Last modified: %s" % time.ctime(os.path.getmtime(md_file_path))
-        folder = file_page.split("/")
-        file_page = folder[-1:][0]
-        folder = folder[:-1]
-        folder = "/".join(folder)
-
-        cached_entry = cache.get(md_file_path)
-        if cached_entry:
-            app.logger.info(f"Showing HTML page from cache >>> '{file_page}'")
-
-            for plugin in plugins:
-                if ("process_html" in dir(plugin)):
-                    app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_html >>> {file_page}")
-                    cached_entry = plugin.process_html(cached_entry)
-
-            return render_template(
-                'content.html', title=file_page, folder=folder, info=cached_entry, modif=mod,
-                system=SYSTEM_SETTINGS
-            )
-
         try:
-            app.logger.info(f"Converting to HTML with pandoc >>> '{md_file_path}' ...")
+            md_file_path = safe_join(cfg.wiki_directory, f"{file_page}.md")
+            mod = "Last modified: %s" % time.ctime(os.path.getmtime(md_file_path))
+            folder = file_page.split("/")
+            file_page = folder[-1:][0]
+            folder = folder[:-1]
+            folder = "/".join(folder)
 
-            html = pypandoc.convert_file(md_file_path, "html5",
-                                format='md', extra_args=["--mathjax"], filters=['pandoc-xnos'])
-            
-            html = clean_html(html)
+            cached_entry = cache.get(md_file_path)
+            if cached_entry:
+                app.logger.info(f"Showing HTML page from cache >>> '{file_page}'")
 
-            for plugin in plugins:
-                if ("process_before_cache_html" in dir(plugin)):
-                    app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_before_cache_html >>> {file_page}")
-                    html = plugin.process_before_cache_html(html)
+                for plugin in plugins:
+                    if ("process_html" in dir(plugin)):
+                        app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_html >>> {file_page}")
+                        cached_entry = plugin.process_html(cached_entry)
 
-            cache.set(md_file_path, html)
+                return render_template(
+                    'content.html', title=file_page, folder=folder, info=cached_entry, modif=mod,
+                    system=SYSTEM_SETTINGS
+                )
 
-            for plugin in plugins:
-                if ("process_html" in dir(plugin)):
-                    app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_html >>> {file_page}")
-                    html = plugin.process_html(html)
+            try:
+                app.logger.info(f"Converting to HTML with pandoc >>> '{md_file_path}' ...")
+
+                html = pypandoc.convert_file(md_file_path, "html5",
+                                    format='md', extra_args=["--mathjax"], filters=['pandoc-xnos'])
+                
+                html = clean_html(html)
+
+                for plugin in plugins:
+                    if ("process_before_cache_html" in dir(plugin)):
+                        app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_before_cache_html >>> {file_page}")
+                        html = plugin.process_before_cache_html(html)
+
+                cache.set(md_file_path, html)
+
+                for plugin in plugins:
+                    if ("process_html" in dir(plugin)):
+                        app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_html >>> {file_page}")
+                        html = plugin.process_html(html)
 
 
-            app.logger.info(f"Showing HTML page >>> '{file_page}'")
-        except Exception as a:
-            app.logger.info(a)
+                app.logger.info(f"Showing HTML page >>> '{file_page}'")
+            except Exception as a:
+                app.logger.info(a)
 
-        return render_template('content.html', title=file_page, folder=folder, info=html, modif=mod,
-                               system=SYSTEM_SETTINGS)
+            return render_template('content.html', title=file_page, folder=folder, info=html, modif=mod,
+                                   system=SYSTEM_SETTINGS)
+        except FileNotFoundError as e:
+            app.logger.info(e)
+            return redirect("/add_new")
 
 
 @app.route('/', methods=['GET'])
