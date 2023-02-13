@@ -109,6 +109,8 @@ def fetch_page_name() -> str:
 
 def new_page_name() -> str:
     page_name = request.args.get('path')
+    if page_name == None:
+        page_name = ""
     return page_name
 
 
@@ -230,7 +232,7 @@ def file_page(file_page):
                                    system=SYSTEM_SETTINGS)
         except FileNotFoundError as e:
             app.logger.info(e)
-            return redirect("/add_new")
+            return redirect("/add_new?page=" + file_page)
 
 
 @app.route('/', methods=['GET'])
