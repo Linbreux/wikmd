@@ -107,6 +107,10 @@ def fetch_page_name() -> str:
         page_name = f"{page_name[:-4]}{uuid.uuid4().hex}"
     return page_name
 
+def new_page_name() -> str:
+    page_name = request.args['path']
+    return page_name
+
 
 @app.route('/list/', methods=['GET'])
 def list_full_wiki():
@@ -267,8 +271,9 @@ def add_new():
 
         return redirect(url_for("file_page", file_page=page_name))
     else:
+        page_name = new_page_name()
         return render_template('new.html', upload_path=cfg.images_route,
-                               image_allowed_mime=cfg.image_allowed_mime, system=SYSTEM_SETTINGS)
+                               image_allowed_mime=cfg.image_allowed_mime, title=page_name, system=SYSTEM_SETTINGS)
 
 
 @app.route('/edit/homepage', methods=['POST', 'GET'])
@@ -415,6 +420,10 @@ def toggle_sort():
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'),
                                'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
+@app.errorhandler(404)
+def not_found(e):
+    return redirect("/add_new")
 
 def setup_search():
     search = Search(cfg.search_dir, create=True)
