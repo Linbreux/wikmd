@@ -2,19 +2,22 @@ menu:
 - item: Home
   link: /
 
-- item: A menu is great
+- item: Installation
   link: /
 
-- item: Nested
+- item: How to use the wiki
   sub:
-  - item: nest1
+  - item: Plugins
     link: /
     sub:
-    - item: testing
-    - item: woops
-  - item: nest2
+    - item: Drawio
+      link: /
+    - item: Alerts
+      link: /
+
+  - item: Latex/Pandoc
     link: /
 
-- item: normal
-  link: /
+- item: Nice projects
+  link: http://github.com/linbreux/wikmd
   

@@ -158,3 +158,15 @@ body {
 .bg-dark {
     color: var(--txt-dark)
 }
+
+.nested::before {
+    content: "- ";
+}
+.nested.collapsed::before {
+    content: "+ ";
+}
+
+.no-bullets{
+    list-style-type: none;
+    background-color: gray;
+}

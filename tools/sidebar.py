@@ -9,20 +9,22 @@ class Sidebar():
 
     def recursive(self, yaml_object):
         for item in yaml_object:
+            # needs to be cleaned...
             self.html += "<li class=\"nav-item with-indicator\">\n"
-            self.html += """<a class="nav-link text-light d-none d-md-block\""""
+            self.html += """<a class="nav-link text-light d-none d-md-block"""
             if "sub" in item:
-                self.html += """
+                # Add class for nested link
+                self.html += """ collapsed nested\"
                 data-bs-toggle="collapse" 
-                href="#"""+ item["item"] + """\" role="button" aria-expanded="false"
-                aria-controls=\"""" + item["item"] + "\""
+                href="#"""+ item["item"].replace(" ", "_") + """\" role="button" aria-expanded="false"
+                aria-controls=\"""" + item["item"].replace(" ", "_") + "\""
             elif "link" in item:
-                self.html += "href=\"" + item["link"] + "\""
+                self.html += "\" href=\"" + item["link"] + "\""
 
             self.html += ">"
             self.html += item["item"] + "</a>"
             if "sub" in item:
-                self.html += """<ul class="collapse" id=\"""" + item["item"] +"""\">\n"""
+                self.html += """<ul class="collapse no-bullets" id=\"""" + item["item"].replace(" ", "_") +"""\">\n"""
                 self.recursive(item["sub"])
                 self.html += "</ul>\n"
             self.html += "</li>\n"

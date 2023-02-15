@@ -8,19 +8,12 @@
     </script>
 {% endblock %}
 
-{% block content %}
-<div class="container-fluid row flex-nowrap">
-    <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0">
-        <ul>
-            <li>
-                Home
-            </li>
-            <li>
-                next
-            </li>
-        </ul>
+{%block content%}
+<div class="container-fluid row">
+    <div class="col-2 px-0 bg-dark">
+        {% include "leftsidebar.html" %}
     </div>
-    <div class="col">
+    <div class="col mt-3 mx-3">
     <h1 class="title">{% if folder %}
         <a class="folder" style="{% if system.darktheme %} color:whitesmoke {% else %} color:#222326 {% endif %}"
            href="/list/{{ folder }}">{{ folder }}</a>/
