@@ -83,7 +83,7 @@ class Search:
         writer = AsyncWriter(self._index)
         for path, title, relpath in files:
             fpath = os.path.join(wiki_directory, relpath, path)
-            with open(fpath) as f:
+            with open(fpath, encoding="utf8") as f:
                 content = f.read()
             content = self.textify(content)
             writer.add_document(
@@ -126,7 +126,7 @@ class Watchdog(FileSystemEventHandler):
         base_path, filename = os.path.split(file_path)
         rel_path = self.rel_path(base_path)
         title, _ = os.path.splitext(filename)
-        with open(file_path) as f:
+        with open(file_path, encoding="utf8") as f:
             content = f.read()
         self.search.index(rel_path, filename, title, content)
 
