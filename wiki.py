@@ -22,7 +22,9 @@ from plugins.load_plugins import PluginLoader
 SESSIONS = []
 
 cfg = WikmdConfig()
-UPLOAD_FOLDER = os.path.join(cfg.wiki_directory, cfg.images_route)
+
+UPLOAD_FOLDER = os.path.normpath(os.path.join(cfg.wiki_directory, cfg.images_route))  # normalized for win
+GIT_FOLDER = os.path.normpath(os.path.join(cfg.wiki_directory, '.git'))
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -34,12 +36,14 @@ app.logger.setLevel(logging.INFO)
 logger = logging.getLogger('werkzeug')
 logger.setLevel(logging.ERROR)
 
-wrm = WikiRepoManager(flask_app=app)
-
 web_deps = get_web_deps(cfg.local_mode, app.logger)
 
 # plugins
 plugins = PluginLoader(flask_app=app, config=cfg, plugins=cfg.plugins, web_deps=web_deps).get_plugins()
+
+wrm = WikiRepoManager(flask_app=app)
+cache = Cache(cfg.cache_dir)
+im = ImageManager(app, cfg)
 
 SYSTEM_SETTINGS = {
     "darktheme": False,
@@ -47,10 +51,6 @@ SYSTEM_SETTINGS = {
     "web_deps": web_deps,
     "plugins": plugins
 }
-
-cache = Cache(cfg.cache_dir)
-
-im = ImageManager(app, cfg)
 
 
 def save(page_name):
@@ -112,52 +112,50 @@ def list_full_wiki():
 
 @app.route('/list/<path:folderpath>/', methods=['GET'])
 def list_wiki(folderpath):
-    folder_list = []
+    """
+    Lists all the pages in a given folder of the wiki.
+    """
+    files_list = []
+
     requested_path = safe_join(cfg.wiki_directory, folderpath)
     if requested_path is None:
-        app.logger.info("Requesting unsafe path >> showing homepage")
+        app.logger.info("Requested unsafe path >>> showing homepage")
         return index()
     app.logger.info("Showing >>> 'all files'")
-    for root, subfolder, files in os.walk(requested_path):
-        if root[-1] == '/':
-            root = root[:-1]
-        for item in files:
-            path = os.path.join(root, item)
-            mtime = os.path.getmtime(os.path.join(root, item))
-            if (
-                root.startswith(os.path.join(cfg.wiki_directory, '.git')) or
-                root.startswith(os.path.join(cfg.wiki_directory, cfg.images_route))
-            ):
-                continue
 
-            folder = root[len(cfg.wiki_directory + "/"):]
-            if folder in cfg.hide_folder_in_wiki:
-                continue
+    for root, _, files in os.walk(requested_path):
+        root = os.path.normpath(root)  # needed to work also with win (replaces "/" with "\")
 
-            if folder == "":
-                if item == cfg.homepage:
-                    continue
-                url = os.path.splitext(
-                    root[len(cfg.wiki_directory + "/"):] + "/" + item)[0]
-            else:
-                url = "/" + \
-                    os.path.splitext(
-                        root[len(cfg.wiki_directory + "/"):] + "/" + item)[0]
+        # Skip the image folder, the .git folder and the folders hidden in the config
+        if not root.startswith(tuple([UPLOAD_FOLDER, GIT_FOLDER] + cfg.hide_folder_in_wiki)):
+            for file_name in files:
+                file_path = os.path.join(root, file_name)
+                mtime = os.path.getmtime(file_path)
 
-            info = {'doc': item,
+                folder = root[len(cfg.wiki_directory + "/"):].replace("\\", "/")  # from win "\" to standard "/"
+
+                url = ""
+                if file_name != cfg.homepage:
+                    url = os.path.splitext(folder + "/" + file_name)[0]
+                if folder != "":
+                    url = "/" + url
+
+                info = {
+                    'doc': file_name,
                     'url': url,
                     'folder': folder,
                     'folder_url': folder,
                     'mtime': mtime,
-                    }
-            folder_list.append(info)
+                }
+                files_list.append(info)
 
+    # Sorting
     if SYSTEM_SETTINGS['listsortMTime']:
-        folder_list.sort(key=lambda x: x["mtime"], reverse=True)
+        files_list.sort(key=lambda x: x["mtime"], reverse=True)
     else:
-        folder_list.sort(key=lambda x: (str(x["url"]).casefold()))
+        files_list.sort(key=lambda x: (str(x["url"]).casefold()))
 
-    return render_template('list_files.html', list=folder_list, folder=folderpath, system=SYSTEM_SETTINGS)
+    return render_template('list_files.html', list=files_list, folder=folderpath, system=SYSTEM_SETTINGS)
 
 
 @app.route('/<path:file_page>', methods=['GET'])
