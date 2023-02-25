@@ -5,7 +5,7 @@ Jinja2==2.11.3
 Markdown==3.3.3
 MarkupSafe==1.1.1
 PyYAML==6.0
-Werkzeug==1.0.1
+Werkzeug==2.2.3
 Whoosh==2.7.4
 beautifulsoup4==4.11.1
 click==7.1.2
@@ -22,7 +22,7 @@ psutil==5.7.3
 pypandoc==1.10
 requests==2.27.1
 smmap==3.0.4
-Werkzeug==1.0.1
+Werkzeug==2.2.3
 idna==3.3
 lxml==4.9.2
 Whoosh==2.7.4
