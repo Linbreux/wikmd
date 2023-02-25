@@ -1,7 +1,4 @@
 import os
-from shutil import ExecError
-import shutil
-import platform
 import time
 import logging
 import uuid
@@ -9,7 +6,6 @@ from lxml.html.clean import clean_html
 import pypandoc
 import knowledge_graph
 import secrets
-import re
 
 from flask import Flask, render_template, request, redirect, url_for, make_response, safe_join, send_file, send_from_directory
 from threading import Thread
@@ -56,6 +52,7 @@ cache = Cache(cfg.cache_dir)
 
 im = ImageManager(app, cfg)
 
+
 def save(page_name):
     """
     Function that saves a *.md page.
@@ -64,7 +61,7 @@ def save(page_name):
     content = request.form['CT']
 
     for plugin in plugins:
-        if ("process_md" in dir(plugin)):
+        if "process_md" in dir(plugin):
             app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_md >>> {page_name}")
             content = plugin.process_md(content)
 
@@ -106,6 +103,7 @@ def fetch_page_name() -> str:
     if page_name[-4:] == "{id}":
         page_name = f"{page_name[:-4]}{uuid.uuid4().hex}"
     return page_name
+
 
 @app.route('/list/', methods=['GET'])
 def list_full_wiki():
@@ -276,6 +274,7 @@ def add_new():
         return render_template('new.html', upload_path=cfg.images_route,
                                image_allowed_mime=cfg.image_allowed_mime, title=page_name, system=SYSTEM_SETTINGS)
 
+
 @app.route('/edit/homepage', methods=['POST', 'GET'])
 def edit_homepage():
     if bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS):
@@ -348,13 +347,14 @@ def upload_file():
         im.delete_image(file_name)
         return 'OK'
 
+
 @app.route("/plug_com", methods=['POST'])
 def communicate_plugins():
     if bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS):
         return login()
     if request.method == "POST":
         for plugin in plugins:
-            if ("communicate_plugin" in dir(plugin)):
+            if "communicate_plugin" in dir(plugin):
                 return plugin.communicate_plugin(request)
     return "nothing to do"
 
@@ -375,7 +375,7 @@ def login(page):
             app.logger.info("User successfully logged in")
             resp = make_response(redirect(page))
             session = secrets.token_urlsafe(1024 // 8)
-            resp.set_cookie("session_wikmd",session)
+            resp.set_cookie("session_wikmd", session)
             SESSIONS.append(session)
             return resp
         else:
@@ -416,10 +416,12 @@ def toggle_sort():
     SYSTEM_SETTINGS['listsortMTime'] = not SYSTEM_SETTINGS['listsortMTime']
     return redirect("/list")
 
+
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'),
                                'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
 
 def setup_search():
     search = Search(cfg.search_dir, create=True)
