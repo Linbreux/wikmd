@@ -53,18 +53,32 @@ SYSTEM_SETTINGS = {
 }
 
 
-def save(page_name):
+def process(content: str, page_name: str):
     """
-    Function that saves a *.md page.
+    Function that processes the content with the plugins.
+    It also manages CRLF to LF conversion.
+    :param content: content
     :param page_name: name of the page
+    :return processed content
     """
-    content = request.form['CT']
+    # Convert Win line ending (CRLF) to standard Unix (LF)
+    processed = content.replace("\r\n", "\n")
 
+    # Process the content with the plugins
     for plugin in plugins:
         if "process_md" in dir(plugin):
             app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_md >>> {page_name}")
-            content = plugin.process_md(content)
+            processed = plugin.process_md(processed)
 
+    return processed
+
+
+def save(page_name):
+    """
+    Function that processes and saves a *.md page.
+    :param page_name: name of the page
+    """
+    content = process(request.form['CT'], page_name)
     app.logger.info(f"Saving >>> '{page_name}' ...")
 
     try:
@@ -72,7 +86,7 @@ def save(page_name):
         dirname = os.path.dirname(filename)
         if not os.path.exists(dirname):
             os.makedirs(dirname)
-        with open(filename, 'w') as f:
+        with open(filename, 'w', encoding="utf-8") as f:
             f.write(content)
     except Exception as e:
         app.logger.error(f"Error while saving '{page_name}' >>> {str(e)}")
@@ -183,7 +197,7 @@ def file_page(file_page):
                 app.logger.info(f"Showing HTML page from cache >>> '{file_page}'")
 
                 for plugin in plugins:
-                    if ("process_html" in dir(plugin)):
+                    if "process_html" in dir(plugin):
                         app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_html >>> {file_page}")
                         cached_entry = plugin.process_html(cached_entry)
 
@@ -201,17 +215,16 @@ def file_page(file_page):
                 html = clean_html(html)
 
                 for plugin in plugins:
-                    if ("process_before_cache_html" in dir(plugin)):
+                    if "process_before_cache_html" in dir(plugin):
                         app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_before_cache_html >>> {file_page}")
                         html = plugin.process_before_cache_html(html)
 
                 cache.set(md_file_path, html)
 
                 for plugin in plugins:
-                    if ("process_html" in dir(plugin)):
+                    if "process_html" in dir(plugin):
                         app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_html >>> {file_page}")
                         html = plugin.process_html(html)
-
 
                 app.logger.info(f"Showing HTML page >>> '{file_page}'")
             except Exception as a:
@@ -267,7 +280,7 @@ def add_new():
         return redirect(url_for("file_page", file_page=page_name))
     else:
         page_name = request.args.get("page")
-        if page_name == None:
+        if page_name is None:
             page_name = ""
         return render_template('new.html', upload_path=cfg.images_route,
                                image_allowed_mime=cfg.image_allowed_mime, title=page_name, system=SYSTEM_SETTINGS)
