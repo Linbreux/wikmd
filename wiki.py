@@ -200,7 +200,7 @@ def file_page(file_page):
                 app.logger.info(f"Converting to HTML with pandoc >>> '{md_file_path}' ...")
 
                 html = pypandoc.convert_file(md_file_path, "html5",
-                                    format='md', extra_args=["--mathjax"], filters=['pandoc-xnos'])
+                                    format='gfm', extra_args=["--mathjax"], filters=['pandoc-xnos'])
                 
                 html = clean_html(html)
 
@@ -247,7 +247,7 @@ def index():
         try:
             app.logger.info("Converting to HTML with pandoc >>> 'homepage' ...")
             html = pypandoc.convert_file(
-                md_file_path, "html5", format='md', extra_args=["--mathjax"],
+                md_file_path, "html5", format='gfm', extra_args=["--mathjax"],
                 filters=['pandoc-xnos'])
             html = clean_html(html)
             cache.set(md_file_path, html)
