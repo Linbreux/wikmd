@@ -28,7 +28,7 @@ jobs:
         python -m pytest -v 
         
     - name: Start wikmd
-      run: python wiki.py
+      run: python wiki.py &
     
     - name: screenshots-ci-action
       uses: flameddd/screenshots-ci-action@master
