@@ -120,39 +120,39 @@ def list_wiki(folderpath):
         app.logger.info("Requesting unsafe path >> showing homepage")
         return index()
     app.logger.info("Showing >>> 'all files'")
-    for root, subfolder, files in os.walk(requested_path):
-        if root[-1] == '/':
-            root = root[:-1]
-        for item in files:
-            path = os.path.join(root, item)
-            mtime = os.path.getmtime(os.path.join(root, item))
-            if (
-                root.startswith(os.path.join(cfg.wiki_directory, '.git')) or
-                root.startswith(os.path.join(cfg.wiki_directory, cfg.images_route))
-            ):
+    for item in os.listdir(requested_path):
+        path = os.path.join(requested_path, item)
+        mtime = os.path.getmtime(os.path.join(requested_path, item))
+        if (
+            path.startswith(os.path.join(cfg.wiki_directory, '.git')) or
+            path.startswith(os.path.join(cfg.wiki_directory, cfg.images_route))
+        ):
+            continue
+        folder = ""
+        if os.path.isdir(os.path.join(requested_path,item)):
+            folder = os.path.join(requested_path,item)[len(cfg.wiki_directory + "/"):]
+
+        if folder in cfg.hide_folder_in_wiki:
+            continue
+
+        if folder == "":
+            if item == cfg.homepage:
                 continue
+            url = os.path.splitext(
+                    os.path.join(requested_path[len(cfg.wiki_directory + "/"):], item))[0]
+        else:
+            url = \
+                os.path.splitext(
+                    os.path.join(requested_path[len(cfg.wiki_directory + "/"):], item))[0]
+                    
 
-            folder = root[len(cfg.wiki_directory + "/"):]
-            if folder in cfg.hide_folder_in_wiki:
-                continue
-
-            if folder == "":
-                if item == cfg.homepage:
-                    continue
-                url = os.path.splitext(
-                    root[len(cfg.wiki_directory + "/"):] + "/" + item)[0]
-            else:
-                url = "/" + \
-                    os.path.splitext(
-                        root[len(cfg.wiki_directory + "/"):] + "/" + item)[0]
-
-            info = {'doc': item,
-                    'url': url,
-                    'folder': folder,
-                    'folder_url': folder,
-                    'mtime': mtime,
-                    }
-            folder_list.append(info)
+        info = {'doc': item,
+                'url': url,
+                'folder': folder,
+                'folder_url': folder,
+                'mtime': mtime,
+                }
+        folder_list.append(info)
 
     if SYSTEM_SETTINGS['listsortMTime']:
         folder_list.sort(key=lambda x: x["mtime"], reverse=True)

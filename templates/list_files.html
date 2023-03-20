@@ -41,9 +41,9 @@
         {% for i in list %}
             <li>
                 {% if i.folder != "" and i.folder != folder %}
-                    <b><a class="folder" href="/list/{{ i.folder }}">{{ i.folder }}/ </a></b><a href="{{ i.url }}">{{ i.doc }}</a>
+                    <b><a class="folder" href="/list/{{ i.folder }}/">{{ i.folder }}/ </a></b>
                 {% else %}
-                    <a href="{{ i.url }}">{{ i.doc }}</a>
+                    <a href="/{{ i.url }}">{{ i.doc }}</a>
                 {% endif %}
             </li>
         {% endfor %}
