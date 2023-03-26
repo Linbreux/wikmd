@@ -5,6 +5,7 @@ if [ ! -f "/var/log/wikmd.log" ]
 then
   touch /var/log/wikmd.log
   chown abc:abc /var/log/wikmd.log
+  chmod 666 /var/log/wikmd.log
 fi
 
 # if /wiki isn't mounted create it
