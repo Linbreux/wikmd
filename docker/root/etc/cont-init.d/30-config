@@ -27,3 +27,4 @@ then
 fi
 
 chown -R abc:abc /app/wikmd/plugins
+chmod -R 666 /app/wikmd/plugins
