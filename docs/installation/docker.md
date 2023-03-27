@@ -20,7 +20,7 @@ Here are some example snippets to help you get started creating a container.
 Build the image,
 
 ```bash
-docker build -t linbreux/wikmd:latest .
+docker build -t linbreux/wikmd:latest -f docker/Dockerfile .
 ```
 
 ### docker-compose (recommended, [click here for more info](https://docs.linuxserver.io/general/docker-compose))
@@ -30,6 +30,9 @@ docker build -t linbreux/wikmd:latest .
 version: "2.1"
 services:
   wikmd:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
     image: linbreux/wikmd:latest
     container_name: wikmd
     environment:
