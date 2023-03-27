@@ -16,7 +16,7 @@
 
 {% block toolbar %}
             <li class="nav-item">
-                <button id="save-button" class="btn btn-success mb-2">Save</button>
+                <button type="submit" form="form" class="btn btn-success mb-2">Save</button>
             </li>
 {% endblock %}
 
@@ -92,14 +92,5 @@
             }
         });
 
-    </script>
-    <script>
-        window.addEventListener("DOMContentLoaded", function () {
-            var form = document.getElementById("form");
-
-            document.getElementById("save-button").addEventListener("click", function () {
-                form.submit();
-            });
-        });
     </script>
 {% endblock %}
