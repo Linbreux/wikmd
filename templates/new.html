@@ -14,6 +14,12 @@
 
 {%endblock%}
 
+{% block toolbar %}
+            <li class="nav-item">
+                <button type="submit" form="form" class="btn btn-success mb-2">Save</button>
+            </li>
+{% endblock %}
+
 
 {% block content %}
 
@@ -29,7 +35,6 @@
         </div>
         <input type="file" multiple>
         <p id="messages"></p>
-        <button type="submit" class="btn btn-success mb-2">Save</button>
     </form>
 
     <script type="text/javascript" src="{{ system.web_deps["codemirror.min.js"] }}"></script>
