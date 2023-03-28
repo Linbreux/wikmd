@@ -7,19 +7,26 @@ nav_order: 2
 
 # wikmd Docker image
 
-[wikmd](https://github.com/Linbreux/wikmd) is a file based wiki that uses markdown.
+[wikmd](https://github.com/Linbreux/wikmd) is a file based wiki that uses Markdown.
 
 This repo provides Docker files that are loosely based on those of the [linuxserver](https://www.linuxserver.io/) community.
 
-Docker files are available for arm, arm64 and amd64.
+Docker files are available for various architectures, including arm (`Dockerfile.armhf`), arm64 (`Dockerfile.aarch64`), and amd64 (`Dockerfile`).
 
 ## Usage
 
 Here are some example snippets to help you get started creating a container.
 
-Build the image,
+Pull down [the latest image from Docker Hub](https://hub.docker.com/r/linbreux/wikmd):
 
 ```bash
+docker pull linbreux/wikmd
+```
+
+Or, build the image after cloning the source code itself:
+
+```bash
+git clone https://github.com/linbreux/wikmd.git && cd wikmd
 docker build -t linbreux/wikmd:latest -f docker/Dockerfile .
 ```
 
