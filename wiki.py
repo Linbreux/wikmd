@@ -1,4 +1,7 @@
 import os
+from shutil import ExecError
+import shutil
+import platform
 import time
 import logging
 import uuid
@@ -6,6 +9,7 @@ from lxml.html.clean import clean_html
 import pypandoc
 import knowledge_graph
 import secrets
+import re
 
 from flask import Flask, render_template, request, redirect, url_for, make_response, safe_join, send_file, send_from_directory
 from threading import Thread
@@ -22,9 +26,7 @@ from plugins.load_plugins import PluginLoader
 SESSIONS = []
 
 cfg = WikmdConfig()
-
-UPLOAD_FOLDER = os.path.normpath(os.path.join(cfg.wiki_directory, cfg.images_route))  # normalized for win
-GIT_FOLDER = os.path.normpath(os.path.join(cfg.wiki_directory, '.git'))
+UPLOAD_FOLDER = os.path.join(cfg.wiki_directory, cfg.images_route)
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -36,14 +38,12 @@ app.logger.setLevel(logging.INFO)
 logger = logging.getLogger('werkzeug')
 logger.setLevel(logging.ERROR)
 
+wrm = WikiRepoManager(flask_app=app)
+
 web_deps = get_web_deps(cfg.local_mode, app.logger)
 
 # plugins
 plugins = PluginLoader(flask_app=app, config=cfg, plugins=cfg.plugins, web_deps=web_deps).get_plugins()
-
-wrm = WikiRepoManager(flask_app=app)
-cache = Cache(cfg.cache_dir)
-im = ImageManager(app, cfg)
 
 SYSTEM_SETTINGS = {
     "darktheme": False,
@@ -52,33 +52,22 @@ SYSTEM_SETTINGS = {
     "plugins": plugins
 }
 
+cache = Cache(cfg.cache_dir)
 
-def process(content: str, page_name: str):
-    """
-    Function that processes the content with the plugins.
-    It also manages CRLF to LF conversion.
-    :param content: content
-    :param page_name: name of the page
-    :return processed content
-    """
-    # Convert Win line ending (CRLF) to standard Unix (LF)
-    processed = content.replace("\r\n", "\n")
-
-    # Process the content with the plugins
-    for plugin in plugins:
-        if "process_md" in dir(plugin):
-            app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_md >>> {page_name}")
-            processed = plugin.process_md(processed)
-
-    return processed
-
+im = ImageManager(app, cfg)
 
 def save(page_name):
     """
-    Function that processes and saves a *.md page.
+    Function that saves a *.md page.
     :param page_name: name of the page
     """
-    content = process(request.form['CT'], page_name)
+    content = request.form['CT']
+
+    for plugin in plugins:
+        if ("process_md" in dir(plugin)):
+            app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_md >>> {page_name}")
+            content = plugin.process_md(content)
+
     app.logger.info(f"Saving >>> '{page_name}' ...")
 
     try:
@@ -86,7 +75,7 @@ def save(page_name):
         dirname = os.path.dirname(filename)
         if not os.path.exists(dirname):
             os.makedirs(dirname)
-        with open(filename, 'w', encoding="utf-8") as f:
+        with open(filename, 'w') as f:
             f.write(content)
     except Exception as e:
         app.logger.error(f"Error while saving '{page_name}' >>> {str(e)}")
@@ -118,7 +107,6 @@ def fetch_page_name() -> str:
         page_name = f"{page_name[:-4]}{uuid.uuid4().hex}"
     return page_name
 
-
 @app.route('/list/', methods=['GET'])
 def list_full_wiki():
     return list_wiki("")
@@ -126,50 +114,52 @@ def list_full_wiki():
 
 @app.route('/list/<path:folderpath>/', methods=['GET'])
 def list_wiki(folderpath):
-    """
-    Lists all the pages in a given folder of the wiki.
-    """
-    files_list = []
-
+    folder_list = []
     requested_path = safe_join(cfg.wiki_directory, folderpath)
     if requested_path is None:
-        app.logger.info("Requested unsafe path >>> showing homepage")
+        app.logger.info("Requesting unsafe path >> showing homepage")
         return index()
     app.logger.info("Showing >>> 'all files'")
+    for item in os.listdir(requested_path):
+        path = os.path.join(requested_path, item)
+        mtime = os.path.getmtime(os.path.join(requested_path, item))
+        if (
+            path.startswith(os.path.join(cfg.wiki_directory, '.git')) or
+            path.startswith(os.path.join(cfg.wiki_directory, cfg.images_route))
+        ):
+            continue
+        folder = ""
+        if os.path.isdir(os.path.join(requested_path,item)):
+            folder = os.path.join(requested_path,item)[len(cfg.wiki_directory + "/"):]
 
-    for root, _, files in os.walk(requested_path):
-        root = os.path.normpath(root)  # needed to work also with win (replaces "/" with "\")
+        if folder in cfg.hide_folder_in_wiki:
+            continue
 
-        # Skip the image folder, the .git folder and the folders hidden in the config
-        if not root.startswith(tuple([UPLOAD_FOLDER, GIT_FOLDER] + cfg.hide_folder_in_wiki)):
-            for file_name in files:
-                file_path = os.path.join(root, file_name)
-                mtime = os.path.getmtime(file_path)
+        if folder == "":
+            if item == cfg.homepage:
+                continue
+            url = os.path.splitext(
+                    os.path.join(requested_path[len(cfg.wiki_directory + "/"):], item))[0]
+        else:
+            url = \
+                os.path.splitext(
+                    os.path.join(requested_path[len(cfg.wiki_directory + "/"):], item))[0]
+                    
 
-                folder = root[len(cfg.wiki_directory + "/"):].replace("\\", "/")  # from win "\" to standard "/"
-
-                url = ""
-                if file_name != cfg.homepage:
-                    url = os.path.splitext(folder + "/" + file_name)[0]
-                if folder != "":
-                    url = "/" + url
-
-                info = {
-                    'doc': file_name,
-                    'url': url,
-                    'folder': folder,
-                    'folder_url': folder,
-                    'mtime': mtime,
+        info = {'doc': item,
+                'url': url,
+                'folder': folder,
+                'folder_url': folder,
+                'mtime': mtime,
                 }
-                files_list.append(info)
+        folder_list.append(info)
 
-    # Sorting
     if SYSTEM_SETTINGS['listsortMTime']:
-        files_list.sort(key=lambda x: x["mtime"], reverse=True)
+        folder_list.sort(key=lambda x: x["mtime"], reverse=True)
     else:
-        files_list.sort(key=lambda x: (str(x["url"]).casefold()))
+        folder_list.sort(key=lambda x: (str(x["url"]).casefold()))
 
-    return render_template('list_files.html', list=files_list, folder=folderpath, system=SYSTEM_SETTINGS)
+    return render_template('list_files.html', list=folder_list, folder=folderpath, system=SYSTEM_SETTINGS)
 
 
 @app.route('/<path:file_page>', methods=['GET'])
@@ -197,7 +187,7 @@ def file_page(file_page):
                 app.logger.info(f"Showing HTML page from cache >>> '{file_page}'")
 
                 for plugin in plugins:
-                    if "process_html" in dir(plugin):
+                    if ("process_html" in dir(plugin)):
                         app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_html >>> {file_page}")
                         cached_entry = plugin.process_html(cached_entry)
 
@@ -215,16 +205,17 @@ def file_page(file_page):
                 html = clean_html(html)
 
                 for plugin in plugins:
-                    if "process_before_cache_html" in dir(plugin):
+                    if ("process_before_cache_html" in dir(plugin)):
                         app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_before_cache_html >>> {file_page}")
                         html = plugin.process_before_cache_html(html)
 
                 cache.set(md_file_path, html)
 
                 for plugin in plugins:
-                    if "process_html" in dir(plugin):
+                    if ("process_html" in dir(plugin)):
                         app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_html >>> {file_page}")
                         html = plugin.process_html(html)
+
 
                 app.logger.info(f"Showing HTML page >>> '{file_page}'")
             except Exception as a:
@@ -280,11 +271,10 @@ def add_new():
         return redirect(url_for("file_page", file_page=page_name))
     else:
         page_name = request.args.get("page")
-        if page_name is None:
+        if page_name == None:
             page_name = ""
         return render_template('new.html', upload_path=cfg.images_route,
                                image_allowed_mime=cfg.image_allowed_mime, title=page_name, system=SYSTEM_SETTINGS)
-
 
 @app.route('/edit/homepage', methods=['POST', 'GET'])
 def edit_homepage():
@@ -358,14 +348,13 @@ def upload_file():
         im.delete_image(file_name)
         return 'OK'
 
-
 @app.route("/plug_com", methods=['POST'])
 def communicate_plugins():
     if bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS):
         return login()
     if request.method == "POST":
         for plugin in plugins:
-            if "communicate_plugin" in dir(plugin):
+            if ("communicate_plugin" in dir(plugin)):
                 return plugin.communicate_plugin(request)
     return "nothing to do"
 
@@ -386,7 +375,7 @@ def login(page):
             app.logger.info("User successfully logged in")
             resp = make_response(redirect(page))
             session = secrets.token_urlsafe(1024 // 8)
-            resp.set_cookie("session_wikmd", session)
+            resp.set_cookie("session_wikmd",session)
             SESSIONS.append(session)
             return resp
         else:
@@ -427,12 +416,10 @@ def toggle_sort():
     SYSTEM_SETTINGS['listsortMTime'] = not SYSTEM_SETTINGS['listsortMTime']
     return redirect("/list")
 
-
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'),
                                'favicon.ico', mimetype='image/vnd.microsoft.icon')
-
 
 def setup_search():
     search = Search(cfg.search_dir, create=True)
