@@ -37,9 +37,6 @@ docker build -t linbreux/wikmd:latest -f docker/Dockerfile .
 version: "2.1"
 services:
   wikmd:
-    build:
-      context: .
-      dockerfile: docker/Dockerfile
     image: linbreux/wikmd:latest
     container_name: wikmd
     environment:
