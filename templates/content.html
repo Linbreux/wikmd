@@ -8,7 +8,6 @@
 {% endblock %}
 
 {% block toolbar %}
-            <li class="nav-item">
                 <a class="nav-link" style="float:right; padding-right:10px" href="/edit/{% if folder %}{{ folder }}/{% endif %}{{ title }}">
                     <button class="btn btn-primary my-2 my-sm-0" type="submit">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
@@ -18,9 +17,7 @@
                         Edit
                     </button>
                 </a>
-            </li>
             <div class="collapse navbar-collapse" id="deleteButton">
-                <li class="nav-item">
                     <a class="nav-link" style="float:right; padding-right:10px" data-bs-target="#removeModal" data-bs-toggle="modal" href="#removeModal">
                         <button class="btn btn-danger my-2 my-sm-0" type="submit">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
@@ -30,7 +27,6 @@
                             Delete
                         </button>
                     </a>
-                </li>
             </div>
 {% endblock %}
 

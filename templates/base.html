@@ -58,9 +58,8 @@
                 </ul>
             </div>
 
-            <ul class="navbar-nav mx-lg-2">
+            <div class="container">
             <!-- New button -->
-            <li class="nav-item">
                 <a class="nav-link" href="/add_new">
                     <button class="btn btn-success" type="button">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-plus" viewBox="0 0 16 16">
@@ -70,11 +69,9 @@
                         New
                     </button>
                 </a>
-            </li>
-
-            <!-- Context related buttons -->
-            {% block toolbar %}{% endblock %}
-            </ul>
+                <!-- Context related buttons -->
+                {% block toolbar %}{% endblock %}
+            </div>
             <div class="collapse navbar-collapse" id="toolbarButtons">
 
                 <ul class="navbar-nav ms-auto my-lg-0">
