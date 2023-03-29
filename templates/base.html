@@ -39,13 +39,31 @@
         <div class="container-fluid mx-2">
             <a class="navbar-brand" href="/">Wiki</a>
             <!-- Context related buttons -->
-            {% block toolbar %}{% endblock %}
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+            <div class="collapse navbar-collapse" id="searchBar">
+                <ul class="navbar-nav ms-auto my-lg-0">
+                    <!-- Search toolbar -->
+                    <li class="nav-item">
+                        <form class="d-flex my-sm-4 my-lg-0 ms-lg-4" method="GET" action="/">
+                            <input class="form-control me-2" type="search" placeholder="Search something..." aria-label="Search" name="q">
+                            <button class="btn btn-primary me-2" type="submit">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search">
+                                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"></path>
+                                </svg>
+                            </button>
+                        </form>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/list">List all pages</a>
+                    </li>
+                </ul>
+            </div>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#searchBar,#toolbarButtons"
                     aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            {% block toolbar %}{% endblock %}
+            <div class="collapse navbar-collapse" id="toolbarButtons">
                 <ul class="navbar-nav mx-lg-2">
                     <!-- New button -->
                     <li class="nav-item">
@@ -63,20 +81,6 @@
 
 
                 <ul class="navbar-nav ms-auto my-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/list">List all pages</a>
-                    </li>
-                    <!-- Search toolbar -->
-                    <li class="nav-item">
-                        <form class="d-flex my-sm-4 my-lg-0 ms-lg-4" method="GET" action="/">
-                            <input class="form-control me-2" type="search" placeholder="Search something..." aria-label="Search" name="q">
-                            <button class="btn btn-primary me-2" type="submit">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search">
-                                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"></path>
-                                </svg>
-                            </button>
-                        </form>
-                    </li>
                     <!-- Graph and toggle dark mode -->
                     <li class="nav-item">
                         <a class="nav-link" href="/knowledge-graph">
