@@ -19,15 +19,20 @@ from search import Search, Watchdog
 from web_dependencies import get_web_deps
 from plugins.load_plugins import PluginLoader
 
+from utils import pathify
+
 SESSIONS = []
 
 cfg = WikmdConfig()
 
-UPLOAD_FOLDER = os.path.normpath(os.path.join(cfg.wiki_directory, cfg.images_route))  # normalized for win
-GIT_FOLDER = os.path.normpath(os.path.join(cfg.wiki_directory, '.git'))
+UPLOAD_FOLDER_PATH = pathify(cfg.wiki_directory, cfg.images_route)
+GIT_FOLDER_PATH = pathify(cfg.wiki_directory, '.git')
+HIDDEN_FOLDER_PATH_LIST = [pathify(cfg.wiki_directory, hidden_folder) for hidden_folder in cfg.hide_folder_in_wiki]
+HOMEPAGE_PATH = pathify(cfg.wiki_directory, cfg.homepage)
+HIDDEN_PATHS = tuple([UPLOAD_FOLDER_PATH, GIT_FOLDER_PATH, HOMEPAGE_PATH] + HIDDEN_FOLDER_PATH_LIST)
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER_PATH
 
 # console logger
 app.logger.setLevel(logging.INFO)
@@ -135,35 +140,25 @@ def list_wiki(folderpath):
     if requested_path is None:
         app.logger.info("Requested unsafe path >>> showing homepage")
         return index()
-    app.logger.info("Showing >>> 'all files'")
+    app.logger.info(f"Showing >>> all files in {folderpath}")
 
-    for root, _, files in os.walk(requested_path):
-        root = os.path.normpath(root)  # needed to work also with win (replaces "/" with "\")
+    for item in os.listdir(requested_path):
+        item_path = pathify(requested_path, item)  # wiki/dir1/dir2/...
+        item_mtime = os.path.getmtime(item_path)
 
-        # Skip the image folder, the .git folder and the folders hidden in the config
-        if not root.startswith(tuple([UPLOAD_FOLDER, GIT_FOLDER] + cfg.hide_folder_in_wiki)):
+        if not item_path.startswith(HIDDEN_PATHS):  # skip hidden paths
+            rel_item_path = item_path[len(cfg.wiki_directory + "/"):]  # dir1/dir2/...
+            item_url = os.path.splitext(rel_item_path)[0]  # eventually drop the extension
+            folder = rel_item_path if os.path.isdir(item_path) else ""
 
-            for file_name in files:
-
-                if file_name != cfg.homepage:  # skip the homepage.md
-
-                    file_path = os.path.join(root, file_name)
-                    mtime = os.path.getmtime(file_path)
-
-                    folder = root[len(cfg.wiki_directory + "/"):].replace("\\", "/")  # from win "\" to standard "/"
-                    url = os.path.splitext(os.path.join(folder, file_name))[0]
-
-                    if folder != "":
-                        url = "/" + url
-
-                    info = {
-                        'doc': file_name,
-                        'url': url,
-                        'folder': folder,
-                        'folder_url': folder,
-                        'mtime': mtime,
-                    }
-                    files_list.append(info)
+            info = {
+                'doc': item,
+                'url': item_url,
+                'folder': folder,
+                'folder_url': folder,
+                'mtime': item_mtime,
+            }
+            files_list.append(info)
 
     # Sorting
     if SYSTEM_SETTINGS['listsortMTime']:
@@ -411,7 +406,7 @@ def nav_id_to_page(id):
 
 @app.route(os.path.join("/", cfg.images_route, "<path:image_name>"))
 def display_image(image_name):
-    image_path = safe_join(UPLOAD_FOLDER, image_name)
+    image_path = safe_join(UPLOAD_FOLDER_PATH, image_name)
     app.logger.info(f"Showing image >>> '{image_path}'")
     response = send_file(image_path)
     # cache indefinitely
@@ -465,9 +460,9 @@ def run_wiki():
     if int(cfg.wikmd_logging) == 1:
         logging.basicConfig(filename=cfg.wikmd_logging_file, level=logging.INFO)
 
-    if not os.path.exists(UPLOAD_FOLDER):
-        app.logger.info(f"Creating upload folder >>> {UPLOAD_FOLDER}")
-        os.mkdir(UPLOAD_FOLDER)
+    if not os.path.exists(UPLOAD_FOLDER_PATH):
+        app.logger.info(f"Creating upload folder >>> {UPLOAD_FOLDER_PATH}")
+        os.mkdir(UPLOAD_FOLDER_PATH)
 
     im.cleanup_images()
     setup_search()
