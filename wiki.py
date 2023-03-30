@@ -5,7 +5,7 @@ import platform
 import time
 import logging
 import uuid
-from lxml.html.clean import clean_html
+from lxml.html.clean import Cleaner
 import pypandoc
 import knowledge_graph
 import secrets
@@ -170,6 +170,7 @@ def file_page(file_page):
         html = ""
         mod = ""
         folder = ""
+        cleaner = Cleaner(forms=False)
 
         if "favicon" in file_page:  # if the GET request is not for the favicon
             return
@@ -202,7 +203,7 @@ def file_page(file_page):
                 html = pypandoc.convert_file(md_file_path, "html5",
                                     format='md', extra_args=["--mathjax"], filters=['pandoc-xnos'])
                 
-                html = clean_html(html)
+                html = cleaner.clean_html(html)
 
                 for plugin in plugins:
                     if ("process_before_cache_html" in dir(plugin)):
@@ -234,6 +235,7 @@ def index():
         return search(request.args.get("q"), request.args.get("page", 1))
     else:
         html = ""
+        cleaner = Cleaner(forms=False)
         app.logger.info("Showing HTML page >>> 'homepage'")
 
         md_file_path = os.path.join(cfg.wiki_directory, cfg.homepage)
@@ -249,7 +251,7 @@ def index():
             html = pypandoc.convert_file(
                 md_file_path, "html5", format='md', extra_args=["--mathjax"],
                 filters=['pandoc-xnos'])
-            html = clean_html(html)
+            html = cleaner.clean_html(html)
             cache.set(md_file_path, html)
 
         except Exception as e:
