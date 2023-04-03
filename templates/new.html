@@ -47,6 +47,8 @@
 
     <script type="text/javascript" src="{{ system.web_deps["codemirror.min.js"] }}"></script>
     <script type="text/javascript" src="{{ system.web_deps["markdown.min.js"] }}"></script>
+    <script type="text/javascript" src="{{ system.web_deps["overlay.min.js"] }}"></script>
+    <script type="text/javascript" src="{{ system.web_deps["gfm.min.js"] }}"></script>
     <script type="text/javascript" src="{{ system.web_deps["filepond.js"] }}"></script>
     <script type="text/javascript" src="{{ system.web_deps["filepond-plugin-file-validate-type.js"] }}"></script>
 
@@ -73,7 +75,12 @@
 
     <script>
         var editor = CodeMirror.fromTextArea(document.getElementById("content"), {
-            mode: 'markdown',
+            mode: {
+                name: "gfm",
+                tokenTypeOverrides: {
+                    emoji: "emoji"
+                }
+            },
             lineNumbers: true,
             theme: "default",
             extraKeys: {

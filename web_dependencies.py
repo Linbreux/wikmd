@@ -49,6 +49,14 @@ WEB_DEPENDENCIES = {
         local="/static/js/codemirror.min.js",
         external="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/codemirror.min.js"
     ),
+    "gfm.min.js": WebDependency(
+        local="/static/js/gfm.min.js",
+        external="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/mode/gfm/gfm.min.js"
+    ),
+    "overlay.min.js": WebDependency(
+        local="/static/js/overlay.min.js",
+        external="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/addon/mode/overlay.min.js"
+    ),
     "markdown.min.js": WebDependency(
         local="/static/js/markdown.min.js",
         external="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/mode/markdown/markdown.min.js"
