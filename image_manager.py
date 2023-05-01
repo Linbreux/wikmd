@@ -58,8 +58,8 @@ class ImageManager:
         else:
             self.logger.info(f"Saving image >>> '{img_file.filename}' as '{hash_file_name}' ...")
             shutil.move(temp_file_path, hash_file_path)
-            os.chmod(hash_file_path, int(self.images_file_mode, base=8))
-            os.chown(hash_file_path, self.images_file_uid, self.images_file_gid)
+            os.chmod(hash_file_path, int(self.cfg.images_file_mode, base=8))
+            os.chown(hash_file_path, self.cfg.images_file_uid, self.cfg.images_file_gid)
 
         return hash_file_name
 
