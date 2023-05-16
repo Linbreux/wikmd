@@ -1,6 +1,16 @@
 import os
 
 
+def pathify(path1, path2):
+    """
+    Joins two paths and eventually converts them from Win (\\) to linux  OS separator.
+    :param path1: first path
+    :param path2: second path
+    :return safe joined path
+    """
+    return os.path.join(path1, path2).replace("\\", "/")
+
+
 def move_all_files(src_dir: str, dest_dir: str):
     """
     Function that moves all the files from a source directory to a destination one.
