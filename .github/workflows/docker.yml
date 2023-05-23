@@ -4,7 +4,8 @@ on:
     tags:
       - '*'
     branches:
-      - main, docker
+      - main
+      - docker
   pull_request:
     branches:
       - main
