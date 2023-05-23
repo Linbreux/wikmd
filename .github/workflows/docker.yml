@@ -5,6 +5,7 @@ on:
       - '*'
     branches:
       - main
+      - docker
   pull_request:
     branches:
       - main
@@ -20,7 +21,8 @@ jobs:
       matrix:
         architecture:
           - linux/amd64
-          # - linux/arm64
+          - linux/arm64
+          - linux/arm
     steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
