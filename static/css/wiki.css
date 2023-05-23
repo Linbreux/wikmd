@@ -139,16 +139,16 @@ body {
     font-weight: 800;
 }
 
-.container a.nostyle{
-    border-bottom: none;
-}
-
-.container a{
+.container a:any-link{
     font-weight: 500;
     color:black;
     text-decoration: none;
     border-bottom: 1px solid black;
     padding-bottom: 2px;
+}
+
+.container a.nostyle{
+    border-bottom: none;
 }
 
 .mermaid {

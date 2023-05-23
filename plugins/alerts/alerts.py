@@ -39,10 +39,10 @@ class Plugin:
 
 
         result = file
-        result = re.sub(r"(\<p)()(\>)\[\[(?i)warning\]\](.*\<\/p\>)", r"\1 class='alert alert-warning d-flex'\3"+warning_icon+r" \4", result)
-        result = re.sub(r"(\<p)()(\>)\[\[(?i)info\]\](.*\<\/p\>)", r"\1 class='alert alert-info d-flex'\3"+info_icon+r" \4", result)
-        result = re.sub(r"(\<p)()(\>)\[\[(?i)danger\]\](.*\<\/p\>)", r"\1 class='alert alert-danger d-flex'\3"+danger_icon+r" \4", result)
-        result = re.sub(r"(\<p)()(\>)\[\[(?i)success\]\](.*\<\/p\>)", r"\1 class='alert alert-success d-flex'\3"+success_icon+r" \4", result)
+        result = re.sub(r"(\<p)()(\>)\[\[(?i)warning\]\](.*)\<\/p\>", r"<div class='alert alert-warning d-flex'\3"+warning_icon+r" <a>\4</a></div>", result)
+        result = re.sub(r"(\<p)()(\>)\[\[(?i)info\]\](.*)\<\/p\>", r"<div class='alert alert-info d-flex'\3"+info_icon+r" <a>\4</a></div>", result)
+        result = re.sub(r"(\<p)()(\>)\[\[(?i)danger\]\](.*)\<\/p\>", r"<div class='alert alert-danger d-flex'\3"+danger_icon+r" <a>\4</a></div>", result)
+        result = re.sub(r"(\<p)()(\>)\[\[(?i)success\]\](.*)\<\/p\>", r"<div class='alert alert-success d-flex'\3"+success_icon+r" <a>\4</a></div>", result)
 
         return result
 
