@@ -15,6 +15,18 @@ code, pre {
     color: #d88;
 }
 
+blockquote {
+    padding: 5px 50px;
+    margin-left: 0px;
+    border-left: 4px solid var(--quotes-color);
+    background-color: var(--bg-codeblock-dark);
+}
+
+blockquote p{
+    margin-top:10px;
+    font-weight: 300;
+}
+
 pre {
     background-color: var(--bg-codeblock-dark);
 }
@@ -29,7 +41,10 @@ pre {
 }
 
 
-.container a{
+.container a:any-link{
     color:var(--txt-dark);
     border-bottom: 1px solid var(--txt-dark);
 }
+
+.container a.nostyle{
+    border-bottom: none;
