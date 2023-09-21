@@ -20,6 +20,9 @@ WIKI_DIRECTORY_DEFAULT = "wiki"
 HOMEPAGE_DEFAULT = "homepage.md"
 HOMEPAGE_TITLE_DEFAULT = "homepage"
 IMAGES_ROUTE_DEFAULT = "img"
+IMAGES_FILE_UID = os.getuid()
+IMAGES_FILE_GID = os.getgid()
+IMAGES_FILE_MODE = '600'
 
 HIDE_FOLDER_IN_WIKI = []
 
@@ -87,6 +90,9 @@ class WikmdConfig:
         self.homepage = os.getenv("HOMEPAGE") or yaml_config["homepage"] or HOMEPAGE_DEFAULT
         self.homepage_title = os.getenv("HOMEPAGE_TITLE") or yaml_config["homepage_title"] or HOMEPAGE_TITLE_DEFAULT
         self.images_route = os.getenv("IMAGES_ROUTE") or yaml_config["images_route"] or IMAGES_ROUTE_DEFAULT
+        self.images_file_uid = os.getenv("IMAGES_FILE_UID") or yaml_config["images_file_uid"] or IMAGES_FILE_UID
+        self.images_file_gid = os.getenv("IMAGES_FILE_GID") or yaml_config["images_file_gid"] or IMAGES_FILE_GID
+        self.images_file_mode = os.getenv("IMAGES_FILE_MODE") or yaml_config["images_file_mode"] or IMAGES_FILE_MODE
 
         self.hide_folder_in_wiki = os.getenv("hide_folder_in_wiki")or yaml_config["hide_folder_in_wiki"] or HIDE_FOLDER_IN_WIKI
 
