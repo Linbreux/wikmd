@@ -62,37 +62,38 @@ class ImageManager:
         return hash_file_name
 
     def cleanup_images(self):
-        """Deletes images not used by any page"""
-        saved_images = set(os.listdir(self.images_path))
-        # Don't delete .gitignore
-        saved_images.discard(".gitignore")
+        if self.cfg.images_cleanup:
+            """Deletes images not used by any page"""
+            saved_images = set(os.listdir(self.images_path))
+            # Don't delete .gitignore
+            saved_images.discard(".gitignore")
 
-        # Matches [*](/img/*) it does not matter if images_route is "/img" or "img"
-        image_link_pattern = fr"\[(.*?)\]\(({os.path.join('/', self.cfg.images_route)}.+?)\)"
-        image_link_regex = re.compile(image_link_pattern)
-        used_images = set()
-        # Searching for Markdown files
-        for root, sub_dir, files in os.walk(self.cfg.wiki_directory):
-            if os.path.join(self.cfg.wiki_directory, '.git') in root:
-                # We don't want to search there
-                continue
-            if self.images_path in root:
-                # Nothing interesting there too
-                continue
-            for filename in files:
-                path = os.path.join(root, filename)
-                try:
-                    with open(path, "r", encoding="utf-8", errors="ignore") as f:
-                        content = f.read()
-                        matches = image_link_regex.findall(content)
-                        for _caption, image_path in matches:
-                            used_images.add(os.path.basename(image_path))
-                except:
-                    self.logger.info(f"ignoring {path}")
+            # Matches [*](/img/*) it does not matter if images_route is "/img" or "img"
+            image_link_pattern = fr"\[(.*?)\]\(({os.path.join('/', self.cfg.images_route)}.+?)\)"
+            image_link_regex = re.compile(image_link_pattern)
+            used_images = set()
+            # Searching for Markdown files
+            for root, sub_dir, files in os.walk(self.cfg.wiki_directory):
+                if os.path.join(self.cfg.wiki_directory, '.git') in root:
+                    # We don't want to search there
+                    continue
+                if self.images_path in root:
+                    # Nothing interesting there too
+                    continue
+                for filename in files:
+                    path = os.path.join(root, filename)
+                    try:
+                        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+                            content = f.read()
+                            matches = image_link_regex.findall(content)
+                            for _caption, image_path in matches:
+                                used_images.add(os.path.basename(image_path))
+                    except:
+                        self.logger.info(f"ignoring {path}")
 
-        not_used_images = saved_images.difference(used_images)
-        for not_used_image in not_used_images:
-            self.delete_image(not_used_image)
+            not_used_images = saved_images.difference(used_images)
+            for not_used_image in not_used_images:
+                self.delete_image(not_used_image)
 
     def delete_image(self, image_name):
         image_path = safe_join(self.images_path, image_name)
