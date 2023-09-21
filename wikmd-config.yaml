@@ -16,6 +16,7 @@ wiki_directory: "wiki"
 homepage: "homepage.md"
 homepage_title: "homepage"
 images_route: "img"
+images_cleanup: false
 image_allowed_mime: ["image/gif", "image/jpeg", "image/png", "image/svg+xml", "image/webp"]
 hide_folder_in_wiki: [".obsidian"]
 
