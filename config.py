@@ -23,6 +23,7 @@ IMAGES_ROUTE_DEFAULT = "img"
 IMAGES_FILE_UID = os.getuid()
 IMAGES_FILE_GID = os.getgid()
 IMAGES_FILE_MODE = '600'
+IMAGES_CLEANUP = False
 
 HIDE_FOLDER_IN_WIKI = []
 
@@ -93,6 +94,7 @@ class WikmdConfig:
         self.images_file_uid = os.getenv("IMAGES_FILE_UID") or yaml_config["images_file_uid"] or IMAGES_FILE_UID
         self.images_file_gid = os.getenv("IMAGES_FILE_GID") or yaml_config["images_file_gid"] or IMAGES_FILE_GID
         self.images_file_mode = os.getenv("IMAGES_FILE_MODE") or yaml_config["images_file_mode"] or IMAGES_FILE_MODE
+        self.images_cleanup = os.getenv("IMAGES_CLEANUP") or yaml_config["images_cleanup"] or IMAGES_CLEANUP
 
         self.hide_folder_in_wiki = os.getenv("hide_folder_in_wiki")or yaml_config["hide_folder_in_wiki"] or HIDE_FOLDER_IN_WIKI
 
