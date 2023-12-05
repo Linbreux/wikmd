@@ -13,7 +13,8 @@ if [ ! -d "/wiki" ]
 then
   # create directories
   mkdir -p /wiki
-  chown abc:abc /wiki
+  chown -R abc:abc /wiki
+  chown -R abc:abc /wiki/*
 fi
 
 # If /wiki exists and is empty, populate it with the examples
@@ -24,7 +25,10 @@ then
 
   # permissions
   chown -R abc:abc /wiki/*
+  chown -R abc:abc /wiki
 fi
 
+chown -R abc:abc /app/wikmd/plugins/*
 chown -R abc:abc /app/wikmd/plugins
+chown -R abc:abc /app/wikmd/static/*
 chown -R abc:abc /app/wikmd/static

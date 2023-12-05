@@ -1,4 +1,5 @@
 import os
+from os.path import exists
 import time
 import logging
 import uuid
@@ -319,7 +320,7 @@ def remove(page):
 @app.route('/edit/<path:page>', methods=['POST', 'GET'])
 def edit(page):
     if bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS):
-        return login(page)
+        return login("edit/" + page)
 
     filename = safe_join(cfg.wiki_directory, f"{page}.md")
     if request.method == 'POST':
@@ -333,10 +334,15 @@ def edit(page):
 
         return redirect(url_for("file_page", file_page=page_name))
     else:
-        with open(filename, 'r', encoding="utf-8", errors='ignore') as f:
-            content = f.read()
-        return render_template("new.html", content=content, title=page, upload_path=cfg.images_route,
-                               image_allowed_mime=cfg.image_allowed_mime, system=SYSTEM_SETTINGS)
+        if exists(filename):
+            with open(filename, 'r', encoding="utf-8", errors='ignore') as f:
+                content = f.read()
+            return render_template("new.html", content=content, title=page, upload_path=cfg.images_route,
+                                image_allowed_mime=cfg.image_allowed_mime, system=SYSTEM_SETTINGS)
+        else:
+            logger.error(f"{filename} does not exists. Creating a new one.")
+            return render_template("new.html", content="", title=page, upload_path=cfg.images_route,
+                                image_allowed_mime=cfg.image_allowed_mime, system=SYSTEM_SETTINGS)
 
 
 @app.route(os.path.join("/", cfg.images_route), methods=['POST', 'DELETE'])
