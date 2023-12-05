@@ -381,7 +381,7 @@ def login(page):
         sha_string = sha256(password.encode('utf-8')).hexdigest()
         if sha_string == cfg.password_in_sha_256.lower():
             app.logger.info("User successfully logged in")
-            resp = make_response(redirect(page))
+            resp = make_response(redirect("/" + page))
             session = secrets.token_urlsafe(1024 // 8)
             resp.set_cookie("session_wikmd", session)
             SESSIONS.append(session)
