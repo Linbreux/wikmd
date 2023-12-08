@@ -144,7 +144,7 @@ def get_html(file_page):
                 app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_html >>> {file_page}")
                 cached_entry = plugin.process_html(cached_entry)
         
-        return cached_entry
+        return cached_entry, mod
 
     app.logger.info(f"Converting to HTML with pandoc >>> '{md_file_path}' ...")
 
@@ -167,7 +167,7 @@ def get_html(file_page):
 
     app.logger.info(f"Showing HTML page >>> '{file_page}'")
 
-    return html
+    return html, mod
 
 
 @app.route('/list/', methods=['GET'])
@@ -228,7 +228,7 @@ def file_page(file_page):
             return
 
         try:
-            html_content = get_html(file_page)
+            html_content, mod = get_html(file_page)
 
             return render_template(
                 'content.html', title=file_page, folder=folder, info=html_content, modif=mod,
