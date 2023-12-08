@@ -291,7 +291,7 @@ def add_new():
 @app.route('/edit/homepage', methods=['POST', 'GET'])
 def edit_homepage():
     if bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS):
-        return login("/edit/homepage")
+        return login("edit/homepage")
 
     if request.method == 'POST':
         page_name = fetch_page_name()
