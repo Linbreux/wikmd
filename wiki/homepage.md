@@ -20,6 +20,7 @@ For now there are only a few supported.
 
 - `[[draw]]` Allows you to add an **interactive drawio drawing** to the wiki.  
 - `[[info]]`, `[[warning]]`, `[[danger]]`, `[[success]]` Adds a nice **alert message**.
+- `[[ page: some-page ]]` Allows to show an other page in the current one.
 
 ### Image support
 ![](https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Markdown-mark.svg/208px-Markdown-mark.svg.png)
