@@ -58,7 +58,6 @@ SYSTEM_SETTINGS = {
     "plugins": plugins
 }
 
-
 def process(content: str, page_name: str):
     """
     Function that processes the content with the plugins.
@@ -125,6 +124,52 @@ def fetch_page_name() -> str:
     return page_name
 
 
+def get_html(file_page):
+    """
+    Function to return the html of a certain file page
+    """
+    md_file_path = safe_join(cfg.wiki_directory, f"{file_page}.md")
+    mod = "Last modified: %s" % time.ctime(os.path.getmtime(md_file_path))
+    folder = file_page.split("/")
+    file_page = folder[-1:][0]
+    folder = folder[:-1]
+    folder = "/".join(folder)
+
+    cached_entry = cache.get(md_file_path)
+    if cached_entry:
+        app.logger.info(f"Showing HTML page from cache >>> '{file_page}'")
+
+        for plugin in plugins:
+            if "process_html" in dir(plugin):
+                app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_html >>> {file_page}")
+                cached_entry = plugin.process_html(cached_entry)
+        
+        return cached_entry
+
+    app.logger.info(f"Converting to HTML with pandoc >>> '{md_file_path}' ...")
+
+    html = pypandoc.convert_file(md_file_path, "html5",
+                                    format='md', extra_args=["--mathjax"], filters=['pandoc-xnos'])
+
+    html = clean_html(html)
+
+    for plugin in plugins:
+        if "process_before_cache_html" in dir(plugin):
+            app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_before_cache_html >>> {file_page}")
+            html = plugin.process_before_cache_html(html)
+
+    cache.set(md_file_path, html)
+
+    for plugin in plugins:
+        if "process_html" in dir(plugin):
+            app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_html >>> {file_page}")
+            html = plugin.process_html(html)
+
+    app.logger.info(f"Showing HTML page >>> '{file_page}'")
+
+    return html
+
+
 @app.route('/list/', methods=['GET'])
 def list_full_wiki():
     return list_wiki("")
@@ -183,53 +228,12 @@ def file_page(file_page):
             return
 
         try:
-            md_file_path = safe_join(cfg.wiki_directory, f"{file_page}.md")
-            mod = "Last modified: %s" % time.ctime(os.path.getmtime(md_file_path))
-            folder = file_page.split("/")
-            file_page = folder[-1:][0]
-            folder = folder[:-1]
-            folder = "/".join(folder)
+            html_content = get_html(file_page)
 
-            cached_entry = cache.get(md_file_path)
-            if cached_entry:
-                app.logger.info(f"Showing HTML page from cache >>> '{file_page}'")
-
-                for plugin in plugins:
-                    if "process_html" in dir(plugin):
-                        app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_html >>> {file_page}")
-                        cached_entry = plugin.process_html(cached_entry)
-
-                return render_template(
-                    'content.html', title=file_page, folder=folder, info=cached_entry, modif=mod,
-                    system=SYSTEM_SETTINGS
-                )
-
-            try:
-                app.logger.info(f"Converting to HTML with pandoc >>> '{md_file_path}' ...")
-
-                html = pypandoc.convert_file(md_file_path, "html5",
-                                             format='md', extra_args=["--mathjax"], filters=['pandoc-xnos'])
-
-                html = clean_html(html)
-
-                for plugin in plugins:
-                    if "process_before_cache_html" in dir(plugin):
-                        app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_before_cache_html >>> {file_page}")
-                        html = plugin.process_before_cache_html(html)
-
-                cache.set(md_file_path, html)
-
-                for plugin in plugins:
-                    if "process_html" in dir(plugin):
-                        app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_html >>> {file_page}")
-                        html = plugin.process_html(html)
-
-                app.logger.info(f"Showing HTML page >>> '{file_page}'")
-            except Exception as a:
-                app.logger.info(a)
-
-            return render_template('content.html', title=file_page, folder=folder, info=html, modif=mod,
-                                   system=SYSTEM_SETTINGS)
+            return render_template(
+                'content.html', title=file_page, folder=folder, info=html_content, modif=mod,
+                system=SYSTEM_SETTINGS
+        )
         except FileNotFoundError as e:
             app.logger.info(e)
             return redirect("/add_new?page=" + file_page)
@@ -477,6 +481,9 @@ def run_wiki():
     watchdog.start()
     app.run(host=cfg.wikmd_host, port=cfg.wikmd_port, debug=True, use_reloader=False)
 
+for plugin in plugins:
+    if "request_html" in dir(plugin):
+        plugin.request_html(get_html)
 
 if __name__ == '__main__':
     run_wiki()
