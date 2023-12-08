@@ -44,11 +44,11 @@ class Plugin:
         for page in pages:
             # get the html of the page
             try:
-                raw_page_html = self.get_html(page)
+                raw_page_html, _ = self.get_html(page)
             except:
                 return file
 
-            integrate_html = f"<div id=\"{page}\" style=\"padding: 20px; background-color: #e3e3e3\"><p><i>{page}</i></p>{raw_page_html}</div>"
+            integrate_html = f"<div id=\"{page}\" class=\"html-integration\"><p><i>{page}</i></p>{raw_page_html}</div>"
             print(page)
 
             # integrate the page into this one.
