@@ -49,10 +49,9 @@ class Plugin:
                 return file
 
             integrate_html = f"<div id=\"{page}\" class=\"html-integration\"><p><i>{page}</i></p>{raw_page_html}</div>"
-            print(page)
 
             # integrate the page into this one.
-            result = re.sub("\<p\>\[\[\s*page: "+page+"\s*\]\]\<\/p\>", file, integrate_html)
+            result = re.sub(r"\<p\>\[\[\s*page:\s*"+page+r"\s*\]\]\<\/p\>", integrate_html, result)
 
         return result
 
