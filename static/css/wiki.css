@@ -139,6 +139,11 @@ body {
     font-weight: 800;
 }
 
+div.html-integration{
+  background-color: var(--html-integration-background-light);
+  padding: 20px;
+}
+
 .container a:any-link{
     font-weight: 500;
     color:black;

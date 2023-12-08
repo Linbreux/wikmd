@@ -31,6 +31,10 @@ pre {
     background-color: var(--bg-codeblock-dark);
 }
 
+div.html-integration{
+  background-color: var(--html-integration-background-dark)
+}
+
 .hljs {
     background-color: var(--bg-codeblock-dark);
 }
