@@ -2,13 +2,14 @@
 
 The homepage is default the `homepage.md` file, this can't be changed. If this file doesn't exist create it in de wiki folder.
 
-## Plugins (beta)
+## Plugins
 
 The plugins are used to extend the functionality of the wiki. Most of them are accessible through the use of `tags`.
 For now there are only a few supported.  
 
 - `[[draw]]` Allows you to add an **interactive drawio drawing** to the wiki.  
 - `[[info]]`, `[[warning]]`, `[[danger]]`, `[[success]]` Adds a nice **alert message**.
+- `[[ page: some-page ]]` Allows to show an other page in the current one.
 
 [[success]] You are ready to go!
 

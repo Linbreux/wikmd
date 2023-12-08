@@ -12,7 +12,7 @@ To view the documents in the browser, the document is converted to html.
 ## Features
 
 - knowledge graph
-- **NEW** plugin system: drawio integration, alerts
+- **NEW** plugin system: drawio integration, alerts, embedded pages
 - git support (version control)
 - image support including sizing and referencing
 - math/latex
