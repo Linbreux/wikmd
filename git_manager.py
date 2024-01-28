@@ -185,3 +185,13 @@ class WikiRepoManager:
 
         if self.sync_with_remote:
             self.__git_push()
+
+    def git_pull(self):
+        """
+        Function that manages the synchronization with a git repo, that could be local or remote.
+        If SYNC_WITH_REMOTE is set, it also pulls before committing and then pushes changes to the remote repo.
+        :param commit_type: could be 'Add', 'Edit' or 'Remove'.
+        :param page_name: name of the page that has been changed.
+        """
+        if self.sync_with_remote:
+            self.__git_pull()

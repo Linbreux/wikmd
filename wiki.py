@@ -220,6 +220,10 @@ def file_page(file_page):
     if request.args.get("q"):
         return search(request.args.get("q"), request.args.get("page", 1))
     else:
+
+        git_sync_thread = Thread(target=wrm.git_pull, args=())
+        git_sync_thread.start()
+
         html = ""
         mod = ""
         folder = ""
@@ -244,6 +248,7 @@ def index():
     if request.args.get("q"):
         return search(request.args.get("q"), request.args.get("page", 1))
     else:
+        
         html = ""
         app.logger.info("Showing HTML page >>> 'homepage'")
 
