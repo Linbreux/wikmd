@@ -278,7 +278,7 @@ def add_new():
         if page_name == None:
             page_name = ""
         upload_path = cfg.images_protected_route
-        if page_name in cfg.unprotected_routes:
+        if any(map(page_name.__contains__, cfg.unprotected_routes)):
             upload_path = cfg.images_route
         return render_template('new.html', upload_path=upload_path,
                                image_allowed_mime=cfg.image_allowed_mime, title=page_name, system=SYSTEM_SETTINGS)
@@ -334,7 +334,7 @@ def edit(page):
         return redirect(url_for("file_page", file_page=page_name))
     else:
         upload_path = cfg.images_protected_route
-        if page in cfg.unprotected_routes:
+        if any(map(page.__contains__, cfg.unprotected_routes)):
             upload_path = cfg.images_route
         with open(filename, 'r', encoding="utf-8", errors='ignore') as f:
             content = f.read()
