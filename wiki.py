@@ -433,7 +433,7 @@ def display_image(image_name):
     return response
 
 @app.route(os.path.join("/", cfg.images_protected_route, "<path:image_name>"))
-def display_image(image_name):
+def display_protected_image(image_name):
     image_path = safe_join(PROTECTED_UPLOAD_FOLDER, image_name)
     app.logger.info(f"Showing image >>> '{image_path}'")
     response = send_file(image_path)
