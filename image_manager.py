@@ -26,7 +26,7 @@ class ImageManager:
         if not self.can_optimize and self.cfg.optimize_images in ["lossless", "lossy"]:
             self.logger.error("To use image optimization webp and gif2webp need to be installed and in the $PATH. They could not be found.")
 
-    def save_images(self, file):
+    def save_images(self, file, images_path):
         """
         Saves the image from the filepond upload.
         The image is renamed to the hash of the content, so the image is immutable.
@@ -50,7 +50,7 @@ class ImageManager:
         # Using base32 instead of urlsafe base64, because the Windows file system is case-insensitive
         img_digest = b32encode(hasher.digest()).decode("utf-8").lower()[:-4]
         hash_file_name = secure_filename(f"{original_file_name}-{img_digest}{img_extension}")
-        hash_file_path = os.path.join(self.images_path, hash_file_name)
+        hash_file_path = os.path.join(images_path, hash_file_name)
 
         # We can skip writing the file if it already exists. It is the same file, because it has the same hash
         if os.path.exists(hash_file_path):
@@ -97,8 +97,8 @@ class ImageManager:
             for not_used_image in not_used_images:
                 self.delete_image(not_used_image)
 
-    def delete_image(self, image_name):
-        image_path = safe_join(self.images_path, image_name)
+    def delete_image(self, image_name, images_path):
+        image_path = safe_join(images_path, image_name)
         self.logger.info(f"Deleting file >>> {image_path}")
         try:
             os.remove(image_path)

@@ -20,6 +20,7 @@ WIKI_DIRECTORY_DEFAULT = "wiki"
 HOMEPAGE_DEFAULT = "homepage.md"
 HOMEPAGE_TITLE_DEFAULT = "homepage"
 IMAGES_ROUTE_DEFAULT = "img"
+IMAGES_PROTECTED_ROUTE_DEFAULT = "img"
 IMAGES_FILE_UID = os.getuid()
 IMAGES_FILE_GID = os.getgid()
 IMAGES_FILE_MODE = '600'
@@ -28,6 +29,7 @@ IMAGES_CLEANUP = False
 HIDE_FOLDER_IN_WIKI = []
 
 PLUGINS = []
+UNPROTECTED_ROUTES = []
 
 PROTECT_EDIT_BY_PASSWORD = 0
 PASSWORD_IN_SHA_256 = "0E9C700FAB2D5B03B0581D080E74A2D7428758FC82BD423824C6C11D6A7F155E" #pw: wikmd
@@ -91,6 +93,8 @@ class WikmdConfig:
         self.homepage = os.getenv("HOMEPAGE") or yaml_config["homepage"] or HOMEPAGE_DEFAULT
         self.homepage_title = os.getenv("HOMEPAGE_TITLE") or yaml_config["homepage_title"] or HOMEPAGE_TITLE_DEFAULT
         self.images_route = os.getenv("IMAGES_ROUTE") or yaml_config["images_route"] or IMAGES_ROUTE_DEFAULT
+        self.images_protected_route = os.getenv("IMAGES_PROTECTED_ROUTE") or yaml_config["images_protected_route"] or IMAGES_PROTECTED_ROUTE_DEFAULT
+        self.unprotected_routes = os.getenv("UNPROTECTED_ROUTES")or yaml_config["unprotected_routes"] or UNPROTECTED_ROUTES
         self.images_file_uid = os.getenv("IMAGES_FILE_UID") or yaml_config["images_file_uid"] or IMAGES_FILE_UID
         self.images_file_gid = os.getenv("IMAGES_FILE_GID") or yaml_config["images_file_gid"] or IMAGES_FILE_GID
         self.images_file_mode = os.getenv("IMAGES_FILE_MODE") or yaml_config["images_file_mode"] or IMAGES_FILE_MODE

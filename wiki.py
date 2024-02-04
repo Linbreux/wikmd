@@ -27,6 +27,7 @@ SESSIONS = []
 
 cfg = WikmdConfig()
 UPLOAD_FOLDER = os.path.join(cfg.wiki_directory, cfg.images_route)
+PROTECTED_UPLOAD_FOLDER = os.path.join(cfg.wiki_directory, cfg.images_protected_route)
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -128,7 +129,8 @@ def list_wiki(folderpath):
             mtime = os.path.getmtime(os.path.join(root, item))
             if (
                 root.startswith(os.path.join(cfg.wiki_directory, '.git')) or
-                root.startswith(os.path.join(cfg.wiki_directory, cfg.images_route))
+                root.startswith(os.path.join(cfg.wiki_directory, cfg.images_route)) or
+                root.startswith(os.path.join(cfg.wiki_directory, cfg.images_protected_route))
             ):
                 continue
 
@@ -275,7 +277,10 @@ def add_new():
         page_name = request.args.get("page")
         if page_name == None:
             page_name = ""
-        return render_template('new.html', upload_path=cfg.images_route,
+        upload_path = cfg.images_protected_route
+        if page_name in cfg.unprotected_routes:
+            upload_path = cfg.images_route
+        return render_template('new.html', upload_path=upload_path,
                                image_allowed_mime=cfg.image_allowed_mime, title=page_name, system=SYSTEM_SETTINGS)
 
 @app.route('/edit/homepage', methods=['POST', 'GET'])
@@ -295,7 +300,7 @@ def edit_homepage():
         with open(os.path.join(cfg.wiki_directory, cfg.homepage), 'r', encoding="utf-8", errors='ignore') as f:
 
             content = f.read()
-        return render_template("new.html", content=content, title=cfg.homepage_title, upload_path=cfg.images_route,
+        return render_template("new.html", content=content, title=cfg.homepage_title, upload_path=cfg.images_protected_route,
                                image_allowed_mime=cfg.image_allowed_mime, system=SYSTEM_SETTINGS)
 
 
@@ -328,26 +333,47 @@ def edit(page):
 
         return redirect(url_for("file_page", file_page=page_name))
     else:
+        upload_path = cfg.images_protected_route
+        if page in cfg.unprotected_routes:
+            upload_path = cfg.images_route
         with open(filename, 'r', encoding="utf-8", errors='ignore') as f:
             content = f.read()
-        return render_template("new.html", content=content, title=page, upload_path=cfg.images_route,
+        return render_template("new.html", content=content, title=page, upload_path=upload_path,
                                image_allowed_mime=cfg.image_allowed_mime, system=SYSTEM_SETTINGS)
 
 
 @app.route(os.path.join("/", cfg.images_route), methods=['POST', 'DELETE'])
 def upload_file():
+    images_path = os.path.join(cfg.wiki_directory, cfg.images_route)
     if bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS):
         return login()
     app.logger.info(f"Uploading new image ...")
     # Upload image when POST
     if request.method == "POST":
-        return im.save_images(request.files)
+        return im.save_images(request.files, images_path)
 
     # DELETE when DELETE
     if request.method == "DELETE":
         # request data is in format "b'nameoffile.png" decode to utf-8
         file_name = request.data.decode("utf-8")
-        im.delete_image(file_name)
+        im.delete_image(file_name, images_path)
+        return 'OK'
+
+@app.route(os.path.join("/", cfg.images_protected_route), methods=['POST', 'DELETE'])
+def upload_file():
+    images_path = os.path.join(cfg.wiki_directory, cfg.images_protected_route)
+    if bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS):
+        return login()
+    app.logger.info(f"Uploading new image ...")
+    # Upload image when POST
+    if request.method == "POST":
+        return im.save_images(request.files, images_path)
+
+    # DELETE when DELETE
+    if request.method == "DELETE":
+        # request data is in format "b'nameoffile.png" decode to utf-8
+        file_name = request.data.decode("utf-8")
+        im.delete_image(file_name, images_path)
         return 'OK'
 
 @app.route("/plug_com", methods=['POST'])
@@ -406,6 +432,15 @@ def display_image(image_name):
     response.headers["Cache-Control"] = "max-age=31536000, immutable"
     return response
 
+@app.route(os.path.join("/", cfg.images_protected_route, "<path:image_name>"))
+def display_image(image_name):
+    image_path = safe_join(PROTECTED_UPLOAD_FOLDER, image_name)
+    app.logger.info(f"Showing image >>> '{image_path}'")
+    response = send_file(image_path)
+    # cache indefinitely
+    response.headers["Cache-Control"] = "max-age=31536000, immutable"
+    return response
+
 
 @app.route('/toggle-darktheme/', methods=['GET'])
 def toggle_darktheme():
@@ -432,7 +467,8 @@ def setup_search():
         for item in files:
             if (
                 root.startswith(os.path.join(cfg.wiki_directory, '.git')) or
-                root.startswith(os.path.join(cfg.wiki_directory, cfg.images_route))
+                root.startswith(os.path.join(cfg.wiki_directory, cfg.images_route)) or
+                root.startswith(os.path.join(cfg.wiki_directory, cfg.images_protected_route))
             ):
                 continue
             page_name, ext = os.path.splitext(item)

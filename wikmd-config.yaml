@@ -16,7 +16,7 @@ wiki_directory: "wiki"
 homepage: "homepage.md"
 homepage_title: "homepage"
 images_route: "img"
-images_secure_route: "secure/img"
+images_protected_route: "protected/img"
 unprotected_routes:
 - "/pages/ideas/blog"
 images_cleanup: false
