@@ -360,7 +360,7 @@ def upload_file():
         return 'OK'
 
 @app.route(os.path.join("/", cfg.images_protected_route), methods=['POST', 'DELETE'])
-def upload_file():
+def upload_protected_file():
     images_path = os.path.join(cfg.wiki_directory, cfg.images_protected_route)
     if bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS):
         return login()
