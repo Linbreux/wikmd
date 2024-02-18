@@ -50,5 +50,13 @@ div.html-integration{
     border-bottom: 1px solid var(--txt-dark);
 }
 
-.container a.nostyle{
+.container a.nostyle {
     border-bottom: none;
+}
+
+.form-control,
+.form-control:focus {
+    background-color: var(--bg-codeblock-dark);
+    border-color: var(--bg-modal-dark);
+    color: var(--txt-dark);
+}
