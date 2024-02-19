@@ -151,7 +151,8 @@ def get_html(file_page):
     html = pypandoc.convert_file(md_file_path, "html5",
                                     format='md', extra_args=["--mathjax"], filters=['pandoc-xnos'])
 
-    html = clean_html(html)
+    if html.strip():
+        html = clean_html(html)
 
     for plugin in plugins:
         if "process_before_cache_html" in dir(plugin):
