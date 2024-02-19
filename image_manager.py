@@ -5,8 +5,7 @@ import tempfile
 from base64 import b32encode
 from hashlib import sha1
 
-from flask import safe_join
-from werkzeug.utils import secure_filename
+from werkzeug.utils import secure_filename, safe_join
 
 
 class ImageManager:
