@@ -38,6 +38,7 @@ OPTIMIZE_IMAGES_DEFAULT = "no"
 CACHE_DIR = "/dev/shm/wikmd/cache"
 SEARCH_DIR = "/dev/shm/wikmd/searchindex"
 
+SECRET_KEY = '\xfd{H\xe5<\x95\xf9\xe3\x96.5\xd1\x01O<!\xd5\xa2\xa0\x9fR"\xa1\xa8'
 
 def config_list(yaml_config, config_item_name, default_value):
     """
@@ -102,3 +103,5 @@ class WikmdConfig:
 
         self.cache_dir = os.getenv("CACHE_DIR") or yaml_config["cache_dir"] or CACHE_DIR
         self.search_dir = os.getenv("SEARCH_DIR") or yaml_config["search_dir"] or SEARCH_DIR
+
+        self.secret_key = os.getenv("SECRET_KEY") or yaml_config["secret_key"] or SECRET_KEY

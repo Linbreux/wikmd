@@ -9,7 +9,7 @@ import knowledge_graph
 import secrets
 
 from flask import Flask, render_template, request, redirect, url_for, make_response, safe_join, send_file, \
-    send_from_directory
+    send_from_directory, flash
 from threading import Thread
 from hashlib import sha256
 from cache import Cache
@@ -34,6 +34,7 @@ HIDDEN_PATHS = tuple([UPLOAD_FOLDER_PATH, GIT_FOLDER_PATH, HOMEPAGE_PATH] + HIDD
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER_PATH
+app.config['SECRET_KEY'] = cfg.secret_key
 
 # console logger
 app.logger.setLevel(logging.INFO)
@@ -76,6 +77,16 @@ def process(content: str, page_name: str):
             processed = plugin.process_md(processed)
 
     return processed
+
+
+def ensure_page_can_be_created(page, page_name):
+    filename = safe_join(cfg.wiki_directory, f"{page_name}.md")
+    if os.path.exists(filename):
+        flash('A page with that name already exists. The page name needs to be unique.')
+        app.logger.info(f"Page name exists >>> {page_name}")
+        content = process(request.form['CT'], page_name)
+        return render_template("new.html", content=content, title=page, upload_path=cfg.images_route,
+                               image_allowed_mime=cfg.image_allowed_mime, system=SYSTEM_SETTINGS)
 
 
 def save(page_name):
@@ -281,6 +292,11 @@ def add_new():
         return login("/add_new")
     if request.method == 'POST':
         page_name = fetch_page_name()
+
+        re_render_page = ensure_page_can_be_created(page_name, page_name)
+        if re_render_page:
+            return re_render_page
+
         save(page_name)
         git_sync_thread = Thread(target=wrm.git_sync, args=(page_name, "Add"))
         git_sync_thread.start()
@@ -301,6 +317,7 @@ def edit_homepage():
 
     if request.method == 'POST':
         page_name = fetch_page_name()
+
         save(page_name)
         git_sync_thread = Thread(target=wrm.git_sync, args=(page_name, "Edit"))
         git_sync_thread.start()
@@ -335,7 +352,12 @@ def edit(page):
     filename = safe_join(cfg.wiki_directory, f"{page}.md")
     if request.method == 'POST':
         page_name = fetch_page_name()
+
         if page_name != page:
+            re_render_page = ensure_page_can_be_created(page_name, page_name)
+            if re_render_page:
+                return re_render_page
+
             os.remove(filename)
 
         save(page_name)
