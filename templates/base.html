@@ -92,6 +92,15 @@
             </div>
         </div>
     </nav>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="alert alert-secondary flashes" role="alert">
+                {% for message in messages %}
+                    <a>{{ message }}</a><br>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
 
     <!-- Page -->
     <div>
