@@ -39,24 +39,21 @@ div.html-integration{
     background-color: var(--bg-codeblock-dark);
 }
 
-#list a.folder{
-    border-bottom: 1px solid var(--txt-dark);
-    font-weight: 800;
-}
-
-
-.container a:any-link{
-    color:var(--txt-dark);
-    border-bottom: 1px solid var(--txt-dark);
-}
-
-.container a.nostyle {
-    border-bottom: none;
-}
-
 .form-control,
 .form-control:focus {
     background-color: var(--bg-codeblock-dark);
     border-color: var(--bg-modal-dark);
+    color: var(--txt-dark);
+}
+
+.list-group-item,
+.list-group-item {
+    background-color: var(--bg-dark);
+    color: var(--txt-dark);
+}
+
+.link-dark:visited,
+.link-dark:hover,
+.link-dark {
     color: var(--txt-dark);
 }
