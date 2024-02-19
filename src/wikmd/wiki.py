@@ -84,6 +84,11 @@ SYSTEM_SETTINGS = {
 }
 
 
+@app.context_processor
+def inject_file_list():
+    return dict(file_list=wiki_tree(Path(cfg.wiki_directory)))
+
+
 class PageContent:
     def __init__(self, title: str = "", content: str = ""):
         self._title = title
@@ -171,6 +176,26 @@ def search(search_term: str, page: int) -> str:
         results=results,
         system=SYSTEM_SETTINGS,
     )
+
+
+def wiki_tree(path: Path):
+    try:
+        p_url = path.relative_to(cfg.wiki_directory).with_suffix("")
+    except ValueError:
+        p_url = Path(".")
+    tree = dict(name=path.stem, children=[],
+                url=p_url.as_posix(), parts=len(p_url.parts), id=hash(p_url))
+    for name in path.iterdir():
+        fn = name.as_posix()
+        if fn.startswith(HIDDEN_PATHS):  # skip hidden paths
+            continue
+        fn = Path(fn)
+        if fn.is_dir():
+            tree['children'].append(wiki_tree(fn))
+        else:
+            url = fn.relative_to(cfg.wiki_directory).with_suffix("")
+            tree['children'].append(dict(name=name.stem, url=url.as_posix(), parts=len(url.parts), id=hash(url)))
+    return tree
 
 
 def get_html(page: PageContent) -> [str, str]:
@@ -294,16 +319,16 @@ def wiki_page(file_page: str) -> None | str | Response:
 def index() -> None | str | Response:
     """Render home page."""
 
-    html = ""
     app.logger.info("Showing HTML page >>> 'homepage'")
 
     md_file_path = Path(cfg.wiki_directory) / cfg.homepage
     cached_entry = cache.get(md_file_path.as_posix())
     if cached_entry:
+        page = PageContent(cfg.homepage_title, cached_entry)
         app.logger.info("Showing HTML page from cache >>> 'homepage'")
         return render_template(
             "index.html",
-            homepage=cached_entry,
+            form=page,
             system=SYSTEM_SETTINGS,
         )
 
@@ -319,7 +344,8 @@ def index() -> None | str | Response:
         # TODO: Use Flask Abort?
         app.logger.exception("Conversion to HTML failed")
 
-    return render_template("index.html", homepage=html, system=SYSTEM_SETTINGS)
+    page = PageContent(cfg.homepage_title, html)
+    return render_template("index.html", form=page, system=SYSTEM_SETTINGS)
 
 
 @app.get("/add_new")
