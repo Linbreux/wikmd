@@ -1,37 +1,4 @@
 {% extends 'base.html' %}
-{% block head %}
-    <style>
-        ul#list {
-            list-style: none;
-            padding: 0px
-        }
-
-        ul#list li {
-            margin: 5px;
-            padding-left: 15px;
-            border-left-style: solid;
-        }
-
-        ul#list li:hover {
-
-        {% if system.darktheme%}
-            background: #3f4448;
-        {%else%}
-            background: #ECECEC;
-        {%endif%}
-        }
-
-        ul#list li a {
-            font-size: 1.2em;
-
-        {% if system.darktheme%}
-            color: whitesmoke;
-        {%else%}
-            color: #222326;
-        {%endif%}
-        }
-    </style>
-{% endblock %}
 
 {% block content %}
     <a class="link-dark text-decoration-none float-end" href="/toggle-sorting">Sort ({% if system.listsortMTime %}last modified{% else %}a-z{% endif%})</a>
