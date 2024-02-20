@@ -21,6 +21,6 @@ pypandoc==1.13
 requests==2.31.0
 smmap==5.0.1
 lxml==5.1.0
-watchdog==4.0.0
+watchdog==2.1.9
 cachelib==0.12.0
 psutil==5.9.8
