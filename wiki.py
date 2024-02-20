@@ -8,9 +8,10 @@ import pypandoc
 import knowledge_graph
 import secrets
 
-from flask import Flask, render_template, request, redirect, url_for, make_response, safe_join, send_file, \
+from flask import Flask, render_template, request, redirect, url_for, make_response, send_file, \
     send_from_directory, flash
-from werkzeug.utils import secure_filename
+
+from werkzeug.utils import safe_join, secure_filename
 from threading import Thread
 from hashlib import sha256
 from cache import Cache
