@@ -355,6 +355,8 @@ def remove(page):
 
     filename = safe_join(cfg.wiki_directory, f"{page}.md")
     os.remove(filename)
+    if not os.listdir(os.path.dirname(filename)):
+        os.removedirs(os.path.dirname(filename))
     git_sync_thread = Thread(target=wrm.git_sync, args=(page, "Remove"))
     git_sync_thread.start()
     return redirect("/")
