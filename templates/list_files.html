@@ -1,49 +1,16 @@
 {% extends 'base.html' %}
-{% block head %}
-    <style>
-        ul#list {
-            list-style: none;
-            padding: 0px
-        }
-
-        ul#list li {
-            margin: 5px;
-            padding-left: 15px;
-            border-left-style: solid;
-        }
-
-        ul#list li:hover {
-
-        {% if system.darktheme%}
-            background: #3f4448;
-        {%else%}
-            background: #ECECEC;
-        {%endif%}
-        }
-
-        ul#list li a {
-            font-size: 1.2em;
-
-        {% if system.darktheme%}
-            color: whitesmoke;
-        {%else%}
-            color: #222326;
-        {%endif%}
-        }
-    </style>
-{% endblock %}
 
 {% block content %}
-    <a style="float:right" href="/toggle-sorting">Sort ({% if system.listsortMTime %}last modified{% else %}a-z{% endif%})</a>
+    <a class="link-dark text-decoration-none float-end" href="/toggle-sorting">Sort ({% if system.listsortMTime %}last modified{% else %}a-z{% endif%})</a>
     <h2><b>{{ folder }}</b> ALL FILES</h2>
-    <ul id="list">
-        <li><i><a href="../">..</a></i></li>
+    <ul class="list-group list-group-flush h5">
+        <li class="list-group-item"><i class="bi bi-folder pe-3"></i><i><a class="link-dark text-decoration-none" href="../">..</a></i></li>
         {% for i in list %}
-            <li>
+            <li class="list-group-item">
                 {% if i.folder != "" and i.folder != folder %}
-                    <b><a class="folder" href="/list/{{ i.folder }}/">{{ i.folder }}/ </a></b>
+                    <i class="bi bi-folder pe-3"></i><a class="link-dark fst-italic" href="/list/{{ i.folder }}/">{{ i.folder }}/ </a>
                 {% else %}
-                    <a href="/{{ i.url }}">{{ i.doc }}</a>
+                    <i class="bi bi-file-earmark-text pe-3"></i><a class="link-dark text-decoration-none" href="/{{ i.url }}">{{ i.doc }}</a>
                 {% endif %}
             </li>
         {% endfor %}

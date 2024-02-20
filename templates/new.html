@@ -17,7 +17,7 @@
 
 {% block content %}
 
-    <form id="form" method="POST">
+    <form id="form" method="POST" onsubmit="setFormSubmitting()">
         <div class="form-group mb-3 col-12">
             <label for="name" class="form-label">Page name</label>
             <input type="text" class="form-control" id="name" name="PN" value="{{title}}">
@@ -87,5 +87,32 @@
             }
         });
 
+        var formSubmitting = false;
+        var setFormSubmitting = function() { formSubmitting = true; };
+        var isDirty = function() {
+            // Does a naive check to see if the content on the page have changed.
+            const loaded_content = document.getElementById("content").value;
+            const current_value = editor.getValue();
+            const old_page_with_changed_content = (current_value !== loaded_content)
+            const new_page_with_changed_content = (current_value !== "" && loaded_content === "")
+            const new_page_with_loaded_content = loaded_content !== "" && document.URL.endsWith("add_new")
+
+
+            return old_page_with_changed_content || new_page_with_changed_content || new_page_with_loaded_content;
+        }
+
+        window.onload = function() {
+            window.addEventListener("beforeunload", function (e) {
+                if (formSubmitting || !isDirty()) {
+                    return undefined;
+                }
+
+                var confirmationMessage = 'You have unsaved changes. '
+                                        + 'If you leave before saving, your changes will be lost.';
+
+                (e || window.event).returnValue = confirmationMessage; //Gecko + IE
+                return confirmationMessage; //Gecko + Webkit, Safari, Chrome etc.
+            });
+        };
     </script>
 {% endblock %}

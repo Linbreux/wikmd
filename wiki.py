@@ -10,7 +10,8 @@ import secrets
 
 from flask import Flask, render_template, request, redirect, url_for, make_response, send_file, \
     send_from_directory, flash
-from werkzeug.utils import safe_join
+
+from werkzeug.utils import safe_join, secure_filename
 from threading import Thread
 from hashlib import sha256
 from cache import Cache
@@ -82,12 +83,27 @@ def process(content: str, page_name: str):
 
 def ensure_page_can_be_created(page, page_name):
     filename = safe_join(cfg.wiki_directory, f"{page_name}.md")
-    if os.path.exists(filename):
+    path_exists = os.path.exists(filename)
+    safe_name = "/".join([secure_filename(part) for part in page_name.split("/")])
+    filename_is_ok = safe_name == page_name
+    if not path_exists and filename_is_ok and page_name:  # Early exist
+        return
+
+    if path_exists:
         flash('A page with that name already exists. The page name needs to be unique.')
-        app.logger.info(f"Page name exists >>> {page_name}")
-        content = process(request.form['CT'], page_name)
-        return render_template("new.html", content=content, title=page, upload_path=cfg.images_route,
-                               image_allowed_mime=cfg.image_allowed_mime, system=SYSTEM_SETTINGS)
+        app.logger.info(f"Page name exists >>> {page_name}.")
+
+    if not filename_is_ok:
+        flash(f"Page name not accepted. Try using '{safe_name}'.")
+        app.logger.info(f"Page name isn't secure >>> {page_name}.")
+
+    if not page_name:
+        flash(f"Your page needs a name.")
+        app.logger.info(f"No page name provided.")
+
+    content = process(request.form['CT'], page_name)
+    return render_template("new.html", content=content, title=page, upload_path=cfg.images_route,
+                           image_allowed_mime=cfg.image_allowed_mime, system=SYSTEM_SETTINGS)
 
 
 def save(page_name):
@@ -340,6 +356,8 @@ def remove(page):
 
     filename = safe_join(cfg.wiki_directory, f"{page}.md")
     os.remove(filename)
+    if not os.listdir(os.path.dirname(filename)):
+        os.removedirs(os.path.dirname(filename))
     git_sync_thread = Thread(target=wrm.git_sync, args=(page, "Remove"))
     git_sync_thread.start()
     return redirect("/")
