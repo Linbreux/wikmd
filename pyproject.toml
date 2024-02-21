@@ -42,3 +42,28 @@ build-backend = "setuptools.build_meta"
 pythonpath = [
   "src"
 ]
+
+[tool.ruff]
+src = ["", "tests"]
+select = ["ALL"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+    # S101: Check for assert
+    "S101",
+
+    # ANN001: Missing type annotation for public function
+    "ANN001",
+
+    # ANN201: Missing return type annotation for public function
+    "ANN201",
+
+    # D100: Missing docstring in public module
+    "D100",
+
+    # D103: Missing docstring in public function
+    "D103",
+
+    # PLR2004: Magic numbers
+    "PLR2004",
+]
