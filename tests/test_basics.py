@@ -6,6 +6,7 @@ import pytest
 from wikmd import wiki
 from wikmd.wiki import app, cfg
 
+cfg.wiki_directory = (Path(__file__).parent.parent / "wiki_template").as_posix()
 
 @pytest.fixture()
 def client():

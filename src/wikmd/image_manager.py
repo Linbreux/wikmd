@@ -64,7 +64,7 @@ class ImageManager:
         """Deletes images not used by any page"""
         saved_images = set(os.listdir(self.images_path))
         # Don't delete .gitignore
-        saved_images.discard(".gitignore")
+        saved_images.discard(".gitkeep")
 
         # Matches [*](/img/*) it does not matter if images_route is "/img" or "img"
         image_link_pattern = fr"\[(.*?)\]\(({os.path.join('/', self.cfg.images_route)}.+?)\)"

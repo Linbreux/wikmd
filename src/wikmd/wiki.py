@@ -6,6 +6,8 @@ import uuid
 from hashlib import sha256
 from os.path import exists
 from threading import Thread
+import shutil
+from pathlib import Path
 
 import pypandoc
 from flask import (
@@ -522,23 +524,41 @@ def setup_search():
     search.index_all(cfg.wiki_directory, items)
 
 
-def run_wiki():
-    """
-    Function that runs the wiki as a Flask app.
-    """
+def setup_wiki_template() -> bool:
+    """Copy wiki_template files into the wiki directory if it's empty."""
+    root = Path(__file__).parent.parent.parent
+
+    if not os.path.exists(cfg.wiki_directory):
+        app.logger.info("Wiki directory doesn't exists, copy template")
+        shutil.copytree(root / "wiki_template", cfg.wiki_directory)
+        return True
+    if len(os.listdir(cfg.wiki_directory)) == 0:
+        app.logger.info("Wiki directory is empty, copy template")
+        shutil.copytree(root / "wiki_template", cfg.wiki_directory, dirs_exist_ok=True)
+        return True
+    return False
+
+
+def run_wiki() -> None:
+    """Run the wiki as a Flask app."""
+    app.logger.info("Starting Wikmd")
     if int(cfg.wikmd_logging) == 1:
         logging.basicConfig(filename=cfg.wikmd_logging_file, level=logging.INFO)
+
+    setup_wiki_template()
 
     if not os.path.exists(UPLOAD_FOLDER_PATH):
         app.logger.info(f"Creating upload folder >>> {UPLOAD_FOLDER_PATH}")
         os.mkdir(UPLOAD_FOLDER_PATH)
 
+    wrm.initialize()
     im.cleanup_images()
     setup_search()
     app.logger.info("Spawning search indexer watchdog")
     watchdog = Watchdog(cfg.wiki_directory, cfg.search_dir)
     watchdog.start()
     app.run(host=cfg.wikmd_host, port=cfg.wikmd_port, debug=True, use_reloader=False)
+
 
 for plugin in plugins:
     if "request_html" in dir(plugin):

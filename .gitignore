@@ -98,17 +98,10 @@ cython_debug/
 
 # Generated plugin files
 src/wikmd/plugins/draw/drawings/*
-!src/wikmd/plugins/draw/drawings/.gitignore
+!src/wikmd/plugins/draw/drawings/.gitkeep
+
 
 # Personal wiki pages
-/wiki/*
-
-
-!src/wiki/Features.md
-!src/wiki/How to use the wiki.md
-!src/wiki/Markdown cheatsheet.md
-!src/wiki/Using the version control system.md
-!src/wiki/homepage.md
-!src/wiki/src
+wiki/*
 
 temp/*
