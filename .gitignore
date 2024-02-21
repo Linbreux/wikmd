@@ -96,6 +96,10 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+# Generated plugin files
+src/wikmd/plugins/draw/drawings/*
+!src/wikmd/plugins/draw/drawings/.gitignore
+
 # Personal wiki pages
 wiki/*
 
