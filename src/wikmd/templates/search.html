@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <style>
+        ul#list {
+            list-style: none;
+            padding: 0px
+        }
+
+        ul#list li {
+            margin: 5px;
+            padding-left: 15px;
+        {% if system.darktheme %}
+            background: #222326;
+        {% endif %}
+            border-left-style: solid;
+        }
+
+        ul#list li:hover {
+
+        {% if system.darktheme %}
+            background: #3f4448;
+        {% else %}
+            background: #ECECEC;
+        {% endif %}
+        }
+
+        ul#list li a {
+            font-size: 1.2em;
+
+        {% if system.darktheme %}
+            color: whitesmoke;
+        {% else %}
+            color: #222326;
+        {% endif %}
+        }
+
+        .pagination {
+           display: inline-block;
+        }
+
+        .pagination a {
+        {% if system.darktheme %}
+            color: whitesmoke;
+        {% else %}
+            color: #222326;
+        {% endif %}
+            float: left;
+            padding: 8px 16px;
+            text-decoration: none;
+        }
+
+        .pagination a.active {
+            background-color: #4CAF50;
+            color: whitesmoke;
+        }
+    </style>
+
+{% endblock %}
+
+{% block content %}
+    <h2>Found {{ num_results }} result(s) for '{{ search_term }}'</h2>
+    <p>
+        Did you mean?: 
+        {% for term in suggestions %}
+            <a href="/wikmd/staticstatic?q={{ term }}">{{ term }}</a>
+        {% if not loop.last %}, {% endif %}
+    {% endfor %}
+    <ul id="list">
+        {% for res in results|sort(attribute="score", reverse=True) %}
+            <li>
+                <p><a href="{{res.path}}/{{ res.title }}">{%if res.path != "."%}{{res.path}}/{%endif%}{{ res.title }}</a></p>
+                <p>{{ res.highlights|safe }}</p>
+            </li>
+        {% endfor %}
+    </ul>
+    {% if num_pages > 1 %}
+        <ul class="pagination">
+        {% for page in range(1, num_pages + 1) %}
+            <li class="pagination">
+                <a href="/wikmd/staticstatic?q={{ search_term }}&page={{ page }}" {% if page == current_page %} class="active" {% endif %}>{{ page }}</a>
+            </li>
+        {% endfor %}
+        <ul>
+    {% endif %}
+{% endblock %}

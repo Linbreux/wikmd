@@ -1,10 +1,8 @@
 import os
 import tempfile
 import time
-from unittest import mock
 
-from search import Search, Watchdog
-from wiki import app
+from wikmd.search import Search, Watchdog
 
 
 def test_textify():

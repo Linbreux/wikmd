@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{%block content%}
+
+<div class="row d-flex justify-content-center ">
+    <div class="col-lg-4">
+
+    <h1>Login</h1>
+    <a><i>You need password access to edit this page.</i></a>
+    <form method="POST">
+        <div class="mb-3 mt-3">
+            <label for="pass" class="form-label">Password</label>
+            <input type="password" class="form-control" name="password" id="pass">
+        </div>
+        <button class="btn btn-primary my-2 my-sm-0">Login</button>
+    </form>
+    </div>
+</div>
+{%endblock%}
+
