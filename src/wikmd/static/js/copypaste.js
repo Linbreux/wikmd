@@ -11,8 +11,8 @@ for (block = 0; block < codeblocks.length; block++) {
         + block 
         + "\" onclick=\"copyCodeBlock(" 
         + block 
-        + ")\" title=\"Copy to clipboard\" src=" + pathToCopyIcon + ""
-        + "\"/static\"></img>"
+        + ")\" title=\"Copy to clipboard\" src=\"/static/images/" + pathToCopyIcon + "\""
+        + "></img>"
 }
 
 function copyCodeBlock() {
