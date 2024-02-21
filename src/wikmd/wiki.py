@@ -41,7 +41,7 @@ HIDDEN_FOLDER_PATH_LIST = [pathify(cfg.wiki_directory, hidden_folder) for hidden
 HOMEPAGE_PATH = pathify(cfg.wiki_directory, cfg.homepage)
 HIDDEN_PATHS = tuple([UPLOAD_FOLDER_PATH, GIT_FOLDER_PATH, HOMEPAGE_PATH] + HIDDEN_FOLDER_PATH_LIST)
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder="templates", static_folder="static")
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER_PATH
 app.config['SECRET_KEY'] = cfg.secret_key
 
@@ -109,7 +109,7 @@ def ensure_page_can_be_created(page, page_name):
         app.logger.info(f"No page name provided.")
 
     content = process(request.form['CT'], page_name)
-    return render_template("templates/new.html", content=content, title=page, upload_path=cfg.images_route,
+    return render_template("new.html", content=content, title=page, upload_path=cfg.images_route,
                            image_allowed_mime=cfg.image_allowed_mime, system=SYSTEM_SETTINGS)
 
 
@@ -141,7 +141,7 @@ def search(search_term: str, page: int):
     page = int(page)
     results, num_results, num_pages, suggestions = search.search(search_term, page)
     return render_template(
-        'templates/search.html',
+        'search.html',
         search_term=search_term,
         num_results=num_results,
         num_pages=num_pages,
@@ -248,7 +248,7 @@ def list_wiki(folderpath):
     else:
         files_list.sort(key=lambda x: (str(x["url"]).casefold()))
 
-    return render_template('templates/list_files.html', list=files_list, folder=folderpath, system=SYSTEM_SETTINGS)
+    return render_template('list_files.html', list=files_list, folder=folderpath, system=SYSTEM_SETTINGS)
 
 
 @app.route('/<path:file_page>', methods=['GET'])
@@ -271,7 +271,7 @@ def file_page(file_page):
             html_content, mod = get_html(file_page)
 
             return render_template(
-                'templates/content.html', title=file_page, folder=folder, info=html_content, modif=mod,
+                'content.html', title=file_page, folder=folder, info=html_content, modif=mod,
                 system=SYSTEM_SETTINGS
         )
         except FileNotFoundError as e:
@@ -293,7 +293,7 @@ def index():
         if cached_entry:
             app.logger.info("Showing HTML page from cache >>> 'homepage'")
             return render_template(
-                'templates/index.html', homepage=cached_entry, system=SYSTEM_SETTINGS
+                'index.html', homepage=cached_entry, system=SYSTEM_SETTINGS
             )
 
         try:
@@ -307,7 +307,7 @@ def index():
         except Exception as e:
             app.logger.error(f"Conversion to HTML failed >>> {str(e)}")
 
-        return render_template('templates/index.html', homepage=html, system=SYSTEM_SETTINGS)
+        return render_template('index.html', homepage=html, system=SYSTEM_SETTINGS)
 
 
 @app.route('/add_new', methods=['POST', 'GET'])
@@ -330,7 +330,7 @@ def add_new():
         page_name = request.args.get("page")
         if page_name is None:
             page_name = ""
-        return render_template('templates/new.html', upload_path=cfg.images_route,
+        return render_template('new.html', upload_path=cfg.images_route,
                                image_allowed_mime=cfg.image_allowed_mime, title=page_name, system=SYSTEM_SETTINGS)
 
 
@@ -352,7 +352,7 @@ def edit_homepage():
         with open(os.path.join(cfg.wiki_directory, cfg.homepage), 'r', encoding="utf-8", errors='ignore') as f:
 
             content = f.read()
-        return render_template("templates/new.html", content=content, title=cfg.homepage_title, upload_path=cfg.images_route,
+        return render_template("new.html", content=content, title=cfg.homepage_title, upload_path=cfg.images_route,
                                image_allowed_mime=cfg.image_allowed_mime, system=SYSTEM_SETTINGS)
 
 
@@ -395,7 +395,7 @@ def edit(page):
         if exists(filename):
             with open(filename, 'r', encoding="utf-8", errors='ignore') as f:
                 content = f.read()
-            return render_template("templates/new.html", content=content, title=page, upload_path=cfg.images_route,
+            return render_template("new.html", content=content, title=page, upload_path=cfg.images_route,
                                    image_allowed_mime=cfg.image_allowed_mime, system=SYSTEM_SETTINGS)
         else:
             logger.error(f"{filename} does not exists. Creating a new one.")
@@ -435,7 +435,7 @@ def communicate_plugins():
 def graph():
     global links
     links = knowledge_graph.find_links()
-    return render_template("templates/knowledge-graph.html", links=links, system=SYSTEM_SETTINGS)
+    return render_template("knowledge-graph.html", links=links, system=SYSTEM_SETTINGS)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -454,7 +454,7 @@ def login(page):
             app.logger.info("Login failed!")
     else:
         app.logger.info("Display login page")
-    return render_template("templates/login.html", system=SYSTEM_SETTINGS)
+    return render_template("login.html", system=SYSTEM_SETTINGS)
 
 
 # Translate id to page path
