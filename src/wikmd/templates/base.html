@@ -19,10 +19,10 @@
         <link rel="stylesheet" href="{{ system.web_deps["default.min.css"] }}">
     {% endif %}
     <!-- wikmd custom -->
-    <link rel="stylesheet" type="text/css" href="/static/css/wiki.colors.css">
-    <link rel="stylesheet" type="text/css" href="/static/css/wiki.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/wiki.colors.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/wiki.css') }}">
     {% if system.darktheme == True %}
-        <link rel="stylesheet" type="text/css" href="/static/css/wiki.dark.css">
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/wiki.dark.css') }}">
     {% endif %}
     {% block head %}{% endblock %}
     {% for plug in system.plugins %}{% if plug.import_head is defined %}{{plug.import_head()|safe}}
