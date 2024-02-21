@@ -41,7 +41,7 @@ jobs:
       - name: Build & export
         uses: docker/build-push-action@v3
         with:
-          file: docker/Dockerfile
+          file: Dockerfile
           push: false
           tags: ${{ steps.meta.outputs.tags }}
           outputs: type=docker,dest=/tmp/wikmd.tar
@@ -116,6 +116,6 @@ jobs:
       - name: Publish
         uses: docker/build-push-action@v3
         with:
-          file: docker/Dockerfile
+          file: Dockerfile
           push: true
           tags: ${{ needs.build.outputs.wikmd_tags }}
