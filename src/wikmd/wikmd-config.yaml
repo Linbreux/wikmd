@@ -12,7 +12,7 @@ main_branch_name: "main"
 sync_with_remote: 0
 remote_url: ""
 
-wiki_directory: "wiki"
+wiki_directory: "../wiki"
 homepage: "homepage.md"
 homepage_title: "homepage"
 images_route: "img"
