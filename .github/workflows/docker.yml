@@ -96,6 +96,10 @@ jobs:
       - name: Assert wikmd status
         run: curl -I localhost:5000 2>&1 | awk '/HTTP\// {print $2}' | grep -w "200\|301"
 
+      # Check that wikmd is rendering
+      - name: Check wikmd rendering status
+        run: curl -s localhost:5000 | grep -w "What is it?"
+
   publish:
     # Publish if official repo and push to 'main' or new tag
     if: |
