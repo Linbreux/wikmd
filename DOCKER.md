@@ -2,10 +2,6 @@
 
 [wikmd](https://github.com/Linbreux/wikmd) is a file based wiki that uses markdown.
 
-This repo provides Docker files that are loosely based on those of the [linuxserver](https://www.linuxserver.io/) community.
-
-Docker files are available for arm, arm64 and amd64.
-
 ## Usage
 
 Here are some example snippets to help you get started creating a container.
