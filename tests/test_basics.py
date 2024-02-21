@@ -5,6 +5,9 @@ import pytest
 from wikmd import wiki
 from wikmd.wiki import app, cfg
 
+# Patch the wiki directory during testing
+cfg.wiki_directory = (Path(__file__).parent.parent / "wiki").as_posix()
+
 
 @pytest.fixture()
 def client():
@@ -38,7 +41,7 @@ def wiki_file(project_file):
 def test_wiki_exists():
     """Wiki directory exists and have content."""
     wiki_dir = Path(cfg.wiki_directory)
-    assert wiki_dir.exists()
+    assert wiki_dir.exists(), f"Wiki directory is at {wiki_dir.resolve().as_posix()}"
     assert len(list(wiki_dir.iterdir())) > 4
 
 
