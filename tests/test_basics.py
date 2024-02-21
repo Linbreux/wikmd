@@ -6,7 +6,7 @@ from wikmd import wiki
 from wikmd.wiki import app, cfg
 
 # Patch the wiki directory during testing
-cfg.wiki_directory = (Path(__file__).parent.parent / "wiki").as_posix()
+cfg.wiki_directory = (Path(__file__).parent.parent / "wiki_template").as_posix()
 
 
 @pytest.fixture()

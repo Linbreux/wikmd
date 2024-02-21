@@ -104,11 +104,4 @@ src/wikmd/plugins/draw/drawings/*
 # Personal wiki pages
 /wiki/*
 
-!/wiki/Features.md
-!/wiki/How to use the wiki.md
-!/wiki/Markdown cheatsheet.md
-!/wiki/Using the version control system.md
-!/wiki/homepage.md
-
-
 temp/*
