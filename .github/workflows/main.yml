@@ -29,7 +29,7 @@ jobs:
     - name: Start wikmd
       run: |
         cd src
-        python -m wikmd.wiki
+        python -m wikmd.wiki &
 
     - name: screenshots-ci-action
       uses: flameddd/screenshots-ci-action@master
