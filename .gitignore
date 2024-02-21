@@ -97,14 +97,13 @@ dmypy.json
 cython_debug/
 
 # Personal wiki pages
-/wiki/*
+wiki/*
 
 
-!src/wiki/Features.md
-!src/wiki/How to use the wiki.md
-!src/wiki/Markdown cheatsheet.md
-!src/wiki/Using the version control system.md
-!src/wiki/homepage.md
-!src/wiki/src
+!wiki/Features.md
+!wiki/How to use the wiki.md
+!wiki/Markdown cheatsheet.md
+!wiki/Using the version control system.md
+!wiki/homepage.md
 
 temp/*
