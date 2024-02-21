@@ -1,9 +1,8 @@
-import wiki
+from wikmd import wiki
 import pytest
-import pypandoc
 import os
 
-from wiki import app
+from wikmd.wiki import app
 
 @pytest.fixture
 def client():

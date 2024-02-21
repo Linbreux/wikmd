@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{%block head%}
+    <script type="text/javascript" src="{{ system.web_deps["vis-network.min.js"] }}"></script>
+
+    <style>
+        #mynetwork {
+            width: auto;
+            height: 800px;
+            border: 0px solid lightgray;
+        }
+    </style>
+{%endblock%}
+
+{%block content%}
+
+<div id="mynetwork"></div>
+
+<script type="text/javascript">
+    // create an array with nodes
+    var nodes = new vis.DataSet([
+        {% for link in links %}
+            {id: {{link.id}},value:{{link.links|length}}, label: "{{link.pagename}}"},
+        {% endfor %}
+    ]);
+
+    // create an array with edges
+    var edges = new vis.DataSet([
+        {% for link in links %}
+            {% for l in link.links %}
+                {from: {{link.id}}, to: {{l.id}}},
+            {% endfor %}
+        {% endfor %}
+
+    ]);
+
+    // create a network
+    var container = document.getElementById('mynetwork');
+
+    // provide the data in the vis format
+    var data = {
+        nodes: nodes,
+        edges: edges
+    };
+    var options = {
+        edges:{
+            arrows:{
+                to:{
+                    enabled: true,
+                    scaleFactor:0.4,
+                    type:"arrow",
+                },
+            },
+        },
+        nodes:{
+            shape: "dot",
+            scaling:{
+                label:{
+                    min: 12,
+                    max: 20,
+                }
+            },
+            font:{
+                {% if system.darktheme %}
+                    color: "#ffffff",
+                {%endif%}
+            }
+        }
+    };
+
+    // initialize your network!
+    var network = new vis.Network(container, data, options);
+    network.on("doubleClick", function (params) {
+        if (params.nodes[0] != undefined){
+            window.location.href = '/nav/'+params.nodes[0];
+        }
+      });
+</script>
+{%endblock%}
