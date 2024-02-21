@@ -1,6 +1,5 @@
-import os
-from pathlib import Path
 import shutil
+from pathlib import Path
 
 import pytest
 from wikmd import wiki
@@ -34,6 +33,13 @@ def project_file(test_file_content):
 @pytest.fixture()
 def wiki_file(project_file):
     return f"/{project_file.parent.name}/{project_file.stem}"
+
+
+def test_wiki_exists():
+    """Wiki directory exists and have content."""
+    wiki_dir = Path(cfg.wiki_directory)
+    assert wiki_dir.exists()
+    assert len(list(wiki_dir.iterdir())) > 4
 
 
 def test_homepage():
