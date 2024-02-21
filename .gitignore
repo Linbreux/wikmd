@@ -98,7 +98,7 @@ cython_debug/
 
 # Generated plugin files
 src/wikmd/plugins/draw/drawings/*
-!src/wikmd/plugins/draw/drawings/.gitignore
+!src/wikmd/plugins/draw/drawings/.gitkeep
 
 
 # Personal wiki pages
