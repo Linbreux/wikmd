@@ -24,10 +24,12 @@ jobs:
         pip install .[dev]
     - name: Test with pytest
       run: |
-        python -m pytest -v 
+        python -m pytest
         
     - name: Start wikmd
-      run: cd src && python wikmd.wiki
+      run: |
+        cd src
+        python -m wikmd.wiki
 
     - name: screenshots-ci-action
       uses: flameddd/screenshots-ci-action@master
