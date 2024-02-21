@@ -100,14 +100,15 @@ cython_debug/
 src/wikmd/plugins/draw/drawings/*
 !src/wikmd/plugins/draw/drawings/.gitignore
 
+
 # Personal wiki pages
-wiki/*
+/wiki/*
 
+!/wiki/Features.md
+!/wiki/How to use the wiki.md
+!/wiki/Markdown cheatsheet.md
+!/wiki/Using the version control system.md
+!/wiki/homepage.md
 
-!wiki/Features.md
-!wiki/How to use the wiki.md
-!wiki/Markdown cheatsheet.md
-!wiki/Using the version control system.md
-!wiki/homepage.md
 
 temp/*
