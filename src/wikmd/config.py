@@ -1,5 +1,4 @@
 import os
-
 import yaml
 
 WIKMD_CONFIG_FILE = "wikmd-config.yaml"
@@ -69,40 +68,40 @@ class WikmdConfig:
             os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
         # .yaml config file
-        with open(os.path.join(__location__,WIKMD_CONFIG_FILE)) as f:
+        with open(os.path.join(__location__, WIKMD_CONFIG_FILE)) as f:
             yaml_config = yaml.safe_load(f)
 
         # Load config parameters from env. vars, yaml or default values (the firsts take precedence)
-        self.wikmd_host = os.getenv("WIKMD_HOST") or yaml_config["wikmd_host"] or WIKMD_HOST_DEFAULT
-        self.wikmd_port = os.getenv("WIKMD_PORT") or yaml_config["wikmd_port"] or WIKMD_PORT_DEFAULT
-        self.wikmd_logging = os.getenv("WIKMD_LOGGING") or yaml_config["wikmd_logging"] or WIKMD_LOGGING_DEFAULT
-        self.wikmd_logging_file = os.getenv("WIKMD_LOGGING_FILE") or yaml_config["wikmd_logging_file"] or WIKMD_LOGGING_FILE_DEFAULT
+        self.wikmd_host = os.getenv("WIKMD_HOST") or yaml_config.get("wikmd_host", WIKMD_HOST_DEFAULT)
+        self.wikmd_port = os.getenv("WIKMD_PORT") or yaml_config.get("wikmd_port", WIKMD_PORT_DEFAULT)
+        self.wikmd_logging = os.getenv("WIKMD_LOGGING") or yaml_config.get("wikmd_logging", WIKMD_LOGGING_DEFAULT)
+        self.wikmd_logging_file = os.getenv("WIKMD_LOGGING_FILE") or yaml_config.get("wikmd_logging_file", WIKMD_LOGGING_FILE_DEFAULT)
 
-        self.git_user = os.getenv("GIT_USER") or yaml_config["git_user"] or GIT_USER_DEFAULT
-        self.git_email = os.getenv("GIT_EMAIL") or yaml_config["git_email"] or GIT_EMAIL_DEFAULT
+        self.git_user = os.getenv("GIT_USER") or yaml_config.get("git_user", GIT_USER_DEFAULT)
+        self.git_email = os.getenv("GIT_EMAIL") or yaml_config.get("git_emai", GIT_EMAIL_DEFAULT)
 
-        self.main_branch_name = os.getenv("MAIN_BRANCH_NAME") or yaml_config["main_branch_name"] or MAIN_BRANCH_NAME_DEFAULT
-        self.sync_with_remote = os.getenv("SYNC_WITH_REMOTE") or yaml_config["sync_with_remote"] or SYNC_WITH_REMOTE_DEFAULT
-        self.remote_url = os.getenv("REMOTE_URL") or yaml_config["remote_url"] or REMOTE_URL_DEFAULT
+        self.main_branch_name = os.getenv("MAIN_BRANCH_NAME") or yaml_config.get("main_branch_name", MAIN_BRANCH_NAME_DEFAULT)
+        self.sync_with_remote = os.getenv("SYNC_WITH_REMOTE") or yaml_config.get("sync_with_remote", SYNC_WITH_REMOTE_DEFAULT)
+        self.remote_url = os.getenv("REMOTE_URL") or yaml_config.get("remote_url", REMOTE_URL_DEFAULT)
 
-        self.wiki_directory = os.getenv("WIKI_DIRECTORY") or yaml_config["wiki_directory"] or WIKI_DIRECTORY_DEFAULT
-        self.homepage = os.getenv("HOMEPAGE") or yaml_config["homepage"] or HOMEPAGE_DEFAULT
-        self.homepage_title = os.getenv("HOMEPAGE_TITLE") or yaml_config["homepage_title"] or HOMEPAGE_TITLE_DEFAULT
-        self.images_route = os.getenv("IMAGES_ROUTE") or yaml_config["images_route"] or IMAGES_ROUTE_DEFAULT
+        self.wiki_directory = os.getenv("WIKI_DIRECTORY") or yaml_config.get("wiki_directory", WIKI_DIRECTORY_DEFAULT)
+        self.homepage = os.getenv("HOMEPAGE") or yaml_config.get("homepage", HOMEPAGE_DEFAULT)
+        self.homepage_title = os.getenv("HOMEPAGE_TITLE") or yaml_config.get("homepage_title", HOMEPAGE_TITLE_DEFAULT)
+        self.images_route = os.getenv("IMAGES_ROUTE") or yaml_config.get("images_route", IMAGES_ROUTE_DEFAULT)
 
-        self.hide_folder_in_wiki = os.getenv("hide_folder_in_wiki")or yaml_config["hide_folder_in_wiki"] or HIDE_FOLDER_IN_WIKI
+        self.hide_folder_in_wiki = os.getenv("HIDE_FOLDER_IN_WIKI") or yaml_config.get("hide_folder_in_wiki", HIDE_FOLDER_IN_WIKI)
 
-        self.plugins = os.getenv("WIKI_PLUGINS")or yaml_config["plugins"] or PLUGINS
+        self.plugins = os.getenv("WIKI_PLUGINS") or yaml_config.get("plugins", PLUGINS)
 
-        self.protect_edit_by_password = os.getenv("PROTECT_EDIT_BY_PASSWORD") or yaml_config["protect_edit_by_password"] or PROTECT_EDIT_BY_PASSWORD
-        self.password_in_sha_256 = os.getenv("PASSWORD_IN_SHA_256") or yaml_config["password_in_sha_256"] or PASSWORD_IN_SHA_256
+        self.protect_edit_by_password = os.getenv("PROTECT_EDIT_BY_PASSWORD") or yaml_config.get("protect_edit_by_password", PROTECT_EDIT_BY_PASSWORD)
+        self.password_in_sha_256 = os.getenv("PASSWORD_IN_SHA_256") or yaml_config.get("password_in_sha_256", PASSWORD_IN_SHA_256)
 
-        self.local_mode = (os.getenv("LOCAL_MODE") in ["True", "true", "Yes", "yes"]) or yaml_config["local_mode"] or LOCAL_MODE
+        self.local_mode = (os.getenv("LOCAL_MODE") in ["True", "true", "Yes", "yes"]) or yaml_config.get("local_mode", LOCAL_MODE)
 
         self.image_allowed_mime = config_list(yaml_config, "IMAGE_ALLOWED_MIME", IMAGE_ALLOWED_MIME_DEFAULT)
-        self.optimize_images = os.getenv("OPTIMIZE_IMAGES") or yaml_config["optimize_images"] or OPTIMIZE_IMAGES_DEFAULT
+        self.optimize_images = os.getenv("OPTIMIZE_IMAGES") or yaml_config.get("optimize_images", OPTIMIZE_IMAGES_DEFAULT)
 
-        self.cache_dir = os.getenv("CACHE_DIR") or yaml_config["cache_dir"] or CACHE_DIR
-        self.search_dir = os.getenv("SEARCH_DIR") or yaml_config["search_dir"] or SEARCH_DIR
+        self.cache_dir = os.getenv("CACHE_DIR") or yaml_config.get("cache_dir", CACHE_DIR)
+        self.search_dir = os.getenv("SEARCH_DIR") or yaml_config.get("search_dir", SEARCH_DIR)
 
-        self.secret_key = os.getenv("SECRET_KEY") or yaml_config["secret_key"] or SECRET_KEY
+        self.secret_key = os.getenv("SECRET_KEY") or yaml_config.get("secret_key", SECRET_KEY)
