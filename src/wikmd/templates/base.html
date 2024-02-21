@@ -19,10 +19,10 @@
         <link rel="stylesheet" href="{{ system.web_deps["default.min.css"] }}">
     {% endif %}
     <!-- wikmd custom -->
-    <link rel="stylesheet" type="text/css" href="/staticki.colors.css">
-    <link rel="stylesheet" type="text/css" href="/staticki.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/wiki.colors.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/wiki.css') }}">
     {% if system.darktheme == True %}
-        <link rel="stylesheet" type="text/css" href="/staticki.dark.css">
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/wiki.dark.css') }}">
     {% endif %}
     {% block head %}{% endblock %}
     {% for plug in system.plugins %}{% if plug.import_head is defined %}{{plug.import_head()|safe}}
@@ -37,14 +37,14 @@
     <!-- Navbar top -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
         <div class="container-fluid mx-2">
-            <a class="navbar-brand" href="/wikmd/staticstatic">Wiki</a>
+            <a class="navbar-brand" href="/">Wiki</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
                     aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <form class="d-flex my-sm-4 my-lg-0 ms-lg-4" method="GET" action="/wikmd/staticstatic">
+                <form class="d-flex my-sm-4 my-lg-0 ms-lg-4" method="GET" action="/">
                     <input class="form-control me-2" type="search" placeholder="Search something..." aria-label="Search" name="q">
                     <button class="btn btn-primary me-2" type="submit">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search">
@@ -79,12 +79,12 @@
                 <ul class="navbar-nav ms-auto ms-sm-2">
                     <li class="nav-item">
                         <a class="nav-link" href="/knowledge-graph">
-                            <img height="25px" src="/wikmd/static/graph_5.svg" alt="graph">
+                            <img height="25px" src="/static/images/graph_5.svg" alt="graph">
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/toggle-darktheme?return={{ url_for(request.endpoint, **request.view_args) }}">
-                            <img src="/wikmd/static/contrast-2-fill.svg" alt="toggle dark theme">
+                            <img src="/static/images/contrast-2-fill.svg" alt="toggle dark theme">
                         </a>
                     </li>
                 </ul>

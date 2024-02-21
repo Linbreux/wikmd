@@ -4,12 +4,12 @@
 {%block head%}
     <link rel="stylesheet" href="{{ system.web_deps["filepond.css"] }}">
     <link href="{{ system.web_deps["codemirror.min.css"] }}" rel="stylesheet">
-    <link href="/staticdemirror.custom.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/codemirror.custom.css') }}" rel="stylesheet">
 
     <!-- Add dark css if dark theme is toggled -->
     {% if system.darktheme == True %}
-        <link href="/staticdemirror.custom.dark.css" rel="stylesheet">
-        <link rel="stylesheet" href="/staticlepond.dark.css" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/codemirror.custom.dark.css') }}" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/filepond.dark.css') }}" rel="stylesheet">
     {% endif %}
 
 {%endblock%}

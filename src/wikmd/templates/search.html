@@ -63,7 +63,7 @@
     <p>
         Did you mean?: 
         {% for term in suggestions %}
-            <a href="/wikmd/staticstatic?q={{ term }}">{{ term }}</a>
+            <a href="/?q={{ term }}">{{ term }}</a>
         {% if not loop.last %}, {% endif %}
     {% endfor %}
     <ul id="list">
@@ -78,7 +78,7 @@
         <ul class="pagination">
         {% for page in range(1, num_pages + 1) %}
             <li class="pagination">
-                <a href="/wikmd/staticstatic?q={{ search_term }}&page={{ page }}" {% if page == current_page %} class="active" {% endif %}>{{ page }}</a>
+                <a href="/?q={{ search_term }}&page={{ page }}" {% if page == current_page %} class="active" {% endif %}>{{ page }}</a>
             </li>
         {% endfor %}
         <ul>

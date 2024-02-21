@@ -4,7 +4,7 @@
     <a class="link-dark text-decoration-none float-end" href="/toggle-sorting">Sort ({% if system.listsortMTime %}last modified{% else %}a-z{% endif%})</a>
     <h2><b>{{ folder }}</b> ALL FILES</h2>
     <ul class="list-group list-group-flush h5">
-        <li class="list-group-item"><i class="bi bi-folder pe-3"></i><i><a class="link-dark text-decoration-none" href="../../..">..</a></i></li>
+        <li class="list-group-item"><i class="bi bi-folder pe-3"></i><i><a class="link-dark text-decoration-none" href="../">..</a></i></li>
         {% for i in list %}
             <li class="list-group-item">
                 {% if i.folder != "" and i.folder != folder %}
