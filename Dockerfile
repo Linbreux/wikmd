@@ -32,7 +32,7 @@ RUN python -m pip install --no-cache-dir --upgrade .
 
 
 COPY ./src/wikmd /code/wikmd
-COPY ./wiki /wiki
+COPY ./wiki_template /wiki_template
 
 # Expose the port that the application listens on.
 EXPOSE 5000

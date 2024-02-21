@@ -35,12 +35,14 @@ class WikiRepoManager:
 
         self.wiki_directory = cfg.wiki_directory
         self.sync_with_remote = cfg.sync_with_remote
-        if not os.path.exists(self.wiki_directory):
-            os.mkdir(self.wiki_directory)
         self.remote_url = cfg.remote_url
-        
 
         self.repo: Optional[Repo] = None
+
+    def initialize(self):
+        if not os.path.exists(self.wiki_directory):
+            self.flask_app.logger.warning("wiki directory doesn't exist")
+            return
         self.__git_repo_init()
 
     def __git_repo_init(self):
