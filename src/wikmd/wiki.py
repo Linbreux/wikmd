@@ -232,13 +232,13 @@ def get_html(file_page: str) -> [str, str]:
     return html, mod
 
 
-@app.route("/list/", methods=["GET"])
+@app.get("/list/")
 def list_full_wiki() -> str:
     """Get files in the wiki root."""
     return list_wiki("")
 
 
-@app.route("/list/<path:folderpath>/", methods=["GET"])
+@app.get("/list/<path:folderpath>/")
 def list_wiki(folderpath: str) -> str:
     """List all the pages in a given folder of the wiki."""
     files_list = []
@@ -280,7 +280,7 @@ def list_wiki(folderpath: str) -> str:
         system=SYSTEM_SETTINGS)
 
 
-@app.route('/search', methods=['GET'])
+@app.get('/search')
 def search_route():
     if request.args.get("q"):
         return search(request.args.get("q"), request.args.get("page", 1))
@@ -288,8 +288,9 @@ def search_route():
     return redirect("/")
 
 
-@app.route('/<path:file_page>', methods=['GET'])
-def file_page(file_page):
+@app.get("/<path:file_page>")
+def wiki_page(file_page: str) -> None | str | Response:
+    """Get wiki page."""
     git_sync_thread = Thread(target=wrm.git_pull, args=())
     git_sync_thread.start()
 
@@ -298,22 +299,21 @@ def file_page(file_page):
 
     try:
         html_content, mod = get_html(file_page)
-
-        return render_template(
-            "content.html",
-            title=file_page,
-            folder="",
-            info=html_content,
-            modif=mod,
-            system=SYSTEM_SETTINGS,
-    )
-
     except FileNotFoundError as e:
         app.logger.info(e)
         return redirect("/add_new?page=" + file_page)
 
+    return render_template(
+        "content.html",
+        title=file_page,
+        folder="",
+        info=html_content,
+        modif=mod,
+        system=SYSTEM_SETTINGS,
+    )
 
-@app.route("/", methods=["GET"])
+
+@app.get("/")
 def index() -> None | str | Response:
     """Render home page."""
 
@@ -345,24 +345,12 @@ def index() -> None | str | Response:
     return render_template("index.html", homepage=html, system=SYSTEM_SETTINGS)
 
 
-@app.route("/add_new", methods=["POST", "GET"])
-def add_new() -> str | Response:
+@app.get("/add_new")
+def add_new_view() -> str | Response:
     """Add a new page."""
     if (bool(cfg.protect_edit_by_password) and
             (request.cookies.get("session_wikmd") not in SESSIONS)):
         return login("/add_new")
-    if request.method == "POST":
-        page_name = fetch_page_name()
-
-        re_render_page = ensure_page_can_be_created(page_name, page_name)
-        if re_render_page:
-            return re_render_page
-
-        save(page_name)
-        git_sync_thread = Thread(target=wrm.git_sync, args=(page_name, "Add"))
-        git_sync_thread.start()
-
-        return redirect(url_for("file_page", file_page=page_name))
 
     page_name = request.args.get("page")
     if page_name is None:
@@ -376,21 +364,32 @@ def add_new() -> str | Response:
     )
 
 
-@app.route("/edit/homepage", methods=["POST", "GET"])
-def edit_homepage() -> str | Response:
-    """Change home page content."""
+@app.post("/add_new")
+def add_new_post() -> str | Response:
+    """Add a new page."""
+    if (bool(cfg.protect_edit_by_password) and
+            (request.cookies.get("session_wikmd") not in SESSIONS)):
+        return login("/add_new")
+
+    page_name = fetch_page_name()
+
+    re_render_page = ensure_page_can_be_created(page_name, page_name)
+    if re_render_page:
+        return re_render_page
+
+    save(page_name)
+    git_sync_thread = Thread(target=wrm.git_sync, args=(page_name, "Add"))
+    git_sync_thread.start()
+
+    return redirect(url_for("wiki_page", file_page=page_name))
+
+
+@app.get("/edit/homepage")
+def edit_homepage_view() -> str | Response:
+    """Get the edit home page view."""
     if (bool(cfg.protect_edit_by_password) and
             (request.cookies.get("session_wikmd") not in SESSIONS)):
         return login("edit/homepage")
-
-    if request.method == "POST":
-        page_name = fetch_page_name()
-
-        save(page_name)
-        git_sync_thread = Thread(target=wrm.git_sync, args=(page_name, "Edit"))
-        git_sync_thread.start()
-
-        return redirect(url_for("file_page", file_page=page_name))
 
     with (Path(cfg.wiki_directory) / cfg.homepage).open("r",
                                                         encoding="utf-8",
@@ -407,12 +406,28 @@ def edit_homepage() -> str | Response:
     )
 
 
-@app.route("/remove/<path:page>", methods=["GET"])
-def remove(page: str) -> Response:
+@app.post("/edit/homepage")
+def edit_homepage_post() -> str | Response:
+    """Change home page content."""
+    if (bool(cfg.protect_edit_by_password) and
+            (request.cookies.get("session_wikmd") not in SESSIONS)):
+        return login("edit/homepage")
+
+    page_name = "homepage"
+
+    save(page_name)
+    git_sync_thread = Thread(target=wrm.git_sync, args=(page_name, "Edit"))
+    git_sync_thread.start()
+
+    return redirect(url_for("/"))
+
+
+@app.get("/remove/<path:page>")
+def remove(page: str) -> Response:  # TODO: This shouldn't be a GET
     """Remove a page."""
     if (bool(cfg.protect_edit_by_password) and
             (request.cookies.get("session_wikmd") not in SESSIONS)):
-        return redirect(url_for("file_page", file_page=page))
+        return redirect(url_for("wiki_page", file_page=page))
 
     filename = Path(safe_join(cfg.wiki_directory, f"{page}.md"))
     filename.unlink()
@@ -423,31 +438,14 @@ def remove(page: str) -> Response:
     return redirect("/")
 
 
-@app.route("/edit/<path:page>", methods=["POST", "GET"])
-def edit(page: str) -> Response | str:
-    """Change page content."""
+@app.get("/edit/<path:page>")
+def edit_view(page: str) -> Response | str:
+    """View the edit page populated with current content."""
     if (bool(cfg.protect_edit_by_password) and
             (request.cookies.get("session_wikmd") not in SESSIONS)):
         return login("edit/" + page)
 
     filename = Path(safe_join(cfg.wiki_directory, f"{page}.md"))
-    if request.method == "POST":
-        page_name = fetch_page_name()
-
-        if page_name != page:
-            re_render_page = ensure_page_can_be_created(page_name, page_name)
-            if re_render_page:
-                return re_render_page
-
-            filename.unlink()
-
-        save(page_name)
-        git_sync_thread = Thread(target=wrm.git_sync, args=(page_name, "Edit"))
-        git_sync_thread.start()
-
-        return redirect(url_for("file_page", file_page=page_name))
-
-    # GET
     if filename.exists():
         with filename.open("r", encoding="utf-8", errors="ignore") as f:
             content = f.read()
@@ -471,7 +469,31 @@ def edit(page: str) -> Response | str:
     )
 
 
-@app.route(f"/{cfg.images_route}", methods=["POST", "DELETE"])
+@app.post("/edit/<path:page>")
+def edit(page: str) -> Response | str:
+    """Change page content."""
+    if (bool(cfg.protect_edit_by_password) and
+            (request.cookies.get("session_wikmd") not in SESSIONS)):
+        return login("edit/" + page)
+
+    filename = Path(safe_join(cfg.wiki_directory, f"{page}.md"))
+    page_name = fetch_page_name()
+
+    if page_name != page:
+        re_render_page = ensure_page_can_be_created(page_name, page_name)
+        if re_render_page:
+            return re_render_page
+
+        filename.unlink()
+
+    save(page_name)
+    git_sync_thread = Thread(target=wrm.git_sync, args=(page_name, "Edit"))
+    git_sync_thread.start()
+
+    return redirect(url_for("wiki_page", file_page=page_name))
+
+
+@app.post(f"/{cfg.images_route}")
 def upload_file() -> str:
     """Upload file to the wiki."""
     if (bool(cfg.protect_edit_by_password) and
@@ -479,31 +501,35 @@ def upload_file() -> str:
         return login()
 
     app.logger.info("Uploading new image ...")
-    # Upload image when POST
-    if request.method == "POST":
-        return im.save_images(request.files)
+    return im.save_images(request.files)
 
-    # DELETE
+
+@app.delete(f"/{cfg.images_route}")
+def delete_file() -> str:
+    """Delete file from the wiki."""
+    if (bool(cfg.protect_edit_by_password) and
+            (request.cookies.get("session_wikmd") not in SESSIONS)):
+        return login()
+
     # request data is in format "b'nameoffile.png" decode to utf-8
     file_name = request.data.decode("utf-8")
     im.delete_image(file_name)
     return "OK"
 
 
-@app.route("/plug_com", methods=["POST"])
+@app.post("/plug_com")
 def communicate_plugins() -> str:
     """Send the request to the plugins."""
     if (bool(cfg.protect_edit_by_password) and
             (request.cookies.get("session_wikmd") not in SESSIONS)):
         return login()
-    if request.method == "POST":
-        for plugin in plugins:
-            if "communicate_plugin" in dir(plugin):
-                return plugin.communicate_plugin(request)
+    for plugin in plugins:
+        if "communicate_plugin" in dir(plugin):
+            return plugin.communicate_plugin(request)
     return "nothing to do"
 
 
-@app.route("/knowledge-graph", methods=["GET"])
+@app.get("/knowledge-graph")
 def graph() -> str:
     """Get the knowledge-graph."""
     global links
@@ -511,36 +537,37 @@ def graph() -> str:
     return render_template("knowledge-graph.html", links=links, system=SYSTEM_SETTINGS)
 
 
-@app.route("/login", methods=["GET", "POST"])
-def login(page: str) -> str | Response:
-    """Login Route."""
-    if request.method == "POST":
-        password = request.form["password"]
-        sha_string = sha256(password.encode("utf-8")).hexdigest()
-        if sha_string == cfg.password_in_sha_256.lower():
-            app.logger.info("User successfully logged in")
-            resp = make_response(redirect("/" + page))
-            session = secrets.token_urlsafe(1024 // 8)
-            resp.set_cookie("session_wikmd", session)
-            SESSIONS.append(session)
-            return resp
-        app.logger.info("Login failed!")
+@app.get("/login")
+def login_view() -> str | Response:
+    """Get login view."""
     app.logger.info("Display login page")
     return render_template("login.html", system=SYSTEM_SETTINGS)
 
 
-# Translate id to page path
+@app.post("/login")
+def login(page: str) -> str | Response:
+    """Login Route."""
+    password = request.form["password"]
+    sha_string = sha256(password.encode("utf-8")).hexdigest()
+    if sha_string == cfg.password_in_sha_256.lower():
+        app.logger.info("User successfully logged in")
+        resp = make_response(redirect("/" + page))
+        session = secrets.token_urlsafe(1024 // 8)
+        resp.set_cookie("session_wikmd", session)
+        SESSIONS.append(session)
+        return resp
+    app.logger.info("Login failed!")
 
-
-@app.route("/nav/<path:id>/", methods=["GET"])
+@app.get("/nav/<path:id>/")
 def nav_id_to_page(id: str) -> Response:
+    """Translate id to page path."""
     for i in links:
         if i["id"] == int(id):
             return redirect("/" + i["path"])
     return redirect("/")
 
 
-@app.route(f"/{cfg.images_route}/<path:image_name>")
+@app.get(f"/{cfg.images_route}/<path:image_name>")
 def display_image(image_name: str) -> str | Response:
     image_path = (Path(UPLOAD_FOLDER_PATH) / image_name).resolve().as_posix()
     try:
@@ -556,21 +583,21 @@ def display_image(image_name: str) -> str | Response:
     return response
 
 
-@app.route("/toggle-darktheme/", methods=["GET"])
+@app.get("/toggle-darktheme/")
 def toggle_darktheme() -> Response:
     """Toggle dark theme."""
     SYSTEM_SETTINGS["darktheme"] = not SYSTEM_SETTINGS["darktheme"]
     return redirect(request.args.get("return", "/"))  # redirect to the same page URL
 
 
-@app.route("/toggle-sorting/", methods=["GET"])
+@app.get("/toggle-sorting/")
 def toggle_sort() -> Response:
     """Toggle sort mode."""
     SYSTEM_SETTINGS["listsortMTime"] = not SYSTEM_SETTINGS["listsortMTime"]
     return redirect("/list")
 
 
-@app.route("/favicon.ico")
+@app.get("/favicon.ico")
 def favicon() -> Response:
     """Favicon."""
     return send_from_directory(Path(app.root_path) / "static",
