@@ -1,17 +1,19 @@
+from __future__ import annotations
+
 import logging
 import os
 import secrets
+import shutil
 import time
 import uuid
 from hashlib import sha256
-from os.path import exists
-from threading import Thread
-import shutil
 from pathlib import Path
+from threading import Thread
 
 import pypandoc
 from flask import (
     Flask,
+    Response,
     flash,
     make_response,
     redirect,
@@ -23,6 +25,7 @@ from flask import (
 )
 from lxml.html.clean import clean_html
 from werkzeug.utils import safe_join
+
 from wikmd import knowledge_graph
 from wikmd.cache import Cache
 from wikmd.config import WikmdConfig
@@ -38,10 +41,12 @@ SESSIONS = []
 cfg = WikmdConfig()
 
 UPLOAD_FOLDER_PATH = pathify(cfg.wiki_directory, cfg.images_route)
-GIT_FOLDER_PATH = pathify(cfg.wiki_directory, '.git')
-HIDDEN_FOLDER_PATH_LIST = [pathify(cfg.wiki_directory, hidden_folder) for hidden_folder in cfg.hide_folder_in_wiki]
+GIT_FOLDER_PATH = pathify(cfg.wiki_directory, ".git")
+HIDDEN_FOLDER_PATH_LIST = [pathify(cfg.wiki_directory, hidden_folder)
+                           for hidden_folder in cfg.hide_folder_in_wiki]
 HOMEPAGE_PATH = pathify(cfg.wiki_directory, cfg.homepage)
-HIDDEN_PATHS = tuple([UPLOAD_FOLDER_PATH, GIT_FOLDER_PATH, HOMEPAGE_PATH] + HIDDEN_FOLDER_PATH_LIST)
+HIDDEN_PATHS = (UPLOAD_FOLDER_PATH, GIT_FOLDER_PATH,
+                HOMEPAGE_PATH, *HIDDEN_FOLDER_PATH_LIST)
 
 _project_folder = Path(__file__).parent
 app = Flask(__name__,
@@ -55,13 +60,17 @@ app.config['SECRET_KEY'] = cfg.secret_key
 app.logger.setLevel(logging.INFO)
 
 # file logger
-logger = logging.getLogger('werkzeug')
+logger = logging.getLogger("werkzeug")
 logger.setLevel(logging.ERROR)
 
 web_deps = get_web_deps(cfg.local_mode, app.logger)
 
 # plugins
-plugins = PluginLoader(flask_app=app, config=cfg, plugins=cfg.plugins, web_deps=web_deps).get_plugins()
+plugins = PluginLoader(
+    flask_app=app,
+    config=cfg,
+    plugins=cfg.plugins,
+    web_deps=web_deps).get_plugins()
 
 wrm = WikiRepoManager(flask_app=app)
 cache = Cache(cfg.cache_dir)
@@ -71,12 +80,13 @@ SYSTEM_SETTINGS = {
     "darktheme": False,
     "listsortMTime": False,
     "web_deps": web_deps,
-    "plugins": plugins
+    "plugins": plugins,
 }
 
-def process(content: str, page_name: str):
-    """
-    Function that processes the content with the plugins.
+
+def process(content: str, page_name: str) -> str:
+    """Process the content with the plugins.
+
     It also manages CRLF to LF conversion.
     :param content: content
     :param page_name: name of the page
@@ -88,13 +98,15 @@ def process(content: str, page_name: str):
     # Process the content with the plugins
     for plugin in plugins:
         if "process_md" in dir(plugin):
-            app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_md >>> {page_name}")
+            app.logger.info("Plug/%s - process_md >>> %s",
+                            plugin.get_plugin_name(), page_name)
             processed = plugin.process_md(processed)
 
     return processed
 
 
-def ensure_page_can_be_created(page, page_name):
+def ensure_page_can_be_created(page: str, page_name: str) -> None | str:
+    """Check that a path name is valid."""
     filename = safe_join(cfg.wiki_directory, f"{page_name}.md")
     if filename is None:
         flash(f"Page name not accepted. Contains disallowed characters.")
@@ -104,54 +116,53 @@ def ensure_page_can_be_created(page, page_name):
         safe_name = "/".join([secure_filename(part) for part in page_name.split("/")])
         filename_is_ok = safe_name == page_name
         if not path_exists and filename_is_ok and page_name:  # Early exist
-            return
+            return None
 
         if path_exists:
-            flash('A page with that name already exists. The page name needs to be unique.')
-            app.logger.info(f"Page name exists >>> {page_name}.")
+            flash("A page with that name already exists. The page name needs to be unique.")
+            app.logger.info("Page name exists >>> %s.", page_name)
 
         if not filename_is_ok:
             flash(f"Page name not accepted. Try using '{safe_name}'.")
-            app.logger.info(f"Page name isn't secure >>> {page_name}.")
+            app.logger.info("Page name isn't secure >>> %s.", page_name)
 
         if not page_name:
-            flash(f"Your page needs a name.")
-            app.logger.info(f"No page name provided.")
+            flash("Your page needs a name.")
+            app.logger.info("No page name provided.")
 
-    content = process(request.form['CT'], page_name)
-    return render_template("new.html", content=content, title=page, upload_path=cfg.images_route,
-                           image_allowed_mime=cfg.image_allowed_mime, system=SYSTEM_SETTINGS)
+    content = process(request.form["CT"], page_name)
+    return render_template("new.html",
+                           content=content, title=page,
+                           upload_path=cfg.images_route,
+                           image_allowed_mime=cfg.image_allowed_mime,
+                           system=SYSTEM_SETTINGS)
 
 
-def save(page_name):
-    """
-    Function that processes and saves a *.md page.
-    :param page_name: name of the page
-    """
-    content = process(request.form['CT'], page_name)
-    app.logger.info(f"Saving >>> '{page_name}' ...")
+def save(page_name: str) -> None:
+    """Get file content from the form and save it."""
+    content = process(request.form["CT"], page_name)
+    app.logger.info("Saving >>> '%s' ...", page_name)
 
     try:
-        filename = safe_join(cfg.wiki_directory, f"{page_name}.md")
-        dirname = os.path.dirname(filename)
-        if not os.path.exists(dirname):
-            os.makedirs(dirname)
-        with open(filename, 'w', encoding="utf-8") as f:
+        filename = Path(safe_join(cfg.wiki_directory, f"{page_name}.md"))
+        dirname = filename.parent
+        dirname.mkdir(exist_ok=True)
+
+        with filename.open("w", encoding="utf-8") as f:
             f.write(content)
     except Exception as e:
-        app.logger.error(f"Error while saving '{page_name}' >>> {str(e)}")
+        # TODO: Use Flask Abort?
+        app.logger.exception("Error while saving '%s'", page_name)
 
 
-def search(search_term: str, page: int):
-    """
-    Function that searches for a term and shows the results.
-    """
-    app.logger.info(f"Searching >>> '{search_term}' ...")
+def search(search_term: str, page: int) -> str:
+    """Preform a search for a term and shows the results."""
+    app.logger.info("Searching >>> '%s' ...", search_term)
     search = Search(cfg.search_dir)
     page = int(page)
     results, num_results, num_pages, suggestions = search.search(search_term, page)
     return render_template(
-        'search.html',
+        "search.html",
         search_term=search_term,
         num_results=num_results,
         num_pages=num_pages,
@@ -163,102 +174,110 @@ def search(search_term: str, page: int):
 
 
 def fetch_page_name() -> str:
-    page_name = request.form['PN']
+    """Get the name of the page from the form."""
+    page_name = request.form["PN"]
     if page_name[-4:] == "{id}":
         page_name = f"{page_name[:-4]}{uuid.uuid4().hex}"
     return page_name
 
 
-def get_html(file_page):
-    """
-    Function to return the html of a certain file page
-    """
-    md_file_path = safe_join(cfg.wiki_directory, f"{file_page}.md")
-    mod = "Last modified: %s" % time.ctime(os.path.getmtime(md_file_path))
+def get_html(file_page: str) -> [str, str]:
+    """Get the content of the file."""
+    md_file_path = Path(safe_join(cfg.wiki_directory, f"{file_page}.md"))
+    mod = "Last modified: %s" % time.ctime(md_file_path.stat().st_mtime)
     folder = file_page.split("/")
     file_page = folder[-1:][0]
-    folder = folder[:-1]
-    folder = "/".join(folder)
 
-    cached_entry = cache.get(md_file_path)
+    cached_entry = cache.get(md_file_path.as_posix())
     if cached_entry:
-        app.logger.info(f"Showing HTML page from cache >>> '{file_page}'")
+        app.logger.info("Showing HTML page from cache >>> '%s'", file_page)
 
         for plugin in plugins:
             if "process_html" in dir(plugin):
-                app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_html >>> {file_page}")
+                app.logger.info("Plug/%s - process_html >>> %s",
+                                plugin.get_plugin_name(), file_page)
                 cached_entry = plugin.process_html(cached_entry)
-        
+
         return cached_entry, mod
 
-    app.logger.info(f"Converting to HTML with pandoc >>> '{md_file_path}' ...")
+    app.logger.info("Converting to HTML with pandoc >>> '%s' ...", md_file_path)
 
-    html = pypandoc.convert_file(md_file_path, "html5",
-                                    format='md', extra_args=["--mathjax"], filters=['pandoc-xnos'])
+    html = pypandoc.convert_file(
+        md_file_path,
+        "html5",
+        format="md",
+        extra_args=["--mathjax"],
+        filters=["pandoc-xnos"],
+    )
 
     if html.strip():
         html = clean_html(html)
 
     for plugin in plugins:
         if "process_before_cache_html" in dir(plugin):
-            app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_before_cache_html >>> {file_page}")
+            app.logger.info("Plug/%s - process_before_cache_html >>> %s",
+                            plugin.get_plugin_name(), file_page)
             html = plugin.process_before_cache_html(html)
 
-    cache.set(md_file_path, html)
+    cache.set(md_file_path.as_posix(), html)
 
     for plugin in plugins:
         if "process_html" in dir(plugin):
-            app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_html >>> {file_page}")
+            app.logger.info("Plug/%s - process_html >>> %s",
+                            plugin.get_plugin_name(), file_page)
             html = plugin.process_html(html)
 
-    app.logger.info(f"Showing HTML page >>> '{file_page}'")
+    app.logger.info("Showing HTML page >>> '%s'", file_page)
 
     return html, mod
 
 
-@app.route('/list/', methods=['GET'])
-def list_full_wiki():
+@app.route("/list/", methods=["GET"])
+def list_full_wiki() -> str:
+    """Get files in the wiki root."""
     return list_wiki("")
 
 
-@app.route('/list/<path:folderpath>/', methods=['GET'])
-def list_wiki(folderpath):
-    """
-    Lists all the pages in a given folder of the wiki.
-    """
+@app.route("/list/<path:folderpath>/", methods=["GET"])
+def list_wiki(folderpath: str) -> str:
+    """List all the pages in a given folder of the wiki."""
     files_list = []
 
     requested_path = safe_join(cfg.wiki_directory, folderpath)
     if requested_path is None:
         app.logger.info("Requested unsafe path >>> showing homepage")
         return index()
-    app.logger.info(f"Showing >>> all files in {folderpath}")
+    app.logger.info("Showing >>> all files in %s", folderpath)
 
     for item in os.listdir(requested_path):
-        item_path = pathify(requested_path, item)  # wiki/dir1/dir2/...
-        item_mtime = os.path.getmtime(item_path)
+        item_path = Path(pathify(requested_path, item))  # wiki/dir1/dir2/...
+        item_mtime = item_path.stat().st_mtime
 
-        if not item_path.startswith(HIDDEN_PATHS):  # skip hidden paths
-            rel_item_path = item_path[len(cfg.wiki_directory + "/"):]  # dir1/dir2/...
-            item_url = os.path.splitext(rel_item_path)[0]  # eventually drop the extension
-            folder = rel_item_path if os.path.isdir(item_path) else ""
+        if not item_path.as_posix().startswith(HIDDEN_PATHS):  # skip hidden paths
 
+            rel_item_path = item_path.relative_to(cfg.wiki_directory)
+            item_url = rel_item_path.with_suffix("")  # drop the extension
+            folder = rel_item_path.as_posix() if item_path.is_dir() else ""
             info = {
-                'doc': item,
-                'url': item_url,
-                'folder': folder,
-                'folder_url': folder,
-                'mtime': item_mtime,
+                "doc": item,
+                "url": item_url,
+                "folder": folder,
+                "folder_url": folder,
+                "mtime": item_mtime,
             }
             files_list.append(info)
 
     # Sorting
-    if SYSTEM_SETTINGS['listsortMTime']:
+    if SYSTEM_SETTINGS["listsortMTime"]:
         files_list.sort(key=lambda x: x["mtime"], reverse=True)
     else:
         files_list.sort(key=lambda x: (str(x["url"]).casefold()))
 
-    return render_template('list_files.html', list=files_list, folder=folderpath, system=SYSTEM_SETTINGS)
+    return render_template(
+        "list_files.html",
+        list=files_list,
+        folder=folderpath,
+        system=SYSTEM_SETTINGS)
 
 
 @app.route('/search', methods=['GET'])
@@ -275,52 +294,64 @@ def file_page(file_page):
     git_sync_thread.start()
 
     if "favicon" in file_page:  # if the GET request is not for the favicon
-        return
+        return None
 
     try:
         html_content, mod = get_html(file_page)
 
         return render_template(
-            'content.html', title=file_page, folder="", info=html_content, modif=mod,
-            system=SYSTEM_SETTINGS
+            "content.html",
+            title=file_page,
+            folder="",
+            info=html_content,
+            modif=mod,
+            system=SYSTEM_SETTINGS,
     )
+
     except FileNotFoundError as e:
         app.logger.info(e)
         return redirect("/add_new?page=" + file_page)
 
 
-@app.route('/', methods=['GET'])
-def index():
+@app.route("/", methods=["GET"])
+def index() -> None | str | Response:
+    """Render home page."""
+
     html = ""
     app.logger.info("Showing HTML page >>> 'homepage'")
 
-    md_file_path = os.path.join(cfg.wiki_directory, cfg.homepage)
-    cached_entry = cache.get(md_file_path)
+    md_file_path = Path(cfg.wiki_directory) / cfg.homepage
+    cached_entry = cache.get(md_file_path.as_posix())
     if cached_entry:
         app.logger.info("Showing HTML page from cache >>> 'homepage'")
         return render_template(
-            'index.html', homepage=cached_entry, system=SYSTEM_SETTINGS
+            "index.html",
+            homepage=cached_entry,
+            system=SYSTEM_SETTINGS,
         )
 
     try:
         app.logger.info("Converting to HTML with pandoc >>> 'homepage' ...")
         html = pypandoc.convert_file(
-            md_file_path, "html5", format='md', extra_args=["--mathjax"],
-            filters=['pandoc-xnos'])
+            md_file_path, "html5", format="md", extra_args=["--mathjax"],
+            filters=["pandoc-xnos"])
         html = clean_html(html)
-        cache.set(md_file_path, html)
+        cache.set(md_file_path.as_posix(), html)
 
     except Exception as e:
-        app.logger.error(f"Conversion to HTML failed >>> {str(e)}")
+        # TODO: Use Flask Abort?
+        app.logger.exception("Conversion to HTML failed")
 
-    return render_template('index.html', homepage=html, system=SYSTEM_SETTINGS)
+    return render_template("index.html", homepage=html, system=SYSTEM_SETTINGS)
 
 
-@app.route('/add_new', methods=['POST', 'GET'])
-def add_new():
-    if bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS):
+@app.route("/add_new", methods=["POST", "GET"])
+def add_new() -> str | Response:
+    """Add a new page."""
+    if (bool(cfg.protect_edit_by_password) and
+            (request.cookies.get("session_wikmd") not in SESSIONS)):
         return login("/add_new")
-    if request.method == 'POST':
+    if request.method == "POST":
         page_name = fetch_page_name()
 
         re_render_page = ensure_page_can_be_created(page_name, page_name)
@@ -332,20 +363,27 @@ def add_new():
         git_sync_thread.start()
 
         return redirect(url_for("file_page", file_page=page_name))
-    else:
-        page_name = request.args.get("page")
-        if page_name is None:
-            page_name = ""
-        return render_template('new.html', upload_path=cfg.images_route,
-                               image_allowed_mime=cfg.image_allowed_mime, title=page_name, system=SYSTEM_SETTINGS)
+
+    page_name = request.args.get("page")
+    if page_name is None:
+        page_name = ""
+    return render_template(
+        "new.html",
+        upload_path=cfg.images_route,
+        image_allowed_mime=cfg.image_allowed_mime,
+        title=page_name,
+        system=SYSTEM_SETTINGS,
+    )
 
 
-@app.route('/edit/homepage', methods=['POST', 'GET'])
-def edit_homepage():
-    if bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS):
+@app.route("/edit/homepage", methods=["POST", "GET"])
+def edit_homepage() -> str | Response:
+    """Change home page content."""
+    if (bool(cfg.protect_edit_by_password) and
+            (request.cookies.get("session_wikmd") not in SESSIONS)):
         return login("edit/homepage")
 
-    if request.method == 'POST':
+    if request.method == "POST":
         page_name = fetch_page_name()
 
         save(page_name)
@@ -353,36 +391,47 @@ def edit_homepage():
         git_sync_thread.start()
 
         return redirect(url_for("file_page", file_page=page_name))
-    else:
 
-        with open(os.path.join(cfg.wiki_directory, cfg.homepage), 'r', encoding="utf-8", errors='ignore') as f:
+    with (Path(cfg.wiki_directory) / cfg.homepage).open("r",
+                                                        encoding="utf-8",
+                                                        errors="ignore") as f:
+        content = f.read()
 
-            content = f.read()
-        return render_template("new.html", content=content, title=cfg.homepage_title, upload_path=cfg.images_route,
-                               image_allowed_mime=cfg.image_allowed_mime, system=SYSTEM_SETTINGS)
+    return render_template(
+        "new.html",
+        content=content,
+        title=cfg.homepage_title,
+        upload_path=cfg.images_route,
+        image_allowed_mime=cfg.image_allowed_mime,
+        system=SYSTEM_SETTINGS,
+    )
 
 
-@app.route('/remove/<path:page>', methods=['GET'])
-def remove(page):
-    if bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS):
+@app.route("/remove/<path:page>", methods=["GET"])
+def remove(page: str) -> Response:
+    """Remove a page."""
+    if (bool(cfg.protect_edit_by_password) and
+            (request.cookies.get("session_wikmd") not in SESSIONS)):
         return redirect(url_for("file_page", file_page=page))
 
-    filename = safe_join(cfg.wiki_directory, f"{page}.md")
-    os.remove(filename)
-    if not os.listdir(os.path.dirname(filename)):
-        os.removedirs(os.path.dirname(filename))
+    filename = Path(safe_join(cfg.wiki_directory, f"{page}.md"))
+    filename.unlink()
+    if not any(filename.parent.iterdir()):
+        filename.parent.rmdir()
     git_sync_thread = Thread(target=wrm.git_sync, args=(page, "Remove"))
     git_sync_thread.start()
     return redirect("/")
 
 
-@app.route('/edit/<path:page>', methods=['POST', 'GET'])
-def edit(page):
-    if bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS):
+@app.route("/edit/<path:page>", methods=["POST", "GET"])
+def edit(page: str) -> Response | str:
+    """Change page content."""
+    if (bool(cfg.protect_edit_by_password) and
+            (request.cookies.get("session_wikmd") not in SESSIONS)):
         return login("edit/" + page)
 
-    filename = safe_join(cfg.wiki_directory, f"{page}.md")
-    if request.method == 'POST':
+    filename = Path(safe_join(cfg.wiki_directory, f"{page}.md"))
+    if request.method == "POST":
         page_name = fetch_page_name()
 
         if page_name != page:
@@ -390,45 +439,62 @@ def edit(page):
             if re_render_page:
                 return re_render_page
 
-            os.remove(filename)
+            filename.unlink()
 
         save(page_name)
         git_sync_thread = Thread(target=wrm.git_sync, args=(page_name, "Edit"))
         git_sync_thread.start()
 
         return redirect(url_for("file_page", file_page=page_name))
-    else:
-        if exists(filename):
-            with open(filename, 'r', encoding="utf-8", errors='ignore') as f:
-                content = f.read()
-            return render_template("new.html", content=content, title=page, upload_path=cfg.images_route,
-                                   image_allowed_mime=cfg.image_allowed_mime, system=SYSTEM_SETTINGS)
-        else:
-            logger.error(f"{filename} does not exists. Creating a new one.")
-            return render_template("new.html", content="", title=page, upload_path=cfg.images_route,
-                                   image_allowed_mime=cfg.image_allowed_mime, system=SYSTEM_SETTINGS)
+
+    # GET
+    if filename.exists():
+        with filename.open("r", encoding="utf-8", errors="ignore") as f:
+            content = f.read()
+        return render_template(
+            "new.html",
+            content=content,
+            title=page,
+            upload_path=cfg.images_route,
+            image_allowed_mime=cfg.image_allowed_mime,
+            system=SYSTEM_SETTINGS,
+        )
+
+    logger.error("%s does not exists. Creating a new one.", filename)
+    return render_template(
+        "new.html",
+        content="",
+        title=page,
+        upload_path=cfg.images_route,
+        image_allowed_mime=cfg.image_allowed_mime,
+        system=SYSTEM_SETTINGS,
+    )
 
 
-@app.route(os.path.join("/", cfg.images_route), methods=['POST', 'DELETE'])
-def upload_file():
-    if bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS):
+@app.route(f"/{cfg.images_route}", methods=["POST", "DELETE"])
+def upload_file() -> str:
+    """Upload file to the wiki."""
+    if (bool(cfg.protect_edit_by_password) and
+            (request.cookies.get("session_wikmd") not in SESSIONS)):
         return login()
-    app.logger.info(f"Uploading new image ...")
+
+    app.logger.info("Uploading new image ...")
     # Upload image when POST
     if request.method == "POST":
         return im.save_images(request.files)
 
-    # DELETE when DELETE
-    if request.method == "DELETE":
-        # request data is in format "b'nameoffile.png" decode to utf-8
-        file_name = request.data.decode("utf-8")
-        im.delete_image(file_name)
-        return 'OK'
+    # DELETE
+    # request data is in format "b'nameoffile.png" decode to utf-8
+    file_name = request.data.decode("utf-8")
+    im.delete_image(file_name)
+    return "OK"
 
 
-@app.route("/plug_com", methods=['POST'])
-def communicate_plugins():
-    if bool(cfg.protect_edit_by_password) and (request.cookies.get('session_wikmd') not in SESSIONS):
+@app.route("/plug_com", methods=["POST"])
+def communicate_plugins() -> str:
+    """Send the request to the plugins."""
+    if (bool(cfg.protect_edit_by_password) and
+            (request.cookies.get("session_wikmd") not in SESSIONS)):
         return login()
     if request.method == "POST":
         for plugin in plugins:
@@ -437,18 +503,20 @@ def communicate_plugins():
     return "nothing to do"
 
 
-@app.route('/knowledge-graph', methods=['GET'])
-def graph():
+@app.route("/knowledge-graph", methods=["GET"])
+def graph() -> str:
+    """Get the knowledge-graph."""
     global links
     links = knowledge_graph.find_links()
     return render_template("knowledge-graph.html", links=links, system=SYSTEM_SETTINGS)
 
 
-@app.route('/login', methods=['GET', 'POST'])
-def login(page):
+@app.route("/login", methods=["GET", "POST"])
+def login(page: str) -> str | Response:
+    """Login Route."""
     if request.method == "POST":
         password = request.form["password"]
-        sha_string = sha256(password.encode('utf-8')).hexdigest()
+        sha_string = sha256(password.encode("utf-8")).hexdigest()
         if sha_string == cfg.password_in_sha_256.lower():
             app.logger.info("User successfully logged in")
             resp = make_response(redirect("/" + page))
@@ -456,18 +524,16 @@ def login(page):
             resp.set_cookie("session_wikmd", session)
             SESSIONS.append(session)
             return resp
-        else:
-            app.logger.info("Login failed!")
-    else:
-        app.logger.info("Display login page")
+        app.logger.info("Login failed!")
+    app.logger.info("Display login page")
     return render_template("login.html", system=SYSTEM_SETTINGS)
 
 
 # Translate id to page path
 
 
-@app.route('/nav/<path:id>/', methods=['GET'])
-def nav_id_to_page(id):
+@app.route("/nav/<path:id>/", methods=["GET"])
+def nav_id_to_page(id: str) -> Response:
     for i in links:
         if i["id"] == int(id):
             return redirect("/" + i["path"])
@@ -475,51 +541,56 @@ def nav_id_to_page(id):
 
 
 @app.route(f"/{cfg.images_route}/<path:image_name>")
-def display_image(image_name):
-    image_path = safe_join(UPLOAD_FOLDER_PATH, image_name)
+def display_image(image_name: str) -> str | Response:
+    image_path = (Path(UPLOAD_FOLDER_PATH) / image_name).resolve().as_posix()
     try:
         response = send_file(Path(image_path).resolve())
     except Exception:
-        app.logger.error(f"Could not find image: {image_path}")
+        # TODO: Use Flask Abort(404)?
+        app.logger.exception("Could not find image: %s", image_path)
         return ""
 
-    app.logger.info(f"Showing image >>> '{image_path}'")
+    app.logger.info("Showing image >>> '%s'", image_path)
     # cache indefinitely
     response.headers["Cache-Control"] = "max-age=31536000, immutable"
     return response
 
 
-@app.route('/toggle-darktheme/', methods=['GET'])
-def toggle_darktheme():
-    SYSTEM_SETTINGS['darktheme'] = not SYSTEM_SETTINGS['darktheme']
+@app.route("/toggle-darktheme/", methods=["GET"])
+def toggle_darktheme() -> Response:
+    """Toggle dark theme."""
+    SYSTEM_SETTINGS["darktheme"] = not SYSTEM_SETTINGS["darktheme"]
     return redirect(request.args.get("return", "/"))  # redirect to the same page URL
 
 
-@app.route('/toggle-sorting/', methods=['GET'])
-def toggle_sort():
-    SYSTEM_SETTINGS['listsortMTime'] = not SYSTEM_SETTINGS['listsortMTime']
+@app.route("/toggle-sorting/", methods=["GET"])
+def toggle_sort() -> Response:
+    """Toggle sort mode."""
+    SYSTEM_SETTINGS["listsortMTime"] = not SYSTEM_SETTINGS["listsortMTime"]
     return redirect("/list")
 
 
-@app.route('/favicon.ico')
-def favicon():
-    return send_from_directory(os.path.join(app.root_path, 'static'),
-                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
+@app.route("/favicon.ico")
+def favicon() -> Response:
+    """Favicon."""
+    return send_from_directory(Path(app.root_path) / "static",
+                               "favicon.ico", mimetype="image/vnd.microsoft.icon")
 
 
-def setup_search():
+def setup_search() -> None:
     search = Search(cfg.search_dir, create=True)
 
     app.logger.info("Search index creation...")
     items = []
-    for root, subfolder, files in os.walk(cfg.wiki_directory):
+    for root, _, files in os.walk(cfg.wiki_directory):
         for item in files:
             if (
-                    root.startswith(os.path.join(cfg.wiki_directory, '.git')) or
-                    root.startswith(os.path.join(cfg.wiki_directory, cfg.images_route))
+                    root.startswith((f"{cfg.wiki_directory}/.git",
+                                    f"{cfg.wiki_directory}/{cfg.images_route}"))
             ):
                 continue
-            page_name, ext = os.path.splitext(item)
+            item_ = Path(item)
+            page_name, ext = item_.stem, item_.suffix
             if ext.lower() != ".md":
                 continue
             path = os.path.relpath(root, cfg.wiki_directory)
@@ -532,11 +603,11 @@ def setup_wiki_template() -> bool:
     """Copy wiki_template files into the wiki directory if it's empty."""
     root = Path(__file__).parent
 
-    if not os.path.exists(cfg.wiki_directory):
+    if not Path(cfg.wiki_directory).exists():
         app.logger.info("Wiki directory doesn't exists, copy template")
         shutil.copytree(root / "wiki_template", cfg.wiki_directory)
         return True
-    if len(os.listdir(cfg.wiki_directory)) == 0:
+    if not any(Path(cfg.wiki_directory).iterdir()):
         app.logger.info("Wiki directory is empty, copy template")
         shutil.copytree(root / "wiki_template", cfg.wiki_directory, dirs_exist_ok=True)
         return True
@@ -546,14 +617,18 @@ def setup_wiki_template() -> bool:
 def run_wiki() -> None:
     """Run the wiki as a Flask app."""
     app.logger.info("Starting Wikmd with wiki directory %s", Path(cfg.wiki_directory).resolve())
+
+    for plugin in plugins:
+        if "request_html" in dir(plugin):
+            plugin.request_html(get_html)
+
     if int(cfg.wikmd_logging) == 1:
         logging.basicConfig(filename=cfg.wikmd_logging_file, level=logging.INFO)
 
     setup_wiki_template()
 
-    if not os.path.exists(UPLOAD_FOLDER_PATH):
-        app.logger.info(f"Creating upload folder >>> {UPLOAD_FOLDER_PATH}")
-        os.mkdir(UPLOAD_FOLDER_PATH)
+    upload_folder = Path(UPLOAD_FOLDER_PATH)
+    upload_folder.mkdir(exist_ok=True)
 
     wrm.initialize()
     im.cleanup_images()
@@ -561,12 +636,13 @@ def run_wiki() -> None:
     app.logger.info("Spawning search indexer watchdog")
     watchdog = Watchdog(cfg.wiki_directory, cfg.search_dir)
     watchdog.start()
-    app.run(host=cfg.wikmd_host, port=cfg.wikmd_port, debug=True, use_reloader=False)
+    app.run(
+        host=cfg.wikmd_host,
+        port=cfg.wikmd_port,
+        debug=True,
+        use_reloader=False,
+    )
 
 
-for plugin in plugins:
-    if "request_html" in dir(plugin):
-        plugin.request_html(get_html)
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_wiki()
