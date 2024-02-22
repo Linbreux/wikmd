@@ -8,12 +8,9 @@ from git import Repo, InvalidGitRepositoryError, GitCommandError, NoSuchPathErro
 from config import WikmdConfig
 from utils import move_all_files
 
-
 TEMP_DIR = "temp"
 
-
 cfg = WikmdConfig()
-
 
 def is_git_repo(path: str) -> bool:
     """

@@ -6,7 +6,6 @@ from config import WikmdConfig
 
 cfg = WikmdConfig()
 
-
 def extend_ids(links):
     for link in links:
         for l in link["links"]:

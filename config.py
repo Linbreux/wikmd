@@ -1,44 +1,8 @@
 import os
 import yaml
 
-WIKMD_CONFIG_FILE = "wikmd-config.yaml"
-
-# Default config parameters
-WIKMD_HOST_DEFAULT = "0.0.0.0"
-WIKMD_PORT_DEFAULT = 5000
-WIKMD_LOGGING_DEFAULT = 1
-WIKMD_LOGGING_FILE_DEFAULT = "wikmd.log"
-
-GIT_EMAIL_DEFAULT = "wikmd@no-mail.com"
-GIT_USER_DEFAULT = "wikmd"
-
-MAIN_BRANCH_NAME_DEFAULT = "main"
-SYNC_WITH_REMOTE_DEFAULT = 0
-REMOTE_URL_DEFAULT = ""
-
-WIKI_DIRECTORY_DEFAULT = "wiki"
-HOMEPAGE_DEFAULT = "homepage.md"
-HOMEPAGE_TITLE_DEFAULT = "homepage"
-IMAGES_ROUTE_DEFAULT = "img"
-
-HIDE_FOLDER_IN_WIKI = []
-
-PLUGINS = []
-
-PROTECT_EDIT_BY_PASSWORD = 0
-PASSWORD_IN_SHA_256 = "0E9C700FAB2D5B03B0581D080E74A2D7428758FC82BD423824C6C11D6A7F155E" #pw: wikmd
-
-# if False: Uses external CDNs to serve some files
-LOCAL_MODE = False
-
+WIKMD_CONFIG_FILE = "config.yaml"
 IMAGE_ALLOWED_MIME_DEFAULT = ["image/gif", "image/jpeg", "image/png", "image/svg+xml", "image/webp"]
-# you need to have cwebp installed for optimization to work
-OPTIMIZE_IMAGES_DEFAULT = "no"
-
-CACHE_DIR = "/dev/shm/wikmd/cache"
-SEARCH_DIR = "/dev/shm/wikmd/searchindex"
-
-SECRET_KEY = '\xfd{H\xe5<\x95\xf9\xe3\x96.5\xd1\x01O<!\xd5\xa2\xa0\x9fR"\xa1\xa8'
 
 def config_list(yaml_config, config_item_name, default_value):
     """
@@ -72,36 +36,36 @@ class WikmdConfig:
             yaml_config = yaml.safe_load(f)
 
         # Load config parameters from env. vars, yaml or default values (the firsts take precedence)
-        self.wikmd_host = os.getenv("WIKMD_HOST") or yaml_config.get("wikmd_host", WIKMD_HOST_DEFAULT)
-        self.wikmd_port = os.getenv("WIKMD_PORT") or yaml_config.get("wikmd_port", WIKMD_PORT_DEFAULT)
-        self.wikmd_logging = os.getenv("WIKMD_LOGGING") or yaml_config.get("wikmd_logging", WIKMD_LOGGING_DEFAULT)
-        self.wikmd_logging_file = os.getenv("WIKMD_LOGGING_FILE") or yaml_config.get("wikmd_logging_file", WIKMD_LOGGING_FILE_DEFAULT)
+        self.wikmd_host = yaml_config.get("wikmd_host")
+        self.wikmd_port =  yaml_config.get("wikmd_port")
+        self.wikmd_logging = yaml_config.get("wikmd_logging")
+        self.wikmd_logging_file = yaml_config.get("wikmd_logging_file")
 
-        self.git_user = os.getenv("GIT_USER") or yaml_config.get("git_user", GIT_USER_DEFAULT)
-        self.git_email = os.getenv("GIT_EMAIL") or yaml_config.get("git_emai", GIT_EMAIL_DEFAULT)
+        self.git_user = yaml_config.get("git_user")
+        self.git_email = yaml_config.get("git_email")
 
-        self.main_branch_name = os.getenv("MAIN_BRANCH_NAME") or yaml_config.get("main_branch_name", MAIN_BRANCH_NAME_DEFAULT)
-        self.sync_with_remote = os.getenv("SYNC_WITH_REMOTE") or yaml_config.get("sync_with_remote", SYNC_WITH_REMOTE_DEFAULT)
-        self.remote_url = os.getenv("REMOTE_URL") or yaml_config.get("remote_url", REMOTE_URL_DEFAULT)
+        self.main_branch_name = yaml_config.get("main_branch_name")
+        self.sync_with_remote = yaml_config.get("sync_with_remote")
+        self.remote_url = yaml_config.get("remote_url")
 
-        self.wiki_directory = os.getenv("WIKI_DIRECTORY") or yaml_config.get("wiki_directory", WIKI_DIRECTORY_DEFAULT)
-        self.homepage = os.getenv("HOMEPAGE") or yaml_config.get("homepage", HOMEPAGE_DEFAULT)
-        self.homepage_title = os.getenv("HOMEPAGE_TITLE") or yaml_config.get("homepage_title", HOMEPAGE_TITLE_DEFAULT)
-        self.images_route = os.getenv("IMAGES_ROUTE") or yaml_config.get("images_route", IMAGES_ROUTE_DEFAULT)
+        self.wiki_directory = yaml_config.get("wiki_directory")
+        self.homepage = yaml_config.get("homepage")
+        self.homepage_title = yaml_config.get("homepage_title")
+        self.images_route = yaml_config.get("images_route")
 
-        self.hide_folder_in_wiki = os.getenv("HIDE_FOLDER_IN_WIKI") or yaml_config.get("hide_folder_in_wiki", HIDE_FOLDER_IN_WIKI)
+        self.hide_folder_in_wiki = yaml_config.get("hide_folder_in_wiki")
 
-        self.plugins = os.getenv("WIKI_PLUGINS") or yaml_config.get("plugins", PLUGINS)
+        self.plugins = yaml_config.get("plugins")
 
-        self.protect_edit_by_password = os.getenv("PROTECT_EDIT_BY_PASSWORD") or yaml_config.get("protect_edit_by_password", PROTECT_EDIT_BY_PASSWORD)
-        self.password_in_sha_256 = os.getenv("PASSWORD_IN_SHA_256") or yaml_config.get("password_in_sha_256", PASSWORD_IN_SHA_256)
+        self.protect_edit_by_password = yaml_config.get("protect_edit_by_password")
+        self.password_in_sha_256 = yaml_config.get("password_in_sha_256")
 
-        self.local_mode = (os.getenv("LOCAL_MODE") in ["True", "true", "Yes", "yes"]) or yaml_config.get("local_mode", LOCAL_MODE)
+        self.local_mode = yaml_config.get("local_mode")
 
         self.image_allowed_mime = config_list(yaml_config, "IMAGE_ALLOWED_MIME", IMAGE_ALLOWED_MIME_DEFAULT)
-        self.optimize_images = os.getenv("OPTIMIZE_IMAGES") or yaml_config.get("optimize_images", OPTIMIZE_IMAGES_DEFAULT)
+        self.optimize_images = yaml_config.get("optimize_images", )
 
-        self.cache_dir = os.getenv("CACHE_DIR") or yaml_config.get("cache_dir", CACHE_DIR)
-        self.search_dir = os.getenv("SEARCH_DIR") or yaml_config.get("search_dir", SEARCH_DIR)
+        self.cache_dir = yaml_config.get("cache_dir")
+        self.search_dir = yaml_config.get("search_dir")
 
-        self.secret_key = os.getenv("SECRET_KEY") or yaml_config.get("secret_key", SECRET_KEY)
+        self.secret_key = yaml_config.get("secret_key")
