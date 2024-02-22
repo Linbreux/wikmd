@@ -1,14 +1,14 @@
 import os
 import yaml
 
-WIKMD_CONFIG_FILE = "config.yaml"
-IMAGE_ALLOWED_MIME_DEFAULT = ["image/gif", "image/jpeg", "image/png", "image/svg+xml", "image/webp"]
+WIKMD_CONFIG_FILE = "../config.yaml"
 
-def config_list(yaml_config, config_item_name, default_value):
+def config_list(yaml_config, config_item_name):
     """
     Function that gets a config item of type list.
     Priority is in the following order either from environment variables or yaml file or default value.
     """
+    default_value = ["image/gif", "image/jpeg", "image/png", "image/svg+xml", "image/webp"]
     if os.getenv(config_item_name.upper()):
         # Env Var in the form `EXAMPLE="a, b, c, d"` or `EXAMPLE="a,b,c,d"`
         return [ext.strip() for ext in os.getenv(config_item_name.upper()).split(",")]
@@ -62,7 +62,7 @@ class WikmdConfig:
 
         self.local_mode = yaml_config.get("local_mode")
 
-        self.image_allowed_mime = config_list(yaml_config, "IMAGE_ALLOWED_MIME", IMAGE_ALLOWED_MIME_DEFAULT)
+        self.image_allowed_mime = config_list(yaml_config, "image_allowed_mime")
         self.optimize_images = yaml_config.get("optimize_images", )
 
         self.cache_dir = yaml_config.get("cache_dir")

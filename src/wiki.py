@@ -35,6 +35,7 @@ HOMEPAGE_PATH = pathify(cfg.wiki_directory, cfg.homepage)
 HIDDEN_PATHS = tuple([UPLOAD_FOLDER_PATH, GIT_FOLDER_PATH, HOMEPAGE_PATH] + HIDDEN_FOLDER_PATH_LIST)
 
 app = Flask(__name__)
+app = Flask(__name__, template_folder="../templates")
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER_PATH
 app.config['SECRET_KEY'] = cfg.secret_key
 
