@@ -401,7 +401,7 @@ def edit(page):
                                    image_allowed_mime=cfg.image_allowed_mime, system=SYSTEM_SETTINGS)
         else:
             logger.error(f"{filename} does not exists. Creating a new one.")
-            return render_template("templates/new.html", content="", title=page, upload_path=cfg.images_route,
+            return render_template("new.html", content="", title=page, upload_path=cfg.images_route,
                                    image_allowed_mime=cfg.image_allowed_mime, system=SYSTEM_SETTINGS)
 
 
