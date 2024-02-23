@@ -44,7 +44,7 @@
             </button>
 
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <form class="d-flex my-sm-4 my-lg-0 ms-lg-4" method="GET" action="/">
+                <form class="d-flex my-sm-4 my-lg-0 ms-lg-4" method="GET" action="{{ url_for('search_route') }}">
                     <input class="form-control me-2" type="search" placeholder="Search something..." aria-label="Search" name="q">
                     <button class="btn btn-primary me-2" type="submit">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search">

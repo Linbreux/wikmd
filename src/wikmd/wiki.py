@@ -261,63 +261,59 @@ def list_wiki(folderpath):
     return render_template('list_files.html', list=files_list, folder=folderpath, system=SYSTEM_SETTINGS)
 
 
-@app.route('/<path:file_page>', methods=['GET'])
-def file_page(file_page):
+@app.route('/search', methods=['GET'])
+def search_route():
     if request.args.get("q"):
         return search(request.args.get("q"), request.args.get("page", 1))
-    else:
+    flash("You didn't enter anything to search for")
+    return redirect("/")
 
-        git_sync_thread = Thread(target=wrm.git_pull, args=())
-        git_sync_thread.start()
 
-        html = ""
-        mod = ""
-        folder = ""
+@app.route('/<path:file_page>', methods=['GET'])
+def file_page(file_page):
+    git_sync_thread = Thread(target=wrm.git_pull, args=())
+    git_sync_thread.start()
 
-        if "favicon" in file_page:  # if the GET request is not for the favicon
-            return
+    if "favicon" in file_page:  # if the GET request is not for the favicon
+        return
 
-        try:
-            html_content, mod = get_html(file_page)
+    try:
+        html_content, mod = get_html(file_page)
 
-            return render_template(
-                'content.html', title=file_page, folder=folder, info=html_content, modif=mod,
-                system=SYSTEM_SETTINGS
-        )
-        except FileNotFoundError as e:
-            app.logger.info(e)
-            return redirect("/add_new?page=" + file_page)
+        return render_template(
+            'content.html', title=file_page, folder="", info=html_content, modif=mod,
+            system=SYSTEM_SETTINGS
+    )
+    except FileNotFoundError as e:
+        app.logger.info(e)
+        return redirect("/add_new?page=" + file_page)
 
 
 @app.route('/', methods=['GET'])
 def index():
-    if request.args.get("q"):
-        return search(request.args.get("q"), request.args.get("page", 1))
-    else:
-        
-        html = ""
-        app.logger.info("Showing HTML page >>> 'homepage'")
+    html = ""
+    app.logger.info("Showing HTML page >>> 'homepage'")
 
-        md_file_path = os.path.join(cfg.wiki_directory, cfg.homepage)
-        cached_entry = cache.get(md_file_path)
-        if cached_entry:
-            app.logger.info("Showing HTML page from cache >>> 'homepage'")
-            return render_template(
-                'index.html', homepage=cached_entry, system=SYSTEM_SETTINGS
-            )
+    md_file_path = os.path.join(cfg.wiki_directory, cfg.homepage)
+    cached_entry = cache.get(md_file_path)
+    if cached_entry:
+        app.logger.info("Showing HTML page from cache >>> 'homepage'")
+        return render_template(
+            'index.html', homepage=cached_entry, system=SYSTEM_SETTINGS
+        )
 
-        try:
-            app.logger.info("Converting to HTML with pandoc >>> 'homepage' ...")
-            html = pypandoc.convert_file(
-                md_file_path, "html5", format='md', extra_args=["--mathjax"],
-                filters=['pandoc-xnos'])
-            html = clean_html(html)
-            cache.set(md_file_path, html)
+    try:
+        app.logger.info("Converting to HTML with pandoc >>> 'homepage' ...")
+        html = pypandoc.convert_file(
+            md_file_path, "html5", format='md', extra_args=["--mathjax"],
+            filters=['pandoc-xnos'])
+        html = clean_html(html)
+        cache.set(md_file_path, html)
 
-        except Exception as e:
-            app.logger.error(f"Conversion to HTML failed >>> {str(e)}")
+    except Exception as e:
+        app.logger.error(f"Conversion to HTML failed >>> {str(e)}")
 
-        return render_template('index.html', homepage=html, system=SYSTEM_SETTINGS)
+    return render_template('index.html', homepage=html, system=SYSTEM_SETTINGS)
 
 
 @app.route('/add_new', methods=['POST', 'GET'])
