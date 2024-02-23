@@ -20,12 +20,12 @@
     <form id="form" method="POST" onsubmit="setFormSubmitting()">
         <div class="form-group mb-3 col-12">
             <label for="name" class="form-label">Page name</label>
-            <input type="text" class="form-control" id="name" name="PN" value="{{title}}" {{ "disabled" if request.path == "/edit/homepage" else "" }}>
+            <input type="text" class="form-control" id="name" name="PN" value="{{form.title}}" {{ "disabled" if request.path == "/edit/homepage" else "" }}>
         </div>
 
         <div class="form-group mb-3">
             <label for="content" class="form-label">Content</label>
-            <textarea style="display: none" class="form-control" id="content" rows="25" name="CT">{{content}}</textarea>
+            <textarea style="display: none" class="form-control" id="content" rows="25" name="CT">{{form.content}}</textarea>
         </div>
         <input type="file" multiple>
         <p id="messages"></p>

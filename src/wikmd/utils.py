@@ -39,6 +39,37 @@ def secure_filename(filename: str) -> str:
     return filename
 
 
+_windows_device_files = {
+    "CON",
+    "PRN",
+    "AUX",
+    "NUL",
+    *(f"COM{i}" for i in range(10)),
+    *(f"LPT{i}" for i in range(10)),
+}
+
+
+def secure_filename(filename: str) -> str:
+    """Copied from werkzeug. This one allows space in the file name."""
+
+    filename = unicodedata.normalize("NFKD", filename)
+    filename = filename.encode("ascii", "ignore").decode("ascii")
+    for sep in os.sep, os.path.altsep:
+        if sep:
+            filename = filename.replace(sep, "_")
+    filename = filename.strip("._")
+    # on nt a couple of special files are present in each folder.  We
+    # have to ensure that the target file is not such a filename.  In
+    # this case we prepend an underline
+    if (
+        os.name == "nt"
+        and filename
+        and filename.split(".")[0].upper() in _windows_device_files
+    ):
+        filename = f"_{filename}"
+
+    return filename
+
 def pathify(path1, path2):
     """
     Joins two paths and eventually converts them from Win (\\) to linux  OS separator.

@@ -100,6 +100,13 @@
                 {% endfor %}
             </div>
         {% endif %}
+        {% if form and form.errors %}
+            <div class="alert alert-secondary flashes" role="alert">
+                {% for message in form.errors %}
+                    <a>{{ message }}</a><br>
+                {% endfor %}
+            </div>
+        {% endif %}
     {% endwith %}
 
     <!-- Page -->
