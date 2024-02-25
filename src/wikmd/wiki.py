@@ -22,7 +22,7 @@ from flask import (
     url_for,
 )
 from lxml.html.clean import clean_html
-from werkzeug.utils import safe_join, secure_filename
+from werkzeug.utils import safe_join
 from wikmd import knowledge_graph
 from wikmd.cache import Cache
 from wikmd.config import WikmdConfig
@@ -30,7 +30,7 @@ from wikmd.git_manager import WikiRepoManager
 from wikmd.image_manager import ImageManager
 from wikmd.plugins.load_plugins import PluginLoader
 from wikmd.search import Search, Watchdog
-from wikmd.utils import pathify
+from wikmd.utils import pathify, secure_filename
 from wikmd.web_dependencies import get_web_deps
 
 SESSIONS = []
