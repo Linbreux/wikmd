@@ -9,7 +9,7 @@ Here are some example snippets to help you get started creating a container.
 Build the image,
 
 ```bash
-docker build -t linbreux/wikmd:latest -f docker/Dockerfile .
+docker build -t linbreux/wikmd:latest -f Dockerfile .
 ```
 
 ### docker-compose (recommended, [click here for more info](https://docs.linuxserver.io/general/docker-compose))
