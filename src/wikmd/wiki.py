@@ -470,11 +470,11 @@ def nav_id_to_page(id):
     return redirect("/")
 
 
-@app.route(os.path.join("/", cfg.images_route, "<path:image_name>"))
+@app.route(f"/{cfg.images_route}/<path:image_name>")
 def display_image(image_name):
     image_path = safe_join(UPLOAD_FOLDER_PATH, image_name)
     try:
-        response = send_file(image_path)
+        response = send_file(Path(image_path).resolve())
     except Exception:
         app.logger.error(f"Could not find image: {image_path}")
         return ""
