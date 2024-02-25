@@ -31,6 +31,10 @@ To view the documents in the browser, the document is converted to html.
 
 Detailed installation instruction can be found [here](https://linbreux.github.io/wikmd/installation.html).
 
+## Development
+
+Instructions on the easiest way to develop on the project can be found [here](https://linbreux.github.io/wikmd/development.html).
+
 ## Plugins & Knowledge graph (beta)
 
 More info can be found in the [docs](https://linbreux.github.io/wikmd/knowledge%20graph.html).
