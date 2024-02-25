@@ -545,7 +545,7 @@ def setup_wiki_template() -> bool:
 
 def run_wiki() -> None:
     """Run the wiki as a Flask app."""
-    app.logger.info("Starting Wikmd")
+    app.logger.info("Starting Wikmd with wiki directory %s", Path(cfg.wiki_directory).resolve())
     if int(cfg.wikmd_logging) == 1:
         logging.basicConfig(filename=cfg.wikmd_logging_file, level=logging.INFO)
 

@@ -38,6 +38,17 @@ dev = [
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+wikmd = [
+    "wikmd-config.yaml",
+    "static/**/*",
+    "templates/**/*",
+    "wiki_template/**/*",
+]
+
 [tool.pytest.ini_options]
 pythonpath = [
   "src"

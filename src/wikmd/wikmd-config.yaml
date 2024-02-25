@@ -3,7 +3,7 @@
 wikmd_host: "0.0.0.0"
 wikmd_port: 5000
 wikmd_logging: 1
-wikmd_logging_file: "../wikmd.log"
+wikmd_logging_file: "wikmd.log"
 
 git_user: "wikmd"
 git_email: "wikmd@no-mail.com"
@@ -12,7 +12,7 @@ main_branch_name: "main"
 sync_with_remote: 0
 remote_url: ""
 
-wiki_directory: "../wiki"
+wiki_directory: "wiki"
 homepage: "homepage.md"
 homepage_title: "homepage"
 images_route: "img"
