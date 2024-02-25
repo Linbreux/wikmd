@@ -3,7 +3,7 @@
 wikmd_host: "0.0.0.0"
 wikmd_port: 5000
 wikmd_logging: 1
-wikmd_logging_file: "wikmd.log"
+wikmd_logging_file: "../wikmd.log"
 
 git_user: "wikmd"
 git_email: "wikmd@no-mail.com"
