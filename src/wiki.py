@@ -8,12 +8,11 @@ import pypandoc
 import knowledge_graph
 import secrets
 
-from flask import Flask, render_template, request, redirect, url_for, make_response, send_file, \
-    send_from_directory, flash
-
+from flask import Flask, render_template, request, redirect, url_for, make_response, send_file, send_from_directory, flash
 from werkzeug.utils import safe_join, secure_filename
 from threading import Thread
 from hashlib import sha256
+
 from cache import Cache
 from image_manager import ImageManager
 from config import WikmdConfig
@@ -21,8 +20,8 @@ from git_manager import WikiRepoManager
 from search import Search, Watchdog
 from web_dependencies import get_web_deps
 from plugins.load_plugins import PluginLoader
-
 from utils import pathify
+
 
 SESSIONS = []
 
@@ -34,8 +33,8 @@ HIDDEN_FOLDER_PATH_LIST = [pathify(cfg.wiki_directory, hidden_folder) for hidden
 HOMEPAGE_PATH = pathify(cfg.wiki_directory, cfg.homepage)
 HIDDEN_PATHS = tuple([UPLOAD_FOLDER_PATH, GIT_FOLDER_PATH, HOMEPAGE_PATH] + HIDDEN_FOLDER_PATH_LIST)
 
-# app = Flask(__name__)
 app = Flask(__name__, template_folder="../templates", static_folder="../static")
+
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER_PATH
 app.config['SECRET_KEY'] = cfg.secret_key
 
