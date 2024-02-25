@@ -526,7 +526,7 @@ def setup_search():
 
 def setup_wiki_template() -> bool:
     """Copy wiki_template files into the wiki directory if it's empty."""
-    root = Path(__file__).parent.parent.parent
+    root = Path(__file__).parent
 
     if not os.path.exists(cfg.wiki_directory):
         app.logger.info("Wiki directory doesn't exists, copy template")
