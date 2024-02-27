@@ -1,6 +1,8 @@
 import os
 import unicodedata
+import re
 
+_filename_ascii_strip_re = re.compile(r"[^A-Za-z0-9 _.-]")
 _windows_device_files = {
     "CON",
     "PRN",
@@ -21,7 +23,9 @@ def secure_filename(filename: str) -> str:
     for sep in os.sep, os.path.altsep:
         if sep:
             filename = filename.replace(sep, "_")
-    filename = filename.strip("._")
+    filename = str(_filename_ascii_strip_re.sub("", filename)).strip(
+        "._"
+    )
     # on nt a couple of special files are present in each folder.  We
     # have to ensure that the target file is not such a filename.  In
     # this case we prepend an underline
@@ -33,6 +37,7 @@ def secure_filename(filename: str) -> str:
         filename = f"_{filename}"
 
     return filename
+
 
 def pathify(path1, path2):
     """

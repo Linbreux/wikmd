@@ -4,9 +4,20 @@ import shutil
 
 import pytest
 from wikmd import wiki
-from wikmd.wiki import app, cfg
+from wikmd.wiki import app, cfg, setup_wiki_template
 
-cfg.wiki_directory = (Path(__file__).parent.parent / "src" / "wikmd" / "wiki_template").as_posix()
+
+@pytest.fixture(scope="function", autouse=True)
+def wiki_path(tmp_path: Path):
+    """Sets up the temporary wiki path.
+     autouse=True is needed as this behaves as a setup for the tests.
+    """
+    wiki_path = tmp_path / "wiki"
+    wiki_path.mkdir()
+    cfg.wiki_directory = wiki_path.as_posix()
+    setup_wiki_template()
+    return wiki_path
+
 
 @pytest.fixture()
 def client():
@@ -19,8 +30,8 @@ def test_file_content():
 
 
 @pytest.fixture()
-def project_file(test_file_content):
-    testing_folder = Path(cfg.wiki_directory) / "testing_folder"
+def project_file(wiki_path, test_file_content):
+    testing_folder = wiki_path / "testing_folder"
     testing_folder.mkdir()
 
     test_file = testing_folder / "test.md"
@@ -56,7 +67,7 @@ def test_list():
 
 
 def test_create_file_in_folder(wiki_file, test_file_content):
-    """Make sure the created file is accessible."""
+    """Test for accessing file that exists, GET '/{file_name}'."""
     rv = app.test_client().get(wiki_file)
 
     assert rv.status_code == 200
@@ -74,7 +85,7 @@ def test_search():
     assert b"Features" in rv.data
 
 
-def test_new_file():
+def test_add_new_file(wiki_path):
     """App can create files."""
     rv = app.test_client().get("/add_new")
     assert rv.status_code == 200
@@ -91,12 +102,53 @@ def test_new_file():
     assert b"testing file" in rv.data
     assert b"this is a test" in rv.data
 
-    f = Path(cfg.wiki_directory) / "testing01234filenotexisting.md"
+    f = wiki_path / "testing01234filenotexisting.md"
     f.unlink()
 
 
+def test_bad_file_names():
+    """Test for creating files with odd character in names."""
+    # Disallowed
+    bad_name = "file*with*star"
+    bad_all_bad = '<>:"/\|?*'
+
+    r = app.test_client().post("/add_new", data={
+        "PN": bad_all_bad,
+        "CT": "#testing file\n this is a test",
+    })
+    assert r.status_code == 200
+    assert b"Page name not accepted." in r.data
+
+    r = app.test_client().post("/add_new", data={
+        "PN": bad_name,
+        "CT": "#testing file\n this is a test",
+    })
+    assert r.status_code == 200
+    assert bad_name.replace("*", "").encode() in r.data
+
+
+def test_ok_file_names(wiki_path):
+    """Test for creating files with odd character in names."""
+    # Disallowed
+    ok_name1 = "file with space"
+    ok_name2 = 'file with slash/is a folder'
+    r = app.test_client().post("/add_new", data={
+        "PN": ok_name1,
+        "CT": "#testing file\n this is a test",
+    })
+    assert r.status_code == 302
+    assert (wiki_path / ok_name1).with_suffix(".md").exists()
+
+    r = app.test_client().post("/add_new", data={
+        "PN": ok_name2,
+        "CT": "#testing file\n this is a test",
+    })
+    assert r.status_code == 302
+    assert (wiki_path / ok_name2).with_suffix(".md").exists()
+
+
 # create a new file in a folder using the wiki and check if it is visible in the wiki
-def test_new_file_folder():
+def test_new_file_folder(wiki_path):
     """App can create folders."""
     rv = app.test_client().get("/add_new")
     assert rv.status_code == 200
@@ -113,7 +165,7 @@ def test_new_file_folder():
     assert b"testing file" in rv.data
     assert b"this is a test" in rv.data
 
-    f = Path(cfg.wiki_directory) / "testingfolder01234"
+    f = wiki_path / "testingfolder01234"
     shutil.rmtree(f)
 
 
