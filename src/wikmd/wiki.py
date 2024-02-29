@@ -99,19 +99,41 @@ class PageContent:
         """set is_new_page to false we are editing a page rather than creating a new"""
 
     @property
-    def title(self) -> str:
-        """Get the name of the page from the form."""
+    def _formatted(self):
         if self._title[-4:] == "{id}":
             return f"{self._title[:-4]}{uuid.uuid4().hex}"
         return self._title
 
     @property
+    def title(self) -> str:
+        """The fully qualified path including any directories, but without a suffix."""
+        return Path(self._formatted).with_suffix("").as_posix() if self._formatted else ""
+
+    @property
     def file_name(self) -> str:
-        return f"{self.title}.md"
+        """The name, any directories are strip out, with a suffix."""
+        # If the title is empty that means we are creating a new file and should return it empty.
+        if not self._formatted:
+            return self._formatted
+        t = Path(self._formatted)
+        print("in PageContent", t)
+        # If the path doesn't have a suffix we add .md
+        return t.name if t.suffix != "" else t.with_suffix(".md").name
+
+    @property
+    def relative_file_path(self) -> Path:
+        """The relative path to the file. Excluding 'wiki' directory.
+
+        This should just be the title but with a suffix.
+        """
+        p = Path(self._formatted)
+        return p if p.suffix != "" else p.with_suffix(".md")
 
     @property
     def file_path(self) -> Path:
-        return Path(safe_join(cfg.wiki_directory, self.file_name))
+        """The path to the file. This will include the 'wiki' directory."""
+        p = Path(safe_join(cfg.wiki_directory, self._formatted))
+        return p if p.suffix != "" else p.with_suffix(".md")
 
         
 
@@ -201,7 +223,7 @@ def wiki_tree(path: Path) -> dict:
         if fn.is_dir():
             tree["children"].append(wiki_tree(fn))
         else:
-            url = fn.relative_to(cfg.wiki_directory).with_suffix("")
+            url = fn.relative_to(cfg.wiki_directory)
             tree["children"].append({
                 "name": name.stem,
                 "url": url.as_posix(),
@@ -234,13 +256,18 @@ def get_html(page: PageContent) -> [str, str]:
 
     app.logger.info("Converting to HTML with pandoc >>> '%s' ...", page.file_name)
 
-    html = pypandoc.convert_file(
-        page.file_path,
-        "html5",
-        format="md",
-        extra_args=["--mathjax"],
-        filters=["pandoc-xnos"],
-    )
+    if page.file_path.suffix == ".md":
+        html = pypandoc.convert_file(
+            page.file_path,
+            "html5",
+            format="md",
+            extra_args=["--mathjax"],
+            filters=["pandoc-xnos"],
+        )
+    else:
+        # If the page isn't an .md page load it without running it through the converter.
+        with page.file_path.open("r", encoding="utf-8", errors="ignore") as f:
+            html = f.read()
 
     if html.strip():
         html = clean_html(html)
@@ -391,7 +418,7 @@ def add_new_post() -> str | Response:
     git_sync_thread = Thread(target=wrm.git_sync, args=(page.title, "Add"))
     git_sync_thread.start()
 
-    return redirect(url_for("wiki_page", file_page=page.title))
+    return redirect(url_for("wiki_page", file_page=page.relative_file_path))
 
 
 @app.get("/edit/homepage")
@@ -437,7 +464,7 @@ def edit_homepage_post() -> str | Response:
     git_sync_thread = Thread(target=wrm.git_sync, args=(page.title, "Edit"))
     git_sync_thread.start()
 
-    return redirect(url_for("wiki_page", file_page=page.title))
+    return redirect(url_for("wiki_page", file_page=page.relative_file_path))
 
 
 @app.get("/remove/<path:page>")
@@ -457,14 +484,14 @@ def remove(page: str) -> Response:  # TODO: This shouldn't be a GET
     return redirect("/")
 
 
-@app.get("/edit/<path:page>")
-def edit_view(page: str) -> Response | str:
+@app.get("/edit/<path:page_name>")
+def edit_view(page_name: str) -> Response | str:
     """View the edit page populated with current content."""
     if (bool(cfg.protect_edit_by_password) and
             (request.cookies.get("session_wikmd") not in SESSIONS)):
-        return login("edit/" + page)
+        return login("edit/" + page_name)
 
-    page = PageContent(page, "")
+    page = PageContent(page_name, "")
     if page.file_path.exists():
         with page.file_path.open("r", encoding="utf-8", errors="ignore") as f:
             page.content = f.read()
@@ -503,7 +530,7 @@ def edit(page_name: str) -> Response | str:
     git_sync_thread = Thread(target=wrm.git_sync, args=(page.title, "Edit"))
     git_sync_thread.start()
 
-    return redirect(url_for("wiki_page", file_page=page.title))
+    return redirect(url_for("wiki_page", file_page=page.relative_file_path))
 
 
 @app.post(f"/{cfg.images_route}")
@@ -569,6 +596,7 @@ def login(page: str) -> str | Response:
         return resp
     app.logger.info("Login failed!")
 
+
 @app.get("/nav/<path:id>/")
 def nav_id_to_page(id: str) -> Response:
     """Translate id to page path."""
@@ -624,7 +652,7 @@ def setup_search() -> None:
         for item in files:
             if (
                     root.startswith((f"{cfg.wiki_directory}/.git",
-                                    f"{cfg.wiki_directory}/{cfg.images_route}"))
+                                     f"{cfg.wiki_directory}/{cfg.images_route}"))
             ):
                 continue
             item_ = Path(item)
