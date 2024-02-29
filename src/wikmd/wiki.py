@@ -9,6 +9,7 @@ import uuid
 from hashlib import sha256
 from pathlib import Path
 from threading import Thread
+from typing import TypeVar
 
 import pypandoc
 from flask import (
@@ -36,6 +37,8 @@ from wikmd.search import Search, Watchdog
 from wikmd.utils import pathify, secure_filename
 from wikmd.web_dependencies import get_web_deps
 
+PC_T = TypeVar("PC_T", bound="PageContent")
+
 SESSIONS = []
 
 cfg = WikmdConfig()
@@ -53,8 +56,9 @@ app = Flask(__name__,
             template_folder=_project_folder / "templates",
             static_folder=_project_folder / "static")
 
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER_PATH
-app.config['SECRET_KEY'] = cfg.secret_key
+
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER_PATH
+app.config["SECRET_KEY"] = cfg.secret_key
 
 # console logger
 app.logger.setLevel(logging.INFO)
@@ -85,11 +89,14 @@ SYSTEM_SETTINGS = {
 
 
 @app.context_processor
-def inject_file_list():
-    return dict(file_list=wiki_tree(Path(cfg.wiki_directory)))
+def inject_file_list() -> dict:
+    """Context processor that injects our file list into every call."""
+    return {"file_list": wiki_tree(Path(cfg.wiki_directory))}
 
 
 class PageContent:
+    """Holds the content of a wiki page."""
+
     def __init__(self, title: str = "", content: str = ""):
         self._title = title
         self.content = content
@@ -98,8 +105,13 @@ class PageContent:
         self.is_new_page = True
         """set is_new_page to false we are editing a page rather than creating a new"""
 
+    @classmethod
+    def load_from_request(cls: type[PC_T]) -> PC_T:
+        """Load the page content from the pages request form."""
+        return cls(request.form["PN"], request.form["CT"])
+
     @property
-    def _formatted(self):
+    def _formatted(self) -> str:
         if self._title[-4:] == "{id}":
             return f"{self._title[:-4]}{uuid.uuid4().hex}"
         return self._title
@@ -107,16 +119,17 @@ class PageContent:
     @property
     def title(self) -> str:
         """The fully qualified path including any directories, but without a suffix."""
-        return Path(self._formatted).with_suffix("").as_posix() if self._formatted else ""
+        return Path(self._formatted).with_suffix("").as_posix()\
+            if self._formatted else ""
 
     @property
     def file_name(self) -> str:
         """The name, any directories are strip out, with a suffix."""
-        # If the title is empty that means we are creating a new file and should return it empty.
+        # If the title is empty that means we are creating
+        # a new file and should return it empty.
         if not self._formatted:
             return self._formatted
         t = Path(self._formatted)
-        print("in PageContent", t)
         # If the path doesn't have a suffix we add .md
         return t.name if t.suffix != "" else t.with_suffix(".md").name
 
@@ -135,9 +148,8 @@ class PageContent:
         p = Path(safe_join(cfg.wiki_directory, self._formatted))
         return p if p.suffix != "" else p.with_suffix(".md")
 
-        
-
     def validate(self) -> bool:
+        """Validate the page name, add errors to the error list for later retrival."""
         can_create_page = self.is_new_page is True and self.file_path.exists()
         safe_name = "/".join([secure_filename(part) for part in self.title.split("/")])
         filename_is_ok = safe_name == self.title
@@ -145,7 +157,8 @@ class PageContent:
             return True
 
         if can_create_page:
-            self.errors.append("A page with that name already exists. The page name needs to be unique.")
+            self.errors.append("A page with that name already exists. "
+                               "The page name needs to be unique.")
 
         if not filename_is_ok:
             self.errors.append(f"Page name not accepted. Try using '{safe_name}'.")
@@ -164,8 +177,7 @@ def process(page: PageContent) -> str:
     processed = page.content.replace("\r\n", "\n")
 
     # Process the content with the plugins
-    processed = plugin_manager.send("process_md", processed)
-    return processed
+    return plugin_manager.broadcast("process_md", processed)
 
 
 def save(page: PageContent) -> None:
@@ -185,9 +197,10 @@ def save(page: PageContent) -> None:
 def search(search_term: str, page: int) -> str:
     """Preform a search for a term and shows the results."""
     app.logger.info("Searching >>> '%s' ...", search_term)
-    search = Search(cfg.search_dir)
+    search_index = Search(cfg.search_dir)
     page = int(page)
-    results, num_results, num_pages, suggestions = search.search(search_term, page)
+    search_result = search_index.search(search_term, page)
+    results, num_results, num_pages, suggestions = search_result
     return render_template(
         "search.html",
         search_term=search_term,
@@ -265,7 +278,8 @@ def get_html(page: PageContent) -> [str, str]:
             filters=["pandoc-xnos"],
         )
     else:
-        # If the page isn't an .md page load it without running it through the converter.
+        # If the page isn't an .md page load it without
+        # running it through the converter.
         with page.file_path.open("r", encoding="utf-8", errors="ignore") as f:
             html = f.read()
 
@@ -313,8 +327,9 @@ def list_wiki(folderpath: str) -> str:
         system=SYSTEM_SETTINGS)
 
 
-@app.get('/search')
-def search_route():
+@app.get("/search")
+def search_route() -> str | Response:
+    """Route to get result from a search."""
     if request.args.get("q"):
         return search(request.args.get("q"), request.args.get("page", 1))
     flash("You didn't enter anything to search for")
@@ -351,7 +366,6 @@ def wiki_page(file_page: str) -> None | str | Response:
 @app.get("/")
 def index() -> None | str | Response:
     """Render home page."""
-
     app.logger.info("Showing HTML page >>> 'homepage'")
 
     md_file_path = Path(cfg.wiki_directory) / cfg.homepage
@@ -583,7 +597,7 @@ def login_view() -> str | Response:
 
 
 @app.post("/login")
-def login(page: str) -> str | Response:
+def login(page: str) -> None | str | Response:
     """Login Route."""
     password = request.form["password"]
     sha_string = sha256(password.encode("utf-8")).hexdigest()
@@ -595,19 +609,21 @@ def login(page: str) -> str | Response:
         SESSIONS.append(session)
         return resp
     app.logger.info("Login failed!")
+    return None
 
 
 @app.get("/nav/<path:id>/")
-def nav_id_to_page(id: str) -> Response:
+def nav_id_to_page(id_: str) -> Response:
     """Translate id to page path."""
     for i in links:
-        if i["id"] == int(id):
+        if i["id"] == int(id_):
             return redirect("/" + i["path"])
     return redirect("/")
 
 
 @app.get(f"/{cfg.images_route}/<path:image_name>")
 def display_image(image_name: str) -> str | Response:
+    """Get the image path route."""
     image_path = (Path(UPLOAD_FOLDER_PATH) / image_name).resolve().as_posix()
     try:
         response = send_file(Path(image_path).resolve())
@@ -644,7 +660,8 @@ def favicon() -> Response:
 
 
 def setup_search() -> None:
-    search = Search(cfg.search_dir, create=True)
+    """Set up search index."""
+    search_index = Search(cfg.search_dir, create=True)
 
     app.logger.info("Search index creation...")
     items = []
@@ -662,7 +679,7 @@ def setup_search() -> None:
             path = os.path.relpath(root, cfg.wiki_directory)
             items.append((item, page_name, path))
 
-    search.index_all(cfg.wiki_directory, items)
+    search_index.index_all(cfg.wiki_directory, items)
 
 
 def setup_wiki_template() -> bool:
@@ -682,7 +699,8 @@ def setup_wiki_template() -> bool:
 
 def run_wiki() -> None:
     """Run the wiki as a Flask app."""
-    app.logger.info("Starting Wikmd with wiki directory %s", Path(cfg.wiki_directory).resolve())
+    app.logger.info("Starting Wikmd with wiki directory %s",
+                    Path(cfg.wiki_directory).resolve())
 
     plugin_manager.broadcast("request_html", get_html)
 

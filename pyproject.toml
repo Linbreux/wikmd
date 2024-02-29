@@ -32,6 +32,11 @@ dependencies=[
 [project.optional-dependencies]
 dev = [
     "pytest",
+    "ruff",
+    "ruff-lsp",
+]
+test = [
+    "pytest",
 ]
 
 [build-system]
@@ -60,6 +65,23 @@ src = ["", "tests"]
 select = ["ALL"]
 
 [tool.ruff.lint.per-file-ignores]
+"*" = [
+    # ANN001: Missing type annotation for public function
+    "ANN101",
+
+    # ANN204: Missing return type annotation for __init__
+    "ANN204",
+
+    # D100: Missing docstring in public module
+    "D100",
+
+    # D107: Missing docstring in __init__
+    "D107",
+
+    # ANN001: Missing type annotation for public function
+    "ANN101",
+]
+
 "tests/*" = [
     # S101: Check for assert
     "S101",
@@ -69,9 +91,6 @@ select = ["ALL"]
 
     # ANN201: Missing return type annotation for public function
     "ANN201",
-
-    # D100: Missing docstring in public module
-    "D100",
 
     # D103: Missing docstring in public function
     "D103",
