@@ -131,3 +131,130 @@ div.html-integration{
 .mermaid {
     text-align: center;
 }
+
+.wmd-main {
+  grid-area:main;
+}
+
+
+@media (min-width: 768px) {
+  .wmd-main {
+    display:grid;
+    gap:inherit;
+    grid-template-areas:"intro" "toc" "content";
+    grid-template-rows:auto auto 1fr;
+  }
+}
+@media (min-width: 992px) {
+  .wmd-main {
+    grid-template-areas:"intro   toc" "content toc";
+    grid-template-columns:4fr 1fr;
+    grid-template-rows:auto 1fr;
+  }
+}
+
+@media (min-width: 768px) {
+  .wmd-layout {
+    display:grid;
+    gap:1.5rem;
+    grid-template-areas:"sidebar main";
+    grid-template-columns:1fr 3fr;
+  }
+}
+@media (min-width: 992px) {
+  .wmd-layout {
+    grid-template-columns:1fr 5fr;
+  }
+}
+
+.wmd-sidebar {
+  grid-area:sidebar;
+}
+.wmd-main {
+  grid-area:main;
+}
+
+@media (max-width: 991.98px) {
+  .wmd-sidebar {
+    width: 100%;
+  }
+}
+.wmd-sidebar .active {
+  border-radius: 5px;
+}
+
+.wmd-sidebar ul {
+    list-style-type: none;
+    padding-left: 0.5rem;
+}
+
+.wmd-links {
+  overflow:auto;
+  font-weight:600;
+}
+
+@media (min-width: 768px) {
+  .wmd-links {
+    position:-webkit-sticky;
+    /*! position:sticky; *//*! top:5rem; *//*! display:block !important; */height:calc(100vh - 7rem);
+    padding-left:.25rem;
+    margin-left:-.25rem;
+    overflow-y:auto;
+  }
+}
+@media (max-width: 767.98px) {
+  .wmd-links>ul {
+    padding:1.5rem .75rem;
+    background-color:#f8f9fa;
+    border-bottom:1px solid #e9ecef;
+  }
+}
+
+.wmd-links a {
+  padding:.1875rem .5rem;
+  margin-top:.125rem;
+  margin-left:1.25rem;
+  color: var(--txt-light);
+  text-decoration:none;
+}
+
+.wmd-links .btn {
+  padding:.25rem .5rem;
+  font-weight:600;
+  color: var(--txt-light);
+  background-color:transparent;
+  border:0;
+}
+
+.wmd-links .btn::before {
+  width:1.25em;
+  line-height:0;
+  content:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='rgba%28128,128,128,1%29' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M5 14l6-6-6-6'/%3e%3c/svg%3e");
+  transition:transform 0.35s ease;
+  transform-origin:.5em 50%
+}
+
+.wmd-links .btn:hover,
+.wmd-links .btn:focus {
+  color: var(--txt-light);
+  background-color:rgba(121,82,179,0.1);
+}
+
+.wmd-links .btn[aria-expanded="true"] {
+  color:rgba(0,0,0,1);
+  font-style: oblique;
+}
+
+.wmd-links .btn[aria-expanded="true"]::before {
+  transform:rotate(90deg)
+}
+.wmd-links .active {
+  font-weight:600;
+  color: var(--txt-light);
+}
+.wmd-links a:hover,
+.wmd-links a:focus {
+  color: var(--txt-light);
+  background-color:rgba(121,82,179,0.1);
+}
+

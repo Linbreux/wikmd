@@ -1,0 +1,40 @@
+{% macro build_element(item) -%}
+    {% if item.name == "wiki" %}
+        {# Skip the root folder #}
+        <ul class="list-unstyled fw-normal pb-1">
+        {% for child in item.children %}
+            <li>
+            {{ build_element(child) }}
+            </li>
+        {% endfor %}
+        </ul>
+
+    {% else %}
+        {% if item.children %}
+            <button class="btn d-inline-flex align-items-center rounded"  type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapse{{ item.id }}"
+                    aria-expanded="{{ "true" if request.path.startswith("/" + item.url) else "false" }}"
+                    aria-controls="collapse{{ item.id }}">{{ item.name }}</button>
+            <div class="collapse {{ "show" if request.path.startswith("/" + item.url) else "" }}" id="collapse{{ item.id }}">
+            <ul class="list-unstyled fw-normal pb-1">
+            {% for child in item.children %}
+                <li>
+                {{ build_element(child) }}
+                </li>
+            {% endfor %}
+            </ul>
+            </div>
+        {% else %}
+            <a class="d-inline-flex align-items-center rounded {% if request.path == "/" + item.url %} active {% endif %}" href="/{{ item.url }}">{{ item.name }}</a>
+        {% endif %}
+    {% endif %}
+{%- endmacro %}
+
+
+{% block content %}
+<aside class="wmd-sidebar ">
+    <nav id="sidebarMenu" class="wmd-links d-none d-md-block">
+        {{ build_element(file_list) }}
+    </nav>
+</aside>
+{% endblock %}

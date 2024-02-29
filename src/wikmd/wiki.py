@@ -84,6 +84,11 @@ SYSTEM_SETTINGS = {
 }
 
 
+@app.context_processor
+def inject_file_list():
+    return dict(file_list=wiki_tree(Path(cfg.wiki_directory)))
+
+
 class PageContent:
     def __init__(self, title: str = "", content: str = ""):
         self._title = title
@@ -173,6 +178,50 @@ def search(search_term: str, page: int) -> str:
     )
 
 
+def wiki_tree(path: Path) -> dict:
+    """Build a dictionary structure from the passed in folder."""
+    try:
+        p_url = path.relative_to(cfg.wiki_directory).with_suffix("")
+    except ValueError:
+        p_url = Path()
+    tree = {
+        "name": path.stem,
+        "children": [],
+        "url": p_url.as_posix(),
+        "parts": len(p_url.parts),
+        "id": hash(p_url),
+        "item_mtime": path.stat().st_mtime,
+    }
+
+    for name in path.iterdir():
+        fn = name.as_posix()
+        if fn.startswith(HIDDEN_PATHS):  # skip hidden paths
+            continue
+        fn = Path(fn)
+        if fn.is_dir():
+            tree["children"].append(wiki_tree(fn))
+        else:
+            url = fn.relative_to(cfg.wiki_directory).with_suffix("")
+            tree["children"].append({
+                "name": name.stem,
+                "url": url.as_posix(),
+                "parts": len(url.parts),
+                "id": hash(url),
+                "item_mtime": path.stat().st_mtime,
+            })
+    return tree
+
+
+def sort_tree_children(dictionary: dict, sort_by: str) -> dict:
+    """Reorders the dictionary and its children."""
+    children = sorted(dictionary.get("children"), key=lambda item: item[sort_by])
+    dictionary["children"] = children
+    for child in children:
+        if "children" in child:
+            child["children"] = sort_tree_children(child, sort_by)
+    return dictionary
+
+
 def get_html(page: PageContent) -> [str, str]:
     """Get the content of the file."""
     mod = "Last modified: %s" % time.ctime(page.file_path.stat().st_mtime)
@@ -216,41 +265,23 @@ def list_full_wiki() -> str:
 @app.get("/list/<path:folderpath>/")
 def list_wiki(folderpath: str) -> str:
     """List all the pages in a given folder of the wiki."""
-    files_list = []
-
     requested_path = safe_join(cfg.wiki_directory, folderpath)
     if requested_path is None:
         app.logger.info("Requested unsafe path >>> showing homepage")
         return index()
     app.logger.info("Showing >>> all files in %s", folderpath)
+    requested_path = Path(requested_path)
 
-    for item in os.listdir(requested_path):
-        item_path = Path(pathify(requested_path, item))  # wiki/dir1/dir2/...
-        item_mtime = item_path.stat().st_mtime
-
-        if not item_path.as_posix().startswith(HIDDEN_PATHS):  # skip hidden paths
-
-            rel_item_path = item_path.relative_to(cfg.wiki_directory)
-            item_url = rel_item_path.with_suffix("")  # drop the extension
-            folder = rel_item_path.as_posix() if item_path.is_dir() else ""
-            info = {
-                "doc": item,
-                "url": item_url,
-                "folder": folder,
-                "folder_url": folder,
-                "mtime": item_mtime,
-            }
-            files_list.append(info)
-
+    file_list = wiki_tree(requested_path)
     # Sorting
     if SYSTEM_SETTINGS["listsortMTime"]:
-        files_list.sort(key=lambda x: x["mtime"], reverse=True)
+        file_list = sort_tree_children(file_list, "listsortMTime")
     else:
-        files_list.sort(key=lambda x: (str(x["url"]).casefold()))
+        file_list = sort_tree_children(file_list, "url")
 
     return render_template(
         "list_files.html",
-        list=files_list,
+        list=file_list,
         folder=folderpath,
         system=SYSTEM_SETTINGS)
 
@@ -294,16 +325,16 @@ def wiki_page(file_page: str) -> None | str | Response:
 def index() -> None | str | Response:
     """Render home page."""
 
-    html = ""
     app.logger.info("Showing HTML page >>> 'homepage'")
 
     md_file_path = Path(cfg.wiki_directory) / cfg.homepage
     cached_entry = cache.get(md_file_path.as_posix())
     if cached_entry:
+        page = PageContent(cfg.homepage_title, cached_entry)
         app.logger.info("Showing HTML page from cache >>> 'homepage'")
         return render_template(
             "index.html",
-            homepage=cached_entry,
+            form=page,
             system=SYSTEM_SETTINGS,
         )
 
@@ -319,7 +350,8 @@ def index() -> None | str | Response:
         # TODO: Use Flask Abort?
         app.logger.exception("Conversion to HTML failed")
 
-    return render_template("index.html", homepage=html, system=SYSTEM_SETTINGS)
+    page = PageContent(cfg.homepage_title, html)
+    return render_template("index.html", form=page, system=SYSTEM_SETTINGS)
 
 
 @app.get("/add_new")

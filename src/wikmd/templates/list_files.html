@@ -5,12 +5,12 @@
     <h2><b>{{ folder }}</b> ALL FILES</h2>
     <ul class="list-group list-group-flush h5">
         <li class="list-group-item"><i class="bi bi-folder pe-3"></i><i><a class="link-dark text-decoration-none" href="../">..</a></i></li>
-        {% for i in list %}
+        {% for i in list.children %}
             <li class="list-group-item">
-                {% if i.folder != "" and i.folder != folder %}
-                    <i class="bi bi-folder pe-3"></i><a class="link-dark fst-italic" href="/list/{{ i.folder }}/">{{ i.folder }}/ </a>
+                {% if i.children %}
+                    <i class="bi bi-folder pe-3"></i><a class="link-dark fst-italic" href="/list/{{ i.url }}/">{{ i.name }}/ </a>
                 {% else %}
-                    <i class="bi bi-file-earmark-text pe-3"></i><a class="link-dark text-decoration-none" href="/{{ i.url }}">{{ i.doc }}</a>
+                    <i class="bi bi-file-earmark-text pe-3"></i><a class="link-dark text-decoration-none" href="/{{ i.url }}">{{ i.name }}</a>
                 {% endif %}
             </li>
         {% endfor %}
