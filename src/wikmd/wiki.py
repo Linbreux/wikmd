@@ -84,70 +84,75 @@ SYSTEM_SETTINGS = {
 }
 
 
-def process(content: str, page_name: str) -> str:
+class PageContent:
+    def __init__(self, title: str = "", content: str = ""):
+        self._title = title
+        self.content = content
+        self.errors = []
+
+        self.is_new_page = True
+        """set is_new_page to false we are editing a page rather than creating a new"""
+
+    @property
+    def title(self) -> str:
+        """Get the name of the page from the form."""
+        if self._title[-4:] == "{id}":
+            return f"{self._title[:-4]}{uuid.uuid4().hex}"
+        return self._title
+
+    @property
+    def file_name(self) -> str:
+        return f"{self.title}.md"
+
+    @property
+    def file_path(self) -> Path:
+        return Path(safe_join(cfg.wiki_directory, self.file_name))
+
+        
+
+    def validate(self) -> bool:
+        can_create_page = self.is_new_page is True and self.file_path.exists()
+        safe_name = "/".join([secure_filename(part) for part in self.title.split("/")])
+        filename_is_ok = safe_name == self.title
+        if not can_create_page and filename_is_ok and self.title:  # Early exist
+            return True
+
+        if can_create_page:
+            self.errors.append("A page with that name already exists. The page name needs to be unique.")
+
+        if not filename_is_ok:
+            self.errors.append(f"Page name not accepted. Try using '{safe_name}'.")
+
+        if not self.title:
+            self.errors.append("Your page needs a name.")
+        return False
+
+
+def process(page: PageContent) -> str:
     """Process the content with the plugins.
 
     It also manages CRLF to LF conversion.
-    :param content: content
-    :param page_name: name of the page
-    :return processed content
     """
     # Convert Win line ending (CRLF) to standard Unix (LF)
-    processed = content.replace("\r\n", "\n")
+    processed = page.content.replace("\r\n", "\n")
 
     # Process the content with the plugins
-    processed = plugin_manager.broadcast("process_md", processed)
+    processed = plugin_manager.send("process_md", processed)
     return processed
 
 
-def ensure_page_can_be_created(page: str, page_name: str) -> None | str:
-    """Check that a path name is valid."""
-    filename = safe_join(cfg.wiki_directory, f"{page_name}.md")
-    if filename is None:
-        flash(f"Page name not accepted. Contains disallowed characters.")
-        app.logger.info(f"Page name isn't secure >>> {page_name}.")
-    else:
-        path_exists = os.path.exists(filename)
-        safe_name = "/".join([secure_filename(part) for part in page_name.split("/")])
-        filename_is_ok = safe_name == page_name
-        if not path_exists and filename_is_ok and page_name:  # Early exist
-            return None
-
-        if path_exists:
-            flash("A page with that name already exists. The page name needs to be unique.")
-            app.logger.info("Page name exists >>> %s.", page_name)
-
-        if not filename_is_ok:
-            flash(f"Page name not accepted. Try using '{safe_name}'.")
-            app.logger.info("Page name isn't secure >>> %s.", page_name)
-
-        if not page_name:
-            flash("Your page needs a name.")
-            app.logger.info("No page name provided.")
-
-    content = process(request.form["CT"], page_name)
-    return render_template("new.html",
-                           content=content, title=page,
-                           upload_path=cfg.images_route,
-                           image_allowed_mime=cfg.image_allowed_mime,
-                           system=SYSTEM_SETTINGS)
-
-
-def save(page_name: str) -> None:
+def save(page: PageContent) -> None:
     """Get file content from the form and save it."""
-    content = process(request.form["CT"], page_name)
-    app.logger.info("Saving >>> '%s' ...", page_name)
+    app.logger.info("Saving >>> '%s' ...", page.title)
 
     try:
-        filename = Path(safe_join(cfg.wiki_directory, f"{page_name}.md"))
-        dirname = filename.parent
-        dirname.mkdir(exist_ok=True)
+        page.file_path.parent.mkdir(exist_ok=True)
 
-        with filename.open("w", encoding="utf-8") as f:
-            f.write(content)
+        with page.file_path.open("w", encoding="utf-8") as f:
+            f.write(page.content)
     except Exception as e:
         # TODO: Use Flask Abort?
-        app.logger.exception("Error while saving '%s'", page_name)
+        app.logger.exception("Error while saving '%s'", page.title)
 
 
 def search(search_term: str, page: int) -> str:
@@ -168,31 +173,20 @@ def search(search_term: str, page: int) -> str:
     )
 
 
-def fetch_page_name() -> str:
-    """Get the name of the page from the form."""
-    page_name = request.form["PN"]
-    if page_name[-4:] == "{id}":
-        page_name = f"{page_name[:-4]}{uuid.uuid4().hex}"
-    return page_name
-
-
-def get_html(file_page: str) -> [str, str]:
+def get_html(page: PageContent) -> [str, str]:
     """Get the content of the file."""
-    md_file_path = Path(safe_join(cfg.wiki_directory, f"{file_page}.md"))
-    mod = "Last modified: %s" % time.ctime(md_file_path.stat().st_mtime)
-    folder = file_page.split("/")
-    file_page = folder[-1:][0]
+    mod = "Last modified: %s" % time.ctime(page.file_path.stat().st_mtime)
 
-    cached_entry = cache.get(md_file_path.as_posix())
+    cached_entry = cache.get(page.file_path.as_posix())
     if cached_entry:
-        app.logger.info("Showing HTML page from cache >>> '%s'", file_page)
+        app.logger.info("Showing HTML page from cache >>> '%s'", page.file_name)
         cached_entry = plugin_manager.broadcast("process_html", cached_entry)
         return cached_entry, mod
 
-    app.logger.info("Converting to HTML with pandoc >>> '%s' ...", md_file_path)
+    app.logger.info("Converting to HTML with pandoc >>> '%s' ...", page.file_name)
 
     html = pypandoc.convert_file(
-        md_file_path,
+        page.file_path,
         "html5",
         format="md",
         extra_args=["--mathjax"],
@@ -204,11 +198,11 @@ def get_html(file_page: str) -> [str, str]:
 
     html = plugin_manager.broadcast("process_before_cache_html", html)
 
-    cache.set(md_file_path.as_posix(), html)
+    cache.set(page.file_path.as_posix(), html)
 
     html = plugin_manager.broadcast("process_html", html)
 
-    app.logger.info("Showing HTML page >>> '%s'", file_page)
+    app.logger.info("Showing HTML page >>> '%s'", page.file_name)
 
     return html, mod
 
@@ -278,15 +272,17 @@ def wiki_page(file_page: str) -> None | str | Response:
     if "favicon" in file_page:  # if the GET request is not for the favicon
         return None
 
+    page = PageContent(title=file_page)
     try:
-        html_content, mod = get_html(file_page)
+        html_content, mod = get_html(page)
     except FileNotFoundError as e:
         app.logger.info(e)
         return redirect("/add_new?page=" + file_page)
 
+    page.content = html_content
     return render_template(
         "content.html",
-        title=file_page,
+        form=page,
         folder="",
         info=html_content,
         modif=mod,
@@ -333,14 +329,12 @@ def add_new_view() -> str | Response:
             (request.cookies.get("session_wikmd") not in SESSIONS)):
         return login("/add_new")
 
-    page_name = request.args.get("page")
-    if page_name is None:
-        page_name = ""
+    page = PageContent(request.args.get("page") or "", "")
     return render_template(
         "new.html",
         upload_path=cfg.images_route,
         image_allowed_mime=cfg.image_allowed_mime,
-        title=page_name,
+        form=page,
         system=SYSTEM_SETTINGS,
     )
 
@@ -351,18 +345,21 @@ def add_new_post() -> str | Response:
     if (bool(cfg.protect_edit_by_password) and
             (request.cookies.get("session_wikmd") not in SESSIONS)):
         return login("/add_new")
+    page = PageContent.load_from_request()
 
-    page_name = fetch_page_name()
+    page.is_new_page = True
+    if not page.validate():
+        return render_template("new.html",
+                               form=page,
+                               upload_path=cfg.images_route,
+                               image_allowed_mime=cfg.image_allowed_mime,
+                               system=SYSTEM_SETTINGS)
 
-    re_render_page = ensure_page_can_be_created(page_name, page_name)
-    if re_render_page:
-        return re_render_page
-
-    save(page_name)
-    git_sync_thread = Thread(target=wrm.git_sync, args=(page_name, "Add"))
+    save(page)
+    git_sync_thread = Thread(target=wrm.git_sync, args=(page.title, "Add"))
     git_sync_thread.start()
 
-    return redirect(url_for("wiki_page", file_page=page_name))
+    return redirect(url_for("wiki_page", file_page=page.title))
 
 
 @app.get("/edit/homepage")
@@ -375,12 +372,11 @@ def edit_homepage_view() -> str | Response:
     with (Path(cfg.wiki_directory) / cfg.homepage).open("r",
                                                         encoding="utf-8",
                                                         errors="ignore") as f:
-        content = f.read()
-
+        str_content = f.read()
+    page = PageContent(cfg.homepage_title, str_content)
     return render_template(
         "new.html",
-        content=content,
-        title=cfg.homepage_title,
+        form=page,
         upload_path=cfg.images_route,
         image_allowed_mime=cfg.image_allowed_mime,
         system=SYSTEM_SETTINGS,
@@ -394,13 +390,22 @@ def edit_homepage_post() -> str | Response:
             (request.cookies.get("session_wikmd") not in SESSIONS)):
         return login("edit/homepage")
 
-    page_name = "homepage"
+    page = PageContent.load_from_request()
+    page.is_new_page = False
+    if not page.validate():
+        return render_template(
+            "new.html",
+            form=page,
+            upload_path=cfg.images_route,
+            image_allowed_mime=cfg.image_allowed_mime,
+            system=SYSTEM_SETTINGS,
+        )
 
-    save(page_name)
-    git_sync_thread = Thread(target=wrm.git_sync, args=(page_name, "Edit"))
+    save(page)
+    git_sync_thread = Thread(target=wrm.git_sync, args=(page.title, "Edit"))
     git_sync_thread.start()
 
-    return redirect(url_for("/"))
+    return redirect(url_for("wiki_page", file_page=page.title))
 
 
 @app.get("/remove/<path:page>")
@@ -410,10 +415,11 @@ def remove(page: str) -> Response:  # TODO: This shouldn't be a GET
             (request.cookies.get("session_wikmd") not in SESSIONS)):
         return redirect(url_for("wiki_page", file_page=page))
 
-    filename = Path(safe_join(cfg.wiki_directory, f"{page}.md"))
-    filename.unlink()
-    if not any(filename.parent.iterdir()):
-        filename.parent.rmdir()
+    page = PageContent(title=page)
+    page.file_path.unlink()
+
+    if not any(page.file_path.parent.iterdir()):
+        page.file_path.parent.rmdir()
     git_sync_thread = Thread(target=wrm.git_sync, args=(page, "Remove"))
     git_sync_thread.start()
     return redirect("/")
@@ -426,52 +432,46 @@ def edit_view(page: str) -> Response | str:
             (request.cookies.get("session_wikmd") not in SESSIONS)):
         return login("edit/" + page)
 
-    filename = Path(safe_join(cfg.wiki_directory, f"{page}.md"))
-    if filename.exists():
-        with filename.open("r", encoding="utf-8", errors="ignore") as f:
-            content = f.read()
-        return render_template(
-            "new.html",
-            content=content,
-            title=page,
-            upload_path=cfg.images_route,
-            image_allowed_mime=cfg.image_allowed_mime,
-            system=SYSTEM_SETTINGS,
-        )
+    page = PageContent(page, "")
+    if page.file_path.exists():
+        with page.file_path.open("r", encoding="utf-8", errors="ignore") as f:
+            page.content = f.read()
 
-    logger.error("%s does not exists. Creating a new one.", filename)
     return render_template(
         "new.html",
-        content="",
-        title=page,
+        form=page,
         upload_path=cfg.images_route,
         image_allowed_mime=cfg.image_allowed_mime,
         system=SYSTEM_SETTINGS,
     )
 
 
-@app.post("/edit/<path:page>")
-def edit(page: str) -> Response | str:
+@app.post("/edit/<path:page_name>")
+def edit(page_name: str) -> Response | str:
     """Change page content."""
     if (bool(cfg.protect_edit_by_password) and
             (request.cookies.get("session_wikmd") not in SESSIONS)):
-        return login("edit/" + page)
+        return login("edit/" + page_name)
 
-    filename = Path(safe_join(cfg.wiki_directory, f"{page}.md"))
-    page_name = fetch_page_name()
+    page = PageContent.load_from_request()
+    page.is_new_page = False
+    if not page.validate():
+        return render_template(
+            "new.html",
+            form=page,
+            upload_path=cfg.images_route,
+            image_allowed_mime=cfg.image_allowed_mime,
+            system=SYSTEM_SETTINGS,
+        )
 
-    if page_name != page:
-        re_render_page = ensure_page_can_be_created(page_name, page_name)
-        if re_render_page:
-            return re_render_page
+    if page.title != page_name:
+        (Path(cfg.wiki_directory) / page_name).unlink()
 
-        filename.unlink()
-
-    save(page_name)
-    git_sync_thread = Thread(target=wrm.git_sync, args=(page_name, "Edit"))
+    save(page)
+    git_sync_thread = Thread(target=wrm.git_sync, args=(page.title, "Edit"))
     git_sync_thread.start()
 
-    return redirect(url_for("wiki_page", file_page=page_name))
+    return redirect(url_for("wiki_page", file_page=page.title))
 
 
 @app.post(f"/{cfg.images_route}")

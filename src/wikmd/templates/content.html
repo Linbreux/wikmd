@@ -12,7 +12,7 @@
         <a class="folder" style="{% if system.darktheme %} color:whitesmoke {% else %} color:#222326 {% endif %}"
            href="/list/{{ folder }}">{{ folder }}</a>/
     {% endif %}
-        {{ title }}
+        {{ form.title }}
         <a class="nostyle" style="float:right; padding-right:10px" data-bs-target="#removeModal" data-bs-toggle="modal" href="#removeModal">
             <button class="btn btn-danger my-2 my-sm-0" type="submit">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
@@ -22,7 +22,7 @@
                 Delete
             </button>
         </a>
-        <a class="nostyle" style="float:right; padding-right:10px" href="/edit/{% if folder %}{{ folder }}/{% endif %}{{ title }}">
+        <a class="nostyle" style="float:right; padding-right:10px" href="/edit/{% if folder %}{{ folder }}/{% endif %}{{ form.title }}">
             <button class="btn btn-primary my-2 my-sm-0" type="submit">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
                     <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
@@ -54,7 +54,7 @@
                 <div class="modal-footer">
 
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <form action="/remove/{% if folder %}{{ folder }}/{% endif %}{{ title }}" method="GET">
+                    <form action="/remove/{% if folder %}{{ folder }}/{% endif %}{{ form.title }}" method="GET">
                         <button type="submit" class="btn btn-danger">Delete</button>
                     </form>
                 </div>
