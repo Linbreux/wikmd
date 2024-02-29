@@ -8,33 +8,32 @@ def client():
     return app.test_client
 
 
-def test_plugin_loading():
-    assert wiki.plugins
+@pytest.fixture()
+def plugin_manager():
+    return wiki.plugin_manager
 
 
-def test_process_md():
+def test_plugin_loading(plugin_manager):
+    assert plugin_manager.plugins
+
+
+def test_process_md(plugin_manager):
     before = "#test this is test\n text should still be available after plugin"
     md = before
-    for plugin in wiki.plugins:
-        if "process_md" in dir(plugin):
-            md = plugin.process_md(md)
+    md = plugin_manager.broadcast("process_md", md)
     assert md == before
 
 
-def test_draw_md():
+def test_draw_md(plugin_manager):
     before = "#test this is test\n[[draw]] \n next line"
     md = before
-    for plugin in wiki.plugins:
-        if "process_md" in dir(plugin):
-            md = plugin.process_md(md)
+    md = plugin_manager.broadcast("process_md", md)
     assert md != before
     assert md != ""
 
 
-def test_process_html():
+def test_process_html(plugin_manager):
     before = "<html><h1>this is a test</h1></html>"
     html = before
-    for plugin in wiki.plugins:
-        if "process_html" in dir(plugin):
-            html = plugin.process_html(html)
+    html = plugin_manager.broadcast("process_html", html)
     assert html == before

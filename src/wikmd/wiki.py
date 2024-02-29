@@ -31,7 +31,7 @@ from wikmd.cache import Cache
 from wikmd.config import WikmdConfig
 from wikmd.git_manager import WikiRepoManager
 from wikmd.image_manager import ImageManager
-from wikmd.plugins.load_plugins import PluginLoader
+from wikmd.plugin_manager import PluginManager
 from wikmd.search import Search, Watchdog
 from wikmd.utils import pathify, secure_filename
 from wikmd.web_dependencies import get_web_deps
@@ -66,11 +66,11 @@ logger.setLevel(logging.ERROR)
 web_deps = get_web_deps(cfg.local_mode, app.logger)
 
 # plugins
-plugins = PluginLoader(
+plugin_manager = PluginManager(
     flask_app=app,
     config=cfg,
     plugins=cfg.plugins,
-    web_deps=web_deps).get_plugins()
+    web_deps=web_deps)
 
 wrm = WikiRepoManager(flask_app=app)
 cache = Cache(cfg.cache_dir)
@@ -80,7 +80,7 @@ SYSTEM_SETTINGS = {
     "darktheme": False,
     "listsortMTime": False,
     "web_deps": web_deps,
-    "plugins": plugins,
+    "plugins": plugin_manager.plugins,
 }
 
 
@@ -96,12 +96,7 @@ def process(content: str, page_name: str) -> str:
     processed = content.replace("\r\n", "\n")
 
     # Process the content with the plugins
-    for plugin in plugins:
-        if "process_md" in dir(plugin):
-            app.logger.info("Plug/%s - process_md >>> %s",
-                            plugin.get_plugin_name(), page_name)
-            processed = plugin.process_md(processed)
-
+    processed = plugin_manager.broadcast("process_md", processed)
     return processed
 
 
@@ -191,13 +186,7 @@ def get_html(file_page: str) -> [str, str]:
     cached_entry = cache.get(md_file_path.as_posix())
     if cached_entry:
         app.logger.info("Showing HTML page from cache >>> '%s'", file_page)
-
-        for plugin in plugins:
-            if "process_html" in dir(plugin):
-                app.logger.info("Plug/%s - process_html >>> %s",
-                                plugin.get_plugin_name(), file_page)
-                cached_entry = plugin.process_html(cached_entry)
-
+        cached_entry = plugin_manager.broadcast("process_html", cached_entry)
         return cached_entry, mod
 
     app.logger.info("Converting to HTML with pandoc >>> '%s' ...", md_file_path)
@@ -213,19 +202,11 @@ def get_html(file_page: str) -> [str, str]:
     if html.strip():
         html = clean_html(html)
 
-    for plugin in plugins:
-        if "process_before_cache_html" in dir(plugin):
-            app.logger.info("Plug/%s - process_before_cache_html >>> %s",
-                            plugin.get_plugin_name(), file_page)
-            html = plugin.process_before_cache_html(html)
+    html = plugin_manager.broadcast("process_before_cache_html", html)
 
     cache.set(md_file_path.as_posix(), html)
 
-    for plugin in plugins:
-        if "process_html" in dir(plugin):
-            app.logger.info("Plug/%s - process_html >>> %s",
-                            plugin.get_plugin_name(), file_page)
-            html = plugin.process_html(html)
+    html = plugin_manager.broadcast("process_html", html)
 
     app.logger.info("Showing HTML page >>> '%s'", file_page)
 
@@ -518,15 +499,13 @@ def delete_file() -> str:
 
 
 @app.post("/plug_com")
-def communicate_plugins() -> str:
+def communicate_plugins() -> None | Response:
     """Send the request to the plugins."""
     if (bool(cfg.protect_edit_by_password) and
             (request.cookies.get("session_wikmd") not in SESSIONS)):
         return login()
-    for plugin in plugins:
-        if "communicate_plugin" in dir(plugin):
-            return plugin.communicate_plugin(request)
-    return "nothing to do"
+    plugin_manager.broadcast("communicate_plugin", request)
+    return None
 
 
 @app.get("/knowledge-graph")
@@ -645,9 +624,7 @@ def run_wiki() -> None:
     """Run the wiki as a Flask app."""
     app.logger.info("Starting Wikmd with wiki directory %s", Path(cfg.wiki_directory).resolve())
 
-    for plugin in plugins:
-        if "request_html" in dir(plugin):
-            plugin.request_html(get_html)
+    plugin_manager.broadcast("request_html", get_html)
 
     if int(cfg.wikmd_logging) == 1:
         logging.basicConfig(filename=cfg.wikmd_logging_file, level=logging.INFO)
