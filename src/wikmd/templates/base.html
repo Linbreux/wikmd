@@ -36,15 +36,15 @@
 <body>
     <!-- Navbar top -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
-        <div class="container-fluid mx-2">
-            <a class="navbar-brand" href="/">Wiki</a>
+        <div class="container-xxl flex-wrap">
+            <a class="navbar-brand ms-4" href="/">Wiki</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
                     aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <form class="d-flex my-sm-4 my-lg-0 ms-lg-4" method="GET" action="{{ url_for('search_route') }}">
+                <form class="d-flex my-sm-2 my-lg-0 ms-lg-4" method="GET" action="{{ url_for('search_route') }}">
                     <input class="form-control me-2" type="search" placeholder="Search something..." aria-label="Search" name="q">
                     <button class="btn btn-primary me-2" type="submit">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search">
@@ -52,11 +52,11 @@
                         </svg>
                     </button>
                 </form>
-
-                <ul class="navbar-nav mx-lg-2">
+                <div class="row w-100">
+                <ul class="col-auto navbar-nav px-3">
                     <!-- New button -->
                     <li class="nav-item">
-                        <a class="nav-link" href="/add_new">
+                        <a class="nav-link " href="/add_new">
                             <button class="btn btn-success" type="button">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-plus" viewBox="0 0 16 16">
                                     <path d="M8.5 6a.5.5 0 0 0-1 0v1.5H6a.5.5 0 0 0 0 1h1.5V10a.5.5 0 0 0 1 0V8.5H10a.5.5 0 0 0 0-1H8.5V6z"/>
@@ -69,26 +69,31 @@
                 </ul>
 
                 <!-- List all pages -->
-                <ul class="navbar-nav me-auto ms-sm-2">
+                <ul class="col-auto navbar-nav align-self-center">
                     <li class="nav-item">
                         <a class="nav-link" href="/list">List all pages</a>
                     </li>
                 </ul>
 
+                <!-- Spacer -->
+                <ul class="col-auto me-auto"></ul>
+
                 <!-- Graph and toggle dark mode -->
-                <ul class="navbar-nav ms-auto ms-sm-2">
+                <ul class="col-auto navbar-nav">
                     <li class="nav-item">
                         <a class="nav-link" href="/knowledge-graph">
                             <img height="25px" src="/static/images/graph_5.svg" alt="graph">
                         </a>
                     </li>
+                </ul>
+                <ul class="col-auto navbar-nav">
                     <li class="nav-item">
                         <a class="nav-link" href="/toggle-darktheme?return={{ url_for(request.endpoint, **request.view_args) }}">
                             <img src="/static/images/contrast-2-fill.svg" alt="toggle dark theme">
                         </a>
                     </li>
                 </ul>
-
+                </div>
             </div>
         </div>
     </nav>
