@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+
+{%block head%}
+    <link rel="stylesheet" href="{{ system.web_deps["filepond.css"] }}">
+    <link href="{{ system.web_deps["codemirror.min.css"] }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/codemirror.custom.css') }}" rel="stylesheet">
+
+    <!-- Add dark css if dark theme is toggled -->
+    {% if system.darktheme == True %}
+        <link href="{{ url_for('static', filename='css/codemirror.custom.dark.css') }}" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/filepond.dark.css') }}" rel="stylesheet">
+    {% endif %}
+
+{%endblock%}
+
+
+{% block content %}
+
+    <form id="form" method="POST" onsubmit="setFormSubmitting()">
+        <div class="form-group mb-3 col-12">
+            <label for="name" class="form-label">Page name</label>
+            <input type="text" class="form-control" id="name" name="PN" value="{{title}}">
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="content" class="form-label">Content</label>
+            <textarea style="display: none" class="form-control" id="content" rows="25" name="CT">{{content}}</textarea>
+        </div>
+        <input type="file" multiple>
+        <p id="messages"></p>
+        <button type="submit" class="btn btn-success mb-2">Save</button>
+    </form>
+
+    <script type="text/javascript" src="{{ system.web_deps["codemirror.min.js"] }}"></script>
+    <script type="text/javascript" src="{{ system.web_deps["markdown.min.js"] }}"></script>
+    <script type="text/javascript" src="{{ system.web_deps["filepond.js"] }}"></script>
+    <script type="text/javascript" src="{{ system.web_deps["filepond-plugin-file-validate-type.js"] }}"></script>
+
+    <script>
+    FilePond.registerPlugin(FilePondPluginFileValidateType);
+    const messagesElement = document.getElementById("messages");
+    const inputElement = document.querySelector('input[type="file"]');
+    FilePond.create(inputElement, {acceptedFileTypes: {{ image_allowed_mime|safe }} }); // image_allowed_mime is provided by the config, so it is safe
+    FilePond.setOptions({
+        server: {
+            url:"/",
+            process: {
+                url: './{{upload_path}}',
+                onload: (filename) => {
+                    const md = `![caption](/{{upload_path}}/${filename})`;
+                    let message = document.createElement("li");
+                    message.innerHTML = `Use <b><code>${md}</code></b> inside your markdown file <a href="#" onclick=navigator.clipboard.writeText("${md}")>Copy</a>`;
+                    messagesElement.appendChild(message);
+                }
+            }
+        },
+    });
+    </script>
+
+    <script>
+        var editor = CodeMirror.fromTextArea(document.getElementById("content"), {
+            mode: 'markdown',
+            lineNumbers: true,
+            theme: "default",
+            extraKeys: {
+                "Enter": "newlineAndIndentContinueMarkdownList",
+            },
+            lineWrapping: true,
+        });
+
+
+        {% if system.darktheme == True%}
+            editor.setOption("theme","ayu-mirage");
+        {% endif %}
+
+
+        document.addEventListener('keydown', e => {
+            if (e.ctrlKey && e.key === "s"){
+                e.preventDefault();
+                document.getElementById("content").value = editor.getValue();
+                const form = document.getElementById("form");
+                const data = new FormData(form);
+                let xmlhttp = new XMLHttpRequest();
+                xmlhttp.open("POST", window.location.href,true);
+                xmlhttp.send(data);
+            }
+        });
+
+        var formSubmitting = false;
+        var setFormSubmitting = function() { formSubmitting = true; };
+        var isDirty = function() {
+            // Does a naive check to see if the content on the page have changed.
+            const loaded_content = document.getElementById("content").value;
+            const current_value = editor.getValue();
+            const old_page_with_changed_content = (current_value !== loaded_content)
+            const new_page_with_changed_content = (current_value !== "" && loaded_content === "")
+            const new_page_with_loaded_content = loaded_content !== "" && document.URL.endsWith("add_new")
+
+
+            return old_page_with_changed_content || new_page_with_changed_content || new_page_with_loaded_content;
+        }
+
+        window.onload = function() {
+            window.addEventListener("beforeunload", function (e) {
+                if (formSubmitting || !isDirty()) {
+                    return undefined;
+                }
+
+                var confirmationMessage = 'You have unsaved changes. '
+                                        + 'If you leave before saving, your changes will be lost.';
+
+                (e || window.event).returnValue = confirmationMessage; //Gecko + IE
+                return confirmationMessage; //Gecko + Webkit, Safari, Chrome etc.
+            });
+        };
+    </script>
+{% endblock %}

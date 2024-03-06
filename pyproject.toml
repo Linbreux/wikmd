@@ -1,0 +1,81 @@
+[project]
+requires-python = ">= 3.8"
+name = "wikmd"
+description = "A file-based wiki that aims for simplicity."
+authors = [
+    { name = "linbreux" }
+]
+
+version = "1.9.0"
+
+dependencies=[
+    "Flask==3.0.2",
+    "GitPython==3.1.42",
+    "Markdown==3.5.2",
+    "PyYAML==6.0.1",
+    "Werkzeug==3.0.1",
+    "Whoosh==2.7.4",
+    "beautifulsoup4==4.12.3",
+    "pandoc-eqnos==2.5.0",
+    "pandoc-fignos==2.4.0",
+    "pandoc-secnos==2.2.2",
+    "pandoc-tablenos==2.3.0",
+    "pandoc-xnos==2.5.0",
+    "pandocfilters==1.5.1",
+    "pypandoc==1.13",
+    "requests==2.31.0",
+    "lxml==5.1.0",
+    "watchdog==2.1.9",
+    "cachelib==0.12.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+wikmd = [
+    "wikmd-config.yaml",
+    "plugins/draw/default_draw",
+    "static/**/*",
+    "templates/**/*",
+    "wiki_template/**/*",
+]
+
+[tool.pytest.ini_options]
+pythonpath = [
+  "src"
+]
+
+[tool.ruff]
+src = ["", "tests"]
+select = ["ALL"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+    # S101: Check for assert
+    "S101",
+
+    # ANN001: Missing type annotation for public function
+    "ANN001",
+
+    # ANN201: Missing return type annotation for public function
+    "ANN201",
+
+    # D100: Missing docstring in public module
+    "D100",
+
+    # D103: Missing docstring in public function
+    "D103",
+
+    # PLR2004: Magic numbers
+    "PLR2004",
+]

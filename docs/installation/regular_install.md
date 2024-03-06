@@ -18,23 +18,22 @@ cd in wikmd
 cd wikmd
 ```
 
-Create a virtual env and activate it(optional)
+Create a virtual env and activate it (optional, but highly recommended)
 ```
 virtualenv venv
 source venv/bin/activate
 ```
-Install requirements
+
+Install 
 ```
-pip install -r requirements.txt
+python -m pip install .
 ```
-Run the wiki
+
+Run the wiki, remember that all paths within wikmd are defined as relative. 
+That means that your current working directory will be the base of the project. 
+As such your current directory will hold the `wiki` directory that contains all md files.
 ```
-export FLASK_APP=wiki.py
-flask run --host=0.0.0.0
-```
-or 
-```
-python wiki.py
+python -m wikmd.wiki
 ```
 
 Now visit localhost:5000 and you will see the wiki. With the 0.0.0.0. option it will show up everywhere on the network.
@@ -47,7 +46,8 @@ Maybe you need to install pandoc on your system before this works.
 ```
 sudo apt-get update && sudo apt-get install pandoc
 ```
-You may experience an issue when running `pip install -r requirements.txt` where you receive the following error:
+
+You may experience an issue when running `python -m pip install -r requirements.txt` where you receive the following error:
 ```
   psutil/_psutil_common.c:9:10: fatal error: Python.h: No such file or directory
       9 | #include <Python.h>
@@ -70,7 +70,7 @@ sudo dnf install python3-devel
 ```
 For other distros, you can search up `[distro] install python 3 dev`.
 
-You may experience an error when running `pip install -r requirements.txt` where it asks you to install `gcc python3-dev`. Example:
+You may experience an error when running `python pip install .` where it asks you to install `gcc python3-dev`. Example:
 ```
   unable to execute 'x86_64-linux-gnu-gcc': No such file or directory
   C compiler or Python headers are not installed on this system. Try to run:
@@ -97,8 +97,7 @@ After=network.target
 [Service]
 User=<user>
 WorkingDirectory=<path to the wiki>
-Environment=FLASK_APP=wiki.py
-ExecStart=<path to the wiki>/env/bin/python3 wiki.py
+ExecStart=<path to the wiki>/env/bin/python3 -m wikmd.wiki
 Restart=always
 
 [Install]
@@ -125,7 +124,7 @@ To fix, run the following commands:
 sudo su
 cd ~
 umask 022
-pip install -r <path to the wiki>/requirements.txt
+pip install -r <path to the wiki> .
 ```
 This will install the python packages system-wide, allowing the wiki service to access it.
 
@@ -137,7 +136,7 @@ Run `systemctl restart wiki.service` and it should be working.
 You should install [pandoc](https://pandoc.org/installing.html) on your windows system. Now you should be able to start
 the server.
 ```
-python wiki.py
+python -m wikmd.wiki
 ```
 If the content of the markdown files are not visible you should add the `pandoc-xnos` location to your path variable. Info about [Environment variables](https://www.computerhope.com/issues/ch000549.htm).
 ```

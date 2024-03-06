@@ -96,15 +96,12 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+# Generated plugin files
+src/wikmd/plugins/draw/drawings/*
+!src/wikmd/plugins/draw/drawings/.gitkeep
+
+
 # Personal wiki pages
 wiki/*
-wiki/src/*
-
-!wiki/Features.md
-!wiki/How to use the wiki.md
-!wiki/Markdown cheatsheet.md
-!wiki/Using the version control system.md
-!wiki/homepage.md
-!wiki/src
 
 temp/*

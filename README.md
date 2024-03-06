@@ -7,7 +7,7 @@ It’s a file-based wiki that aims to simplicity. Instead of storing the data in
 
 To view the documents in the browser, the document is converted to html.
 
-![preview](static/images/readme-img.png)
+![preview](src/wikmd/static/images/readme-img.png)
 
 ## Features
 
@@ -30,6 +30,10 @@ To view the documents in the browser, the document is converted to html.
 ## Installation
 
 Detailed installation instruction can be found [here](https://linbreux.github.io/wikmd/installation.html).
+
+## Development
+
+Instructions on the easiest way to develop on the project can be found [here](https://linbreux.github.io/wikmd/development.html).
 
 ## Plugins & Knowledge graph (beta)
 

@@ -1,147 +1,149 @@
-import wiki
-import pytest
-import pypandoc
 import os
+from pathlib import Path
+import shutil
 
-from wiki import app
+import pytest
+from wikmd import wiki
+from wikmd.wiki import app, cfg
 
-@pytest.fixture
+cfg.wiki_directory = (Path(__file__).parent.parent / "src" / "wikmd" / "wiki_template").as_posix()
+
+@pytest.fixture()
 def client():
     return app.test_client
 
-# test if homepage responses
+
+@pytest.fixture(scope="module")
+def test_file_content():
+    return b"this is the header", b"extra content"
+
+
+@pytest.fixture()
+def project_file(test_file_content):
+    testing_folder = Path(cfg.wiki_directory) / "testing_folder"
+    testing_folder.mkdir()
+
+    test_file = testing_folder / "test.md"
+    with test_file.open("wb") as fp:
+        fp.writelines(test_file_content)
+
+    yield test_file
+
+    shutil.rmtree(str(testing_folder))
+
+
+@pytest.fixture()
+def wiki_file(project_file):
+    return f"/{project_file.parent.name}/{project_file.stem}"
+
+
 def test_homepage():
+    """Homepage renders."""
     rv = app.test_client().get("/")
-    
-    # see if hompage responses
+
     assert rv.status_code == 200
 
     # Check if homepage loads
-    assert b'What is it?' in rv.data
+    assert b"What is it?" in rv.data
 
-# check if list returns all files (tests only 2 defaults)
+
 def test_list():
+    """List functionality returns one of the standard files."""
     rv = app.test_client().get("/list/")
 
     assert rv.status_code == 200
-    #assert b'homepage.md' in rv.data
-    assert b'Features.md' in rv.data
+    assert b"Features.md" in rv.data
 
-# creates a file and check if the content of the file is visible in the wiki
-def test_create_file_in_folder():
-    # create dir if it does not exist
-    if not os.path.exists("wiki/testing_folder_0123"):
-        os.makedirs("wiki/testing_folder_0123")
 
-    # write content in the test.md file
-    f = open("wiki/testing_folder_0123/test.md","w+")
-    f.write("# this is the header\n extra content")
-    f.close()
-
-    rv = app.test_client().get("/testing_folder_0123/test")
+def test_create_file_in_folder(wiki_file, test_file_content):
+    """Make sure the created file is accessible."""
+    rv = app.test_client().get(wiki_file)
 
     assert rv.status_code == 200
-    assert b'this is the header' in rv.data 
-    assert b'extra content' in rv.data 
+    assert test_file_content[0] in rv.data
+    assert test_file_content[1] in rv.data
 
-    # remove created folders
-    os.remove("wiki/testing_folder_0123/test.md")
-    os.removedirs("wiki/testing_folder_0123/")
-    
-# checks if the search response with searchterm = Features    
+
 def test_search():
-     wiki.setup_search()
-     rv = app.test_client().get("/?q=Features")
-     assert rv.status_code == 200
-     assert b'Found' in rv.data
-     assert b'result(s)' in rv.data
-     assert b'Features' in rv.data
+    """Search functionality returns result."""
+    wiki.setup_search()
+    rv = app.test_client().get("/?q=Features")
+    assert rv.status_code == 200
+    assert b"Found" in rv.data
+    assert b"result(s)" in rv.data
+    assert b"Features" in rv.data
 
-# create a new file using the wiki and check if it is visible in the wiki
+
 def test_new_file():
+    """App can create files."""
     rv = app.test_client().get("/add_new")
     assert rv.status_code == 200
-    assert b'content' in rv.data
+    assert b"content" in rv.data
 
     # create new file
-    rv = app.test_client().post("/add_new", data=dict(
-        PN="testing01234filenotexisting",
-        CT="#testing file\n this is a test"
-    ))
+    app.test_client().post("/add_new", data={
+        "PN": "testing01234filenotexisting",
+        "CT": "#testing file\n this is a test",
+    })
 
     # look at file
     rv = app.test_client().get("/testing01234filenotexisting")
-    assert b'testing file' in rv.data
-    assert b'this is a test' in rv.data
+    assert b"testing file" in rv.data
+    assert b"this is a test" in rv.data
 
-    os.remove("wiki/testing01234filenotexisting.md")
+    f = Path(cfg.wiki_directory) / "testing01234filenotexisting.md"
+    f.unlink()
+
 
 # create a new file in a folder using the wiki and check if it is visible in the wiki
 def test_new_file_folder():
+    """App can create folders."""
     rv = app.test_client().get("/add_new")
     assert rv.status_code == 200
-    assert b'content' in rv.data
+    assert b"content" in rv.data
 
-    # create new file
-    rv = app.test_client().post("/add_new", data=dict(
-        PN="testingfolder01234/testing01234filenotexisting",
-        CT="#testing file\n this is a test"
-    ))
-    
+    # create new file in a folder
+    app.test_client().post("/add_new", data={
+        "PN": "testingfolder01234/testing01234filenotexisting",
+        "CT": "#testing file\n this is a test",
+    })
+
     # look at file
     rv = app.test_client().get("/testingfolder01234/testing01234filenotexisting")
-    assert b'testing file' in rv.data
-    assert b'this is a test' in rv.data
+    assert b"testing file" in rv.data
+    assert b"this is a test" in rv.data
 
-    os.remove("wiki/testingfolder01234/testing01234filenotexisting.md")
-    os.removedirs("wiki/testingfolder01234")
+    f = Path(cfg.wiki_directory) / "testingfolder01234"
+    shutil.rmtree(f)
+
 
 # edits file using the wiki and check if it is visible in the wiki
-def test_edit_file():
-    f = open("wiki/testing01234filenotexisting.md","w+")
-    f.write("# this is the header\n extra content")
-    f.close()
+def test_get_file_after_file_edit(project_file, wiki_file):
+    with project_file.open("w+") as fp:
+        fp.write("our new content")
 
-    rv = app.test_client().get("/edit/testing01234filenotexisting")
+    rv = app.test_client().get(wiki_file)
     assert rv.status_code == 200
-    assert b'this is the header' in rv.data
+    assert b"our new content" in rv.data
 
-    # create new file
-    rv = app.test_client().post("/edit/testing01234filenotexisting", data=dict(
-        PN="testing01234filenotexisting",
-        CT="#testing file\n this is a test"
-    ))
-    
-    # look at file
-    rv = app.test_client().get("/testing01234filenotexisting")
-    assert b'testing file' in rv.data
-    assert b'this is a test' in rv.data
 
-    os.remove("wiki/testing01234filenotexisting.md")
+def test_get_file_after_api_edit(wiki_file):
+    # Edit the file through API
+    app.test_client().post(f"/edit{wiki_file}", data={
+        "PN": wiki_file[1:],
+        "CT": "#testing file\n this is a test",
+    })
+
+    rv = app.test_client().get(wiki_file)
+    assert b"testing file" in rv.data
+    assert b"this is a test" in rv.data
+
 
 # edits file in folder using the wiki and check if it is visible in the wiki
-def test_edit_file_folder():
-    if not os.path.exists("wiki/testingfolder01234"):
-        os.makedirs("wiki/testingfolder01234")
+def test_get_edit_page_content(project_file, wiki_file):
+    with project_file.open("w+") as fp:
+        fp.write("# this is the header\n extra content")
 
-    f = open("wiki/testingfolder01234/testing01234filenotexisting.md","w+")
-    f.write("# this is the header\n extra content")
-    f.close()
-
-    rv = app.test_client().get("/edit/testingfolder01234/testing01234filenotexisting")
+    rv = app.test_client().get(f"/edit{wiki_file}")
     assert rv.status_code == 200
-    assert b'this is the header' in rv.data
-
-    # create new file
-    rv = app.test_client().post("/edit/testingfolder01234/testing01234filenotexisting", data=dict(
-        PN="testingfolder01234/testing01234filenotexisting",
-        CT="#testing file\n this is a test"
-    ))
-    
-    # look at file
-    rv = app.test_client().get("/testingfolder01234/testing01234filenotexisting")
-    assert b'testing file' in rv.data
-    assert b'this is a test' in rv.data
-
-    os.remove("wiki/testingfolder01234/testing01234filenotexisting.md")
-    os.removedirs("wiki/testingfolder01234")
+    assert b"this is the header" in rv.data
