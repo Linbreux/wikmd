@@ -96,23 +96,27 @@ def process(content: str, page_name: str):
 
 def ensure_page_can_be_created(page, page_name):
     filename = safe_join(cfg.wiki_directory, f"{page_name}.md")
-    path_exists = os.path.exists(filename)
-    safe_name = "/".join([secure_filename(part) for part in page_name.split("/")])
-    filename_is_ok = safe_name == page_name
-    if not path_exists and filename_is_ok and page_name:  # Early exist
-        return
-
-    if path_exists:
-        flash('A page with that name already exists. The page name needs to be unique.')
-        app.logger.info(f"Page name exists >>> {page_name}.")
-
-    if not filename_is_ok:
-        flash(f"Page name not accepted. Try using '{safe_name}'.")
+    if filename is None:
+        flash(f"Page name not accepted. Contains disallowed characters.")
         app.logger.info(f"Page name isn't secure >>> {page_name}.")
+    else:
+        path_exists = os.path.exists(filename)
+        safe_name = "/".join([secure_filename(part) for part in page_name.split("/")])
+        filename_is_ok = safe_name == page_name
+        if not path_exists and filename_is_ok and page_name:  # Early exist
+            return
 
-    if not page_name:
-        flash(f"Your page needs a name.")
-        app.logger.info(f"No page name provided.")
+        if path_exists:
+            flash('A page with that name already exists. The page name needs to be unique.')
+            app.logger.info(f"Page name exists >>> {page_name}.")
+
+        if not filename_is_ok:
+            flash(f"Page name not accepted. Try using '{safe_name}'.")
+            app.logger.info(f"Page name isn't secure >>> {page_name}.")
+
+        if not page_name:
+            flash(f"Your page needs a name.")
+            app.logger.info(f"No page name provided.")
 
     content = process(request.form['CT'], page_name)
     return render_template("new.html", content=content, title=page, upload_path=cfg.images_route,
