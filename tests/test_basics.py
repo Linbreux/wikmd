@@ -78,7 +78,7 @@ def test_create_file_in_folder(wiki_file, test_file_content):
 def test_search():
     """Search functionality returns result."""
     wiki.setup_search()
-    rv = app.test_client().get("/?q=Features")
+    rv = app.test_client().get("/search?q=Features")
     assert rv.status_code == 200
     assert b"Found" in rv.data
     assert b"result(s)" in rv.data
