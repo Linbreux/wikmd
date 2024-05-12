@@ -153,7 +153,7 @@ To do this, set the environment variable `SYNC_WITH_REMOTE` to `1`.
 
 
 ```
-export SYNCH_WITH_REMOTE=1
+export SYNC_WITH_REMOTE=1
 ```
 
 Also set the environment variable `REMOTE_URL` to your remote repo URL. 
