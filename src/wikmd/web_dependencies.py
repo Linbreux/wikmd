@@ -80,6 +80,10 @@ WEB_DEPENDENCIES = {
     "mermaid.min.js": WebDependency(
         local="/static/js/mermaid.min.js",
         external="https://cdn.jsdelivr.net/npm/mermaid@9.3.0/dist/mermaid.min.js"
+    ),
+    "quicksand.woff2": WebDependency(
+        local="/static/fonts/quicksand.woff2",
+        external="https://fonts.gstatic.com/s/quicksand/v31/6xKtdSZaM9iE8KbpRA_hK1QN.woff2"
     )
 }
 
