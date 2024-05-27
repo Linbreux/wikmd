@@ -23,7 +23,7 @@ dependencies=[
     "pandoc-xnos==2.5.0",
     "pandocfilters==1.5.1",
     "pypandoc==1.13",
-    "requests==2.31.0",
+    "requests==2.32.2",
     "lxml==5.1.0",
     "watchdog==2.1.9",
     "cachelib==0.12.0",
