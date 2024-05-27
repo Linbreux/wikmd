@@ -37,7 +37,6 @@ FROM python-base as python-builder
 # Install our dependencies
 RUN apk update
 RUN apk add git
-RUN apk add pandoc
 RUN apk add build-base linux-headers
 
 # Python dependencies
