@@ -20,6 +20,11 @@ class Plugin:
         self.web_dep = web_dep
         self.drawings_folder = os.path.join(self.config.wiki_directory, config.drawings_route)
 
+    def post_setup(self) -> bool:
+        """
+        configure the drawings folder
+        returns True if folder did not exist and created it
+        """
         if not os.path.exists(self.drawings_folder):
             os.mkdir(self.drawings_folder)
 
@@ -28,7 +33,9 @@ class Plugin:
             for item in os.listdir(os.path.join(self.this_location, "drawings")):
                 print(f"copy {item} to {self.drawings_folder}")
                 shutil.copy2(os.path.join(self.this_location, "drawings",item), os.path.join(self.drawings_folder, item))
+            return True
 
+        return False
 
     def get_plugin_name(self) -> str:
         """

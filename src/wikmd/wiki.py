@@ -541,6 +541,11 @@ def setup_wiki_template() -> bool:
         app.logger.info("Wiki directory is empty, copy template")
         shutil.copytree(root / "wiki_template", cfg.wiki_directory, dirs_exist_ok=True)
         return True
+
+    for plugin in plugins:
+        if "post_setup" in dir(plugin):
+            plugin.post_setup()
+
     return False
 
 
