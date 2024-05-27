@@ -23,6 +23,13 @@ class Plugin:
         if not os.path.exists(self.drawings_folder):
             os.mkdir(self.drawings_folder)
 
+            # allow backward compatibility and move all the contents in the plugins
+            # drawing folder to the wiki drawings folder
+            for item in os.listdir(os.path.join(self.this_location, "drawings")):
+                print(f"copy {item} to {self.drawings_folder}")
+                shutil.copy2(os.path.join(self.this_location, "drawings",item), os.path.join(self.drawings_folder, item))
+
+
     def get_plugin_name(self) -> str:
         """
         returns the name of the plugin
