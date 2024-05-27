@@ -18,6 +18,9 @@ class Plugin:
         self.config = config
         self.this_location = os.path.dirname(__file__)
         self.web_dep = web_dep
+        self.drawings_folder = os.path.join(self.config.wiki_directory, "drawings")
+        if not os.path.exists(self.drawings_folder):
+            os.mkdir(self.drawings_folder)
 
     def get_plugin_name(self) -> str:
         """
@@ -47,7 +50,7 @@ class Plugin:
         self.flask_app.logger.info(f"Plug/{self.name} - changing drawing {id}")
 
         # look for folder
-        location = os.path.join(os.path.dirname(__file__), "drawings", id)
+        location = os.path.join(self.drawings_folder, id)
         if os.path.exists(location):
             file = open(location, "w")
             file.write(image)
@@ -60,7 +63,7 @@ class Plugin:
         look for a drawId in the wiki/draw folder and return the file as a string
         """
         try:
-            file = open(os.path.join(self.this_location, "drawings", drawid), "r")
+            file = open(os.path.join(self.drawings_folder, drawid), "r")
             return file.read()
         except Exception:
             print("Did not find the file")
@@ -70,7 +73,7 @@ class Plugin:
         """
         Copy the default drawing to a new one with this filename
         """
-        path_to_file = os.path.join(self.this_location, "drawings", filename)
+        path_to_file = os.path.join(self.drawings_folder, filename)
         shutil.copyfile(os.path.join(self.this_location, "default_draw"), path_to_file)
         s = open(path_to_file,"r")
         result = re.sub("id=\"\"","id=\"" + filename + "\"",s.read())
