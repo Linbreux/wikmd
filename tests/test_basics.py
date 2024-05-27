@@ -87,6 +87,7 @@ def test_search():
 
 def test_add_new_file(wiki_path):
     """App can create files."""
+    wiki.setup_wiki_template()
     rv = app.test_client().get("/add_new")
     assert rv.status_code == 200
     assert b"content" in rv.data

@@ -39,9 +39,10 @@ cfg = WikmdConfig()
 
 UPLOAD_FOLDER_PATH = pathify(cfg.wiki_directory, cfg.images_route)
 GIT_FOLDER_PATH = pathify(cfg.wiki_directory, '.git')
+DRAWING_FOLDER_PATH = pathify(cfg.wiki_directory, cfg.drawings_route)
 HIDDEN_FOLDER_PATH_LIST = [pathify(cfg.wiki_directory, hidden_folder) for hidden_folder in cfg.hide_folder_in_wiki]
 HOMEPAGE_PATH = pathify(cfg.wiki_directory, cfg.homepage)
-HIDDEN_PATHS = tuple([UPLOAD_FOLDER_PATH, GIT_FOLDER_PATH, HOMEPAGE_PATH] + HIDDEN_FOLDER_PATH_LIST)
+HIDDEN_PATHS = tuple([UPLOAD_FOLDER_PATH, GIT_FOLDER_PATH, DRAWING_FOLDER_PATH, HOMEPAGE_PATH] + HIDDEN_FOLDER_PATH_LIST)
 
 _project_folder = Path(__file__).parent
 app = Flask(__name__,
@@ -540,6 +541,11 @@ def setup_wiki_template() -> bool:
         app.logger.info("Wiki directory is empty, copy template")
         shutil.copytree(root / "wiki_template", cfg.wiki_directory, dirs_exist_ok=True)
         return True
+
+    for plugin in plugins:
+        if "post_setup" in dir(plugin):
+            plugin.post_setup()
+
     return False
 
 

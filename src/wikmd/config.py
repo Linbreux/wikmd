@@ -21,6 +21,7 @@ WIKI_DIRECTORY_DEFAULT = "wiki"
 HOMEPAGE_DEFAULT = "homepage.md"
 HOMEPAGE_TITLE_DEFAULT = "homepage"
 IMAGES_ROUTE_DEFAULT = "img"
+DRAWINGS_ROUTE_DEFAULT = ".drawings"
 
 HIDE_FOLDER_IN_WIKI = []
 
@@ -89,6 +90,7 @@ class WikmdConfig:
         self.homepage = os.getenv("HOMEPAGE") or yaml_config.get("homepage", HOMEPAGE_DEFAULT)
         self.homepage_title = os.getenv("HOMEPAGE_TITLE") or yaml_config.get("homepage_title", HOMEPAGE_TITLE_DEFAULT)
         self.images_route = os.getenv("IMAGES_ROUTE") or yaml_config.get("images_route", IMAGES_ROUTE_DEFAULT)
+        self.drawings_route = DRAWINGS_ROUTE_DEFAULT
 
         self.hide_folder_in_wiki = os.getenv("HIDE_FOLDER_IN_WIKI") or yaml_config.get("hide_folder_in_wiki", HIDE_FOLDER_IN_WIKI)
 
