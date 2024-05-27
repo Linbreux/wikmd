@@ -18,7 +18,8 @@ class Plugin:
         self.config = config
         self.this_location = os.path.dirname(__file__)
         self.web_dep = web_dep
-        self.drawings_folder = os.path.join(self.config.wiki_directory, "drawings")
+        self.drawings_folder = os.path.join(self.config.wiki_directory, config.drawings_route)
+
         if not os.path.exists(self.drawings_folder):
             os.mkdir(self.drawings_folder)
 
