@@ -27,7 +27,8 @@ source venv/bin/activate
 
 Install it in [development mode aka editable install](https://setuptools.pypa.io/en/latest/userguide/development_mode.html)  
 ```
-python -m pip install .[dev] --editable
+bash: python -m pip install --editable .[dev]
+zsh: python -m pip install --editable '.[dev]'
 ```
 
 Run the wiki
