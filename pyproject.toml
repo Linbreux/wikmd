@@ -2,6 +2,7 @@
 requires-python = ">= 3.8"
 name = "wikmd"
 description = "A file-based wiki that aims for simplicity."
+readme = "README.md"
 authors = [
     { name = "linbreux" }
 ]
