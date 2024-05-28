@@ -12,7 +12,7 @@ on:
   release:
     types: [published]
  push:
-    branches: [ publish-pypi ]
+    branches: [ publish-to-pypi ]
 
 permissions:
   contents: read
