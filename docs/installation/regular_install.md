@@ -5,6 +5,14 @@ parent: Installation
 nav_order: 1
 ---
 
+# Fast installation via pip
+
+Wikmd is available as a [pip package](https://pypi.org/project/wikmd/).
+```
+pip install wikmd
+```
+Now `wikmd` is available as a console command. It will create or use a wiki folder in the current working directory.
+
 # Regular installation
 ! It's tested on windows and linux based systems.
 ! Runs on flask server
