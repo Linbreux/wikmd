@@ -1,0 +1,73 @@
+import os
+import re
+
+from flask import Flask
+from wikmd.config import WikmdConfig
+
+
+injected_html = """
+    <div id="{id}"></div>
+    <script src="https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui-bundle.js" crossorigin></script>
+    <script>
+      window.onload = () => {
+        window.ui = SwaggerUIBundle({
+          url: '{url}',
+          dom_id: '#{id}',
+        });
+      };
+    </script>
+    """
+
+
+class Plugin:
+    def import_head(self):
+        return '<link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui.css" />'
+
+
+    def __init__(self, flask_app: Flask, config: WikmdConfig, web_dep):
+        self.name = "swagger"
+        self.plugname = "swagger"
+        self.flask_app = flask_app
+        self.config = config
+        self.this_location = os.path.dirname(__file__)
+        self.web_dep = web_dep
+
+    def get_plugin_name(self) -> str:
+        """
+        returns the name of the plugin
+        """
+        return self.name
+
+    def process_md(self, md: str) -> str:
+        """
+        returns the md file after process the input file
+        """
+        return md
+
+    def process_html(self, html: str) -> str:
+        """
+        returns the html file after process the input file
+        """
+        return self.insert_swagger_divs(html)
+
+    def request_html(self, get_html_callback):
+        self.get_html = get_html_callback
+
+    def insert_swagger_divs(self, file: str) -> str:
+        """
+        inserts the swagger divs into the html file
+        """
+        annotations = re.findall(r"\[\[(" + self.name + r" .*)\]\]", file)
+        result = file
+        for i, annotation in enumerate(annotations):
+            link = annotation[len(self.name) + 1:]
+            result = re.sub(r"\[\["+annotation+r"\]\]", self.prepare_html_string(link, i), result, count=1)
+        return result
+
+
+    def prepare_html_string(self, link: str, id: int) -> str:
+        """
+        returns the html string with id and url
+        """
+        return injected_html.replace("{id}", "swagger-ui-div-" + str(id)).replace("{url}", link)
+
