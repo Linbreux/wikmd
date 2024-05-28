@@ -2,7 +2,8 @@
 requires-python = ">= 3.8"
 name = "wikmd"
 description = "A file-based wiki that aims for simplicity."
-readme = README.md
+long_description = file: README.md
+long_description_content_type = text/markdown
 authors = [
     { name = "linbreux" }
 ]
