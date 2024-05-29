@@ -230,7 +230,7 @@ def wiki_tree(path: Path) -> dict:
     except ValueError:
         p_url = Path()
     tree = {
-        "name": path.stem,
+        "name": path.name,
         "children": [],
         "url": p_url.as_posix(),
         "parts": len(p_url.parts),
@@ -248,7 +248,7 @@ def wiki_tree(path: Path) -> dict:
         else:
             url = fn.relative_to(cfg.wiki_directory).with_suffix("")
             tree["children"].append({
-                "name": name.stem,
+                "name": name.name,
                 "url": url.as_posix(),
                 "parts": len(url.parts),
                 "id": hash(url),
