@@ -6,8 +6,8 @@ from wikmd.config import WikmdConfig
 
 
 injected_html = """
-    <div id="{id}"></div>
-    <script src="https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui-bundle.js" crossorigin></script>
+    <div id="{id}", style="--bg-codeblock-light: rgba(0, 0, 0, 0);"></div>
+    <script src="{script_source}" crossorigin></script>
     <script>
       window.onload = () => {
         window.ui = SwaggerUIBundle({
@@ -21,8 +21,7 @@ injected_html = """
 
 class Plugin:
     def import_head(self):
-        return '<link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui.css" />'
-
+        return '<link rel="stylesheet" href="' + self.web_dep['swagger-ui.css'] + '" />'
 
     def __init__(self, flask_app: Flask, config: WikmdConfig, web_dep):
         self.name = "swagger"
@@ -57,17 +56,19 @@ class Plugin:
         """
         inserts the swagger divs into the html file
         """
-        annotations = re.findall(r"\[\[(" + self.name + r" .*)\]\]", file)
+        annotations = re.findall(r"(\[\[" + self.name + r".*?]])", file, re.DOTALL)
         result = file
         for i, annotation in enumerate(annotations):
-            link = annotation[len(self.name) + 1:]
-            result = re.sub(r"\[\["+annotation+r"\]\]", self.prepare_html_string(link, i), result, count=1)
+            link_start = annotation.find("http")
+            if link_start != -1:
+                link = annotation[link_start:-2]
+                result = re.sub(re.escape(annotation), self.prepare_html_string(link, i), result, count=1)
         return result
-
 
     def prepare_html_string(self, link: str, id: int) -> str:
         """
         returns the html string with id and url
         """
-        return injected_html.replace("{id}", "swagger-ui-div-" + str(id)).replace("{url}", link)
+        return injected_html.replace("{id}", "swagger-ui-div-" + str(id)).replace("{url}", link)\
+            .replace("{script_source}", self.web_dep['swagger-ui-bundle.js'])
 

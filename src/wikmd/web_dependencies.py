@@ -84,6 +84,14 @@ WEB_DEPENDENCIES = {
     "quicksand.woff2": WebDependency(
         local="/static/fonts/quicksand.woff2",
         external="https://fonts.gstatic.com/s/quicksand/v31/6xKtdSZaM9iE8KbpRA_hK1QN.woff2"
+    ),
+    "swagger-ui-bundle.js": WebDependency(
+        local="/static/js/swagger-ui-bundle.js",
+        external="https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui-bundle.js"
+    ),
+    "swagger-ui.css": WebDependency(
+        local="/static/css/swagger-ui.css",
+        external="https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui.css"
     )
 }
 
