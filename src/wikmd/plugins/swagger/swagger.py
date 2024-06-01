@@ -5,20 +5,6 @@ from flask import Flask
 from wikmd.config import WikmdConfig
 
 
-injected_html = """
-    <div id="{id}", style="--bg-codeblock-light: rgba(0, 0, 0, 0);"></div>
-    <script src="{script_source}" crossorigin></script>
-    <script>
-      window.onload = () => {
-        window.ui = SwaggerUIBundle({
-          url: '{url}',
-          dom_id: '#{id}',
-        });
-      };
-    </script>
-    """
-
-
 class Plugin:
     def import_head(self):
         return '<link rel="stylesheet" href="' + self.web_dep['swagger-ui.css'] + '" />'
@@ -30,6 +16,18 @@ class Plugin:
         self.config = config
         self.this_location = os.path.dirname(__file__)
         self.web_dep = web_dep
+        self.injected_html = f"""
+            <div id='{{id}}', style=\"--bg-codeblock-light: rgba(0, 0, 0, 0);\"></div>
+            <script src=\"{self.web_dep['swagger-ui-bundle.js']}\" crossorigin></script>
+            <script>
+            window.onload = () => {{
+                window.ui = SwaggerUIBundle({{
+                url: '{{url}}',
+                dom_id: '#{{id}}',
+                }});
+            }};
+            </script>
+        """
 
     def get_plugin_name(self) -> str:
         """
@@ -69,6 +67,5 @@ class Plugin:
         """
         returns the html string with id and url
         """
-        return injected_html.replace("{id}", "swagger-ui-div-" + str(id)).replace("{url}", link)\
-            .replace("{script_source}", self.web_dep['swagger-ui-bundle.js'])
+        return self.injected_html.replace("{id}", "swagger-ui-div-" + str(id)).replace("{url}", link)
 
