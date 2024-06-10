@@ -18,7 +18,9 @@ For now there are only a few supported.
 - `[[ page: some-page ]]` Allows to show an other page in the current one.
 - `[[swagger link]]` Allows to insert a **swagger** block into the wiki page. Link in annotation should lead 
   to a GET endpoint with .json openapi file. `[[swagger https://petstore3.swagger.io/api/v3/openapi.json]]` 
-  can be used as an example
+  can be used as an example.
+- `[[plantuml start]]`, `[[plantuml end]]` Allows to embed a plantuml diagram. [Plantuml](https://plantuml.com) code 
+  should be between those tags. A custom plantuml server can be defined using configuration file.    
 
 ## Adding a plugin
 
@@ -52,6 +54,11 @@ This method should return the name of the plugin.
 #### process_md(md: str) -> str *optional*
 
 This method will be called before saving the markdown file. The returned string is the content of the saved file.
+
+#### process_md_before_html_convert(md: str) -> str *optional*
+
+This method will be called before converting markdown file into html and after saving the markdown file. All changes 
+made in this method are not going to be saved in .md file, but will be shown on the html page.
 
 #### process_html(md: str) -> str *optional*
 

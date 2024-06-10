@@ -192,9 +192,16 @@ def get_html(file_page):
         
         return cached_entry, mod
 
-    app.logger.info(f"Converting to HTML with pandoc >>> '{md_file_path}' ...")
+    with open(md_file_path, 'r') as file:
+        md_file_content = file.read()
 
-    html = pypandoc.convert_file(md_file_path, "html5",
+    for plugin in plugins:
+        if "process_md_before_html_convert" in dir(plugin):
+            app.logger.info(f"Plug/{plugin.get_plugin_name()} - process_md_before_html_convert >>> {file_page}")
+            md_file_content = plugin.process_md_before_html_convert(md_file_content)
+
+    app.logger.info(f"Converting to HTML with pandoc >>> '{md_file_path}' ...")
+    html = pypandoc.convert_text(md_file_content, "html5",
                                     format='md', extra_args=["--mathjax"], filters=['pandoc-xnos'])
 
     if html.strip():

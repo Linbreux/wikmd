@@ -21,6 +21,11 @@ For now there are only a few supported.
 - `[[draw]]` Allows you to add an **interactive drawio drawing** to the wiki.  
 - `[[info]]`, `[[warning]]`, `[[danger]]`, `[[success]]` Adds a nice **alert message**.
 - `[[ page: some-page ]]` Allows to show an other page in the current one.
+- `[[swagger link]]` Allows to insert a **swagger** block into the wiki page. Link in annotation should lead 
+  to a GET endpoint with .json openapi file. `[[swagger https://petstore3.swagger.io/api/v3/openapi.json]]` 
+  can be used as an example.
+- `[[plantuml start]]`, `[[plantuml end]]` Allows to embed a plantuml diagram. [Plantuml](https://plantuml.com) code 
+  should be between those tags. A custom plantuml server can be defined using configuration file.    
 
 ### Image support
 ![](https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Markdown-mark.svg/208px-Markdown-mark.svg.png)
