@@ -50,7 +50,6 @@ class Plugin:
         returns the md file after before html convertation
         """
         plantuml_code_blocks = re.findall(r"(```plantuml(.*?)```)", md, re.DOTALL)
-        print(plantuml_code_blocks)
         for code_block in plantuml_code_blocks:
             full_block, code = code_block
             compressed_code = self.encode_plantuml(code)
