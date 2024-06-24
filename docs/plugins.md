@@ -18,10 +18,12 @@ For now there are only a few supported.
 - `[[ page: some-page ]]` Allows to show an other page in the current one.
 - `[[swagger link]]` Allows to insert a **swagger** block into the wiki page. Link in annotation should lead 
   to a GET endpoint with .json openapi file. `[[swagger https://petstore3.swagger.io/api/v3/openapi.json]]` 
-  can be used as an example.
-- `[[plantuml start]]`, `[[plantuml end]]` Allows to embed a plantuml diagram. [Plantuml](https://plantuml.com) code 
+  can be used as an example. 
+- \`\`\`plantuml CODE \`\`\` Allows to embed a plantuml diagram. [Plantuml](https://plantuml.com) code 
   should be between those tags. A custom plantuml server can be defined using configuration file.    
-
+- \`\`\`mermaid CODE \`\`\` Allows to embed a mermaid diagram. [Mermaid](https://mermaid.js.org/intro/) code 
+  should be between those tags.
+  
 ## Adding a plugin
 
 Add the plugin to the `plugins` folder and add the `foldername` to section `plugins` in the `wikmd-config.yaml` file.
