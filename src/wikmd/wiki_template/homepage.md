@@ -24,8 +24,12 @@ For now there are only a few supported.
 - `[[swagger link]]` Allows to insert a **swagger** block into the wiki page. Link in annotation should lead 
   to a GET endpoint with .json openapi file. `[[swagger https://petstore3.swagger.io/api/v3/openapi.json]]` 
   can be used as an example.
-- `[[plantuml start]]`, `[[plantuml end]]` Allows to embed a plantuml diagram. [Plantuml](https://plantuml.com) code 
-  should be between those tags. A custom plantuml server can be defined using configuration file.    
+- \`\`\`plantuml CODE \`\`\` Allows to embed a [plantuml](https://plantuml.com) diagram. 
+  A custom plantuml server can be defined using configuration file.    
+- \`\`\`mermaid CODE \`\`\` Allows to embed a [mermaid](https://mermaid.js.org/intro/) diagram.     
+
+You can read more about plugins [here](https://linbreux.github.io/wikmd/plugins.html).
+
 
 ### Image support
 ![](https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Markdown-mark.svg/208px-Markdown-mark.svg.png)
