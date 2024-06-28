@@ -40,7 +40,7 @@ where `link` is a link to a GET endpoint with .json openapi file.
 ### Plantuml diagrams
 Allows to embed a plantuml diagram. 
 <br>Usage:<br>
-```
+``````
 ```plantuml
 @startuml
 Alice -> Bob: Authentication Request
@@ -49,8 +49,8 @@ Bob --> Alice: Authentication Response
 Alice -> Bob: Another authentication Request
 Alice <-- Bob: Another authentication Response
 @enduml
-'''
 ```
+``````
 
 A custom plantuml server can be defined using configuration file.
 Read more about plantuml [here](https://plantuml.com).
@@ -58,14 +58,14 @@ Read more about plantuml [here](https://plantuml.com).
 ### Mermaid diagrams
 Allows to embed a mermaid diagram.
 <br>Usage:<br>
-```
+``````
 ```mermaid
 graph LR
 A[Square Rect] -- Link text --> B((Circle))
 A --> C(Round Rect)
 B --> D{Rhombus}
 C --> D
-'''
 ```
+``````
 
 Read more about mermaid diagrams [here](https://mermaid.js.org/intro/).
