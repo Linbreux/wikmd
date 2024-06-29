@@ -57,3 +57,28 @@ div.html-integration{
 .link-dark {
     color: var(--txt-dark);
 }
+
+.wmd-links a {
+  color: var(--txt-dark);
+}
+
+.wmd-links .btn {
+  color: var(--txt-dark);
+}
+
+.wmd-links .btn:hover,
+.wmd-links .btn:focus {
+  color: var(--txt-dark);
+}
+
+.wmd-links .btn[aria-expanded="true"] {
+  color: var(--txt-dark)
+}
+
+.wmd-links .active {
+  color: var(--txt-dark)
+}
+.wmd-links a:hover,
+.wmd-links a:focus {
+  color: var(--txt-dark);
+}
