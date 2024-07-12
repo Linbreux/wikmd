@@ -40,6 +40,9 @@ def find_links():
             if os.path.join(cfg.wiki_directory, cfg.images_route) in str(path):
                 # Nothing interesting there too
                 continue
+            if os.path.join(cfg.wiki_directory, '.drawings') in str(path):
+                # Nothing interesting there too
+                continue
             with open(os.path.join(root, item), encoding="utf8", errors='ignore') as f:
                 fin = f.read()
                 print("--------------------")
