@@ -302,22 +302,9 @@ def index():
     html = ""
     app.logger.info("Showing HTML page >>> 'homepage'")
 
-    md_file_path = os.path.join(cfg.wiki_directory, cfg.homepage)
-    cached_entry = cache.get(md_file_path)
-    if cached_entry:
-        app.logger.info("Showing HTML page from cache >>> 'homepage'")
-        return render_template(
-            'index.html', homepage=cached_entry, system=SYSTEM_SETTINGS
-        )
-
     try:
-        app.logger.info("Converting to HTML with pandoc >>> 'homepage' ...")
-        html = pypandoc.convert_file(
-            md_file_path, "html5", format='md', extra_args=["--mathjax"],
-            filters=['pandoc-xnos'])
-        html = clean_html(html)
-        cache.set(md_file_path, html)
-
+        if cfg.homepage.lower().endswith(".md"):
+            html, mod = get_html(cfg.homepage[:-len(".md")])
     except Exception as e:
         app.logger.error(f"Conversion to HTML failed >>> {str(e)}")
 
