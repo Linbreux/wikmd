@@ -31,9 +31,10 @@ class Plugin:
 
             # allow backward compatibility and move all the contents in the plugins
             # drawing folder to the wiki drawings folder
-            for item in os.listdir(os.path.join(self.this_location, "drawings")):
-                print(f"copy {item} to {self.drawings_folder}")
-                shutil.copy2(os.path.join(self.this_location, "drawings",item), os.path.join(self.drawings_folder, item))
+            if os.path.exists(os.path.join(self.this_location, "drawings")):
+                for item in os.listdir(os.path.join(self.this_location, "drawings")):
+                    print(f"copy {item} to {self.drawings_folder}")
+                    shutil.copy2(os.path.join(self.this_location, "drawings",item), os.path.join(self.drawings_folder, item))
             return True
 
         return False
