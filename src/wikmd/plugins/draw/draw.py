@@ -90,6 +90,11 @@ class Plugin:
         """
         Copy the default drawing to a new one with this filename
         """
+
+        if self.drawings_folder == None:
+            self.flask_app.logger.warning(f"DrawIO folder does not exist yet. Trying to create it now.")
+            self.post_setup()
+
         path_to_file = os.path.join(self.drawings_folder, filename)
         shutil.copyfile(os.path.join(self.this_location, "default_draw"), path_to_file)
         s = open(path_to_file,"r")

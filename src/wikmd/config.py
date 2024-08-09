@@ -26,6 +26,7 @@ DRAWINGS_ROUTE_DEFAULT = ".drawings"
 HIDE_FOLDER_IN_WIKI = []
 
 PLUGINS = []
+PLANTUML_SERVER_URL = ""
 
 PROTECT_EDIT_BY_PASSWORD = 0
 PASSWORD_IN_SHA_256 = "0E9C700FAB2D5B03B0581D080E74A2D7428758FC82BD423824C6C11D6A7F155E" #pw: wikmd
@@ -95,6 +96,7 @@ class WikmdConfig:
         self.hide_folder_in_wiki = os.getenv("HIDE_FOLDER_IN_WIKI") or yaml_config.get("hide_folder_in_wiki", HIDE_FOLDER_IN_WIKI)
 
         self.plugins = os.getenv("WIKI_PLUGINS") or yaml_config.get("plugins", PLUGINS)
+        self.plantuml_server_url = os.getenv("PLANTUML_SERVER_URL") or yaml_config.get("plantuml_server_url", PLANTUML_SERVER_URL)
 
         self.protect_edit_by_password = os.getenv("PROTECT_EDIT_BY_PASSWORD") or yaml_config.get("protect_edit_by_password", PROTECT_EDIT_BY_PASSWORD)
         self.password_in_sha_256 = os.getenv("PASSWORD_IN_SHA_256") or yaml_config.get("password_in_sha_256", PASSWORD_IN_SHA_256)
