@@ -31,7 +31,7 @@ WEB_DEPENDENCIES = {
     ),
     "polyfill.min.js": WebDependency(
         local="/static/js/polyfill.min.js",
-        external="https://polyfill.io/v3/polyfill.min.js?features=es6"
+        external="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"
     ),
     "tex-mml-chtml.js": WebDependency(
         local="/static/js/tex-mml-chtml.js",
