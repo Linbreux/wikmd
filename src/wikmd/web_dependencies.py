@@ -1,5 +1,5 @@
 from collections import namedtuple
-from os import path
+from os import path, makedirs
 
 import requests
 
@@ -24,6 +24,14 @@ WEB_DEPENDENCIES = {
     "bootstrap-icons.css": WebDependency(
         local="/static/css/bootstrap-icons.css",
         external="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css"
+    ),
+    "bootstrap-icons.woff": WebDependency(
+        local="/static/css/fonts/bootstrap-icons.woff",
+        external="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/fonts/bootstrap-icons.woff"
+    ),
+    "bootstrap-icons.woff2": WebDependency(
+        local="/static/css/fonts/bootstrap-icons.woff2",
+        external="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/fonts/bootstrap-icons.woff2"
     ),
     "jquery.slim.min.js": WebDependency(
         local="/static/js/jquery.slim.min.js",
@@ -116,6 +124,12 @@ def download_web_deps(logger):
     for dep_name in WEB_DEPENDENCIES:
         dep = WEB_DEPENDENCIES[dep_name]
         dep_file_path = path.join(path.dirname(__file__), dep.local[1:])  # Drop the first '/' so join works
+        dep_folder_path = path.dirname(dep_file_path)
+
+        # Dependency parent folder is not present and has to be created
+        if not path.exists(dep_folder_path):
+            logger.info(f"Creating dependency folder {dep_folder_path}")
+            makedirs(dep_folder_path)
 
         # File is not present and has to be downloaded
         if not path.exists(dep_file_path):
