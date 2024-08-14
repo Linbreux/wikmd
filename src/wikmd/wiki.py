@@ -121,8 +121,14 @@ def ensure_page_can_be_created(page, page_name):
             app.logger.info(f"No page name provided.")
 
     content = process(request.form['CT'], page_name)
-    return render_template("new.html", content=content, title=page, upload_path=cfg.images_route,
-                           image_allowed_mime=cfg.image_allowed_mime, system=SYSTEM_SETTINGS)
+    return render_template(
+        "new.html",
+        content=content,
+        title=page,
+        upload_path=cfg.images_route,
+        image_allowed_mime=cfg.image_allowed_mime,
+        system=SYSTEM_SETTINGS
+    )
 
 
 def save(page_name):
@@ -160,7 +166,7 @@ def search(search_term: str, page: int):
         current_page=page,
         suggestions=suggestions,
         results=results,
-        system=SYSTEM_SETTINGS,
+        system=SYSTEM_SETTINGS
     )
 
 
@@ -267,7 +273,12 @@ def list_wiki(folderpath):
     else:
         files_list.sort(key=lambda x: (str(x["url"]).casefold()))
 
-    return render_template('list_files.html', list=files_list, folder=folderpath, system=SYSTEM_SETTINGS)
+    return render_template(
+        'list_files.html',
+        list=files_list,
+        folder=folderpath,
+        system=SYSTEM_SETTINGS
+    )
 
 
 @app.route('/search', methods=['GET'])
@@ -290,9 +301,13 @@ def file_page(file_page):
         html_content, mod = get_html(file_page)
 
         return render_template(
-            'content.html', title=file_page, folder="", info=html_content, modif=mod,
+            'content.html',
+            title=file_page,
+            folder="",
+            info=html_content,
+            modif=mod,
             system=SYSTEM_SETTINGS
-    )
+        )
     except FileNotFoundError as e:
         app.logger.info(e)
         return redirect("/add_new?page=" + file_page)
@@ -332,8 +347,13 @@ def add_new():
         page_name = request.args.get("page")
         if page_name is None:
             page_name = ""
-        return render_template('new.html', upload_path=cfg.images_route,
-                               image_allowed_mime=cfg.image_allowed_mime, title=page_name, system=SYSTEM_SETTINGS)
+        return render_template(
+            'new.html',
+            upload_path=cfg.images_route,
+            image_allowed_mime=cfg.image_allowed_mime,
+            title=page_name,
+            system=SYSTEM_SETTINGS
+        )
 
 
 @app.route('/edit/homepage', methods=['POST', 'GET'])
@@ -354,8 +374,14 @@ def edit_homepage():
         with open(os.path.join(cfg.wiki_directory, cfg.homepage), 'r', encoding="utf-8", errors='ignore') as f:
 
             content = f.read()
-        return render_template("new.html", content=content, title=cfg.homepage_title, upload_path=cfg.images_route,
-                               image_allowed_mime=cfg.image_allowed_mime, system=SYSTEM_SETTINGS)
+        return render_template(
+            "new.html",
+            content=content,
+            title=cfg.homepage_title,
+            upload_path=cfg.images_route,
+            image_allowed_mime=cfg.image_allowed_mime,
+            system=SYSTEM_SETTINGS
+        )
 
 
 @app.route('/remove/<path:page>', methods=['GET'])
@@ -397,12 +423,24 @@ def edit(page):
         if exists(filename):
             with open(filename, 'r', encoding="utf-8", errors='ignore') as f:
                 content = f.read()
-            return render_template("new.html", content=content, title=page, upload_path=cfg.images_route,
-                                   image_allowed_mime=cfg.image_allowed_mime, system=SYSTEM_SETTINGS)
+            return render_template(
+                "new.html",
+                content=content,
+                title=page,
+                upload_path=cfg.images_route,
+                image_allowed_mime=cfg.image_allowed_mime,
+                system=SYSTEM_SETTINGS
+            )
         else:
             logger.error(f"{filename} does not exists. Creating a new one.")
-            return render_template("new.html", content="", title=page, upload_path=cfg.images_route,
-                                   image_allowed_mime=cfg.image_allowed_mime, system=SYSTEM_SETTINGS)
+            return render_template(
+                "new.html",
+                content="",
+                title=page,
+                upload_path=cfg.images_route,
+                image_allowed_mime=cfg.image_allowed_mime,
+                system=SYSTEM_SETTINGS
+            )
 
 
 @app.route(os.path.join("/", cfg.images_route), methods=['POST', 'DELETE'])
