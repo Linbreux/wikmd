@@ -18,6 +18,7 @@ SYNC_WITH_REMOTE_DEFAULT = 0
 REMOTE_URL_DEFAULT = ""
 
 WIKI_DIRECTORY_DEFAULT = "wiki"
+WIKI_TITLE_DEFAULT = "Wiki"
 HOMEPAGE_DEFAULT = "homepage.md"
 HOMEPAGE_TITLE_DEFAULT = "homepage"
 IMAGES_ROUTE_DEFAULT = "img"
@@ -88,6 +89,7 @@ class WikmdConfig:
         self.remote_url = os.getenv("REMOTE_URL") or yaml_config.get("remote_url", REMOTE_URL_DEFAULT)
 
         self.wiki_directory = os.getenv("WIKI_DIRECTORY") or yaml_config.get("wiki_directory", WIKI_DIRECTORY_DEFAULT)
+        self.wiki_title = os.getenv("WIKI_TITLE") or yaml_config.get("wiki_title", WIKI_TITLE_DEFAULT)
         self.homepage = os.getenv("HOMEPAGE") or yaml_config.get("homepage", HOMEPAGE_DEFAULT)
         self.homepage_title = os.getenv("HOMEPAGE_TITLE") or yaml_config.get("homepage_title", HOMEPAGE_TITLE_DEFAULT)
         self.images_route = os.getenv("IMAGES_ROUTE") or yaml_config.get("images_route", IMAGES_ROUTE_DEFAULT)

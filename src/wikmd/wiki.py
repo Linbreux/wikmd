@@ -72,7 +72,8 @@ SYSTEM_SETTINGS = {
     "darktheme": False,
     "listsortMTime": False,
     "web_deps": web_deps,
-    "plugins": plugins
+    "plugins": plugins,
+    "wiki_title": cfg.wiki_title
 }
 
 def process(content: str, page_name: str):
