@@ -20,6 +20,14 @@ export HOMEPAGE=<location>
 export HOMEPAGE_TITLE=<title>
 ```
 
+## Wiki title
+
+The title/name is displayed in the top left corner of the GUI and in the browser tab. It is defaulted to "Wiki". Set this to a unique name to tell multiple instances of wikmd apart.
+
+```
+export WIKI_TITLE="My wiki"
+```
+
 ## Custom port and host
 
 You can change the host and port value by respectively changing the `WIKMD_HOST` and `WIKMD_PORT` variable.

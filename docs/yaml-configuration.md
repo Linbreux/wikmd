@@ -29,6 +29,7 @@ sync_with_remote: 0
 remote_url: ""
 
 wiki_directory: "wiki"
+wiki_title: "Wiki"
 homepage: "homepage.md"
 homepage_title: "homepage"
 images_route: "img"
