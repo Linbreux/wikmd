@@ -61,5 +61,8 @@ WORKDIR /
 # Expose the port that the application listens on.
 EXPOSE 5000
 
+# Flask expects sigint as stop signal
+STOPSIGNAL SIGINT
+
 # Run the application.
 CMD ["python", "-m", "wikmd.wiki"]
