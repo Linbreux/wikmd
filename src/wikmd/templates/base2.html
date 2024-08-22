@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="{{ system.web_deps["bootstrap-icons.css"] }}"/>
+
+    <!-- Bootstrap -->
+    <link href="{{ system.web_deps["bootstrap.min.css"] }}" rel="stylesheet"
+          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
+          crossorigin="anonymous">
+    <!-- Highlight default/dark depending on the theme -->
+    {% if system.darktheme == True %}
+        <link rel="stylesheet" href="{{ system.web_deps["dark.min.css"] }}">
+    {% else %}
+        <link rel="stylesheet" href="{{ system.web_deps["default.min.css"] }}">
+    {% endif %}
+    <!-- wikmd custom -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/wiki.colors.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/wiki.css') }}">
+    {% if system.darktheme == True %}
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/wiki.dark.css') }}">
+    {% endif %}
+    {% block head %}{% endblock %}
+    {% for plug in system.plugins %}{% if plug.import_head is defined %}{{plug.import_head()|safe}}
+    {% endif%}{%endfor%}
+    <!-- favicon -->
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+    <!-- fonts -->
+    <style>
+        @font-face {
+            font-family: 'Quicksand';
+            src: url('{{ system.web_deps["quicksand.woff2"] }}') format('woff2');
+        }
+    </style>
+
+    <title>{{ system.wiki_title }}</title>
+</head>
+
+<body>
+    <!-- Navbar top -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container-fluid mx-2">
+            <a class="navbar-brand" href="/">{{ system.wiki_title }}</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <form class="d-flex my-sm-4 my-lg-0 ms-lg-4" method="GET" action="{{ url_for('search_route') }}">
+                    <input class="form-control me-2" type="search" placeholder="Search something..." aria-label="Search" name="q">
+                    <button class="btn btn-primary me-2" type="submit">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search">
+                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"></path>
+                        </svg>
+                    </button>
+                </form>
+
+                <ul class="navbar-nav mx-lg-2">
+                    <!-- New button -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="/add_new">
+                            <button class="btn btn-success" type="button">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-plus" viewBox="0 0 16 16">
+                                    <path d="M8.5 6a.5.5 0 0 0-1 0v1.5H6a.5.5 0 0 0 0 1h1.5V10a.5.5 0 0 0 1 0V8.5H10a.5.5 0 0 0 0-1H8.5V6z"/>
+                                    <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1z"/>
+                                </svg>
+                                New
+                            </button>
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- List all pages -->
+                <ul class="navbar-nav me-auto ms-sm-2">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/list">List all pages</a>
+                    </li>
+                </ul>
+
+                <!-- Graph and toggle dark mode -->
+                <ul class="navbar-nav ms-auto ms-sm-2">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/knowledge-graph">
+                            <img height="25px" src="/static/images/graph_5.svg" alt="graph">
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/toggle-darktheme?return={{ url_for(request.endpoint, **request.view_args) }}">
+                            <img src="/static/images/contrast-2-fill.svg" alt="toggle dark theme">
+                        </a>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </nav>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="alert alert-secondary flashes" role="alert">
+                {% for message in messages %}
+                    <a>{{ message }}</a><br>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Page -->
+    <div>
+
+        <!-- Content -->
+        <div class="container mt-3">
+                {% block content %}
+
+                {% endblock %}
+        </div>
+
+        <!-- Footer -->
+        <footer class="d-flex flex-wrap justify-content-center py-3 my-4 mx-2 border-top">
+            <ul class="nav d-flex list-unstyled">
+                <li class="ms-2">
+
+                    <a class="text-muted text-center" href="https://github.com/Linbreux/wikmd">
+
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-github">
+                            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>
+                        </svg>
+                    </a>
+                </li>
+                <li class="ms-2">
+                     <span class="text-muted">© 2024 wikmd</span>
+                </li>
+            </ul>
+        </footer>
+    </div>
+
+
+    <!-- Scripts -->
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="{{ system.web_deps["bootstrap.bundle.min.js"] }}"
+            integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+            crossorigin="anonymous"></script>
+    <!-- JQuery -->
+    <script src="{{ system.web_deps["jquery.slim.min.js"] }}"
+            integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI="
+            crossorigin="anonymous"></script>
+    <!-- Polyfill -->
+    <script src="{{ system.web_deps["polyfill.min.js"] }}"></script>
+    <!-- MatJax -->
+    <script id="MathJax-script" async src="{{ system.web_deps["tex-mml-chtml.js"] }}"></script>
+    <!-- Highlight -->
+    <script src="{{ system.web_deps["highlight.min.js"] }}"></script>
+    <script>hljs.highlightAll();</script>
+
+    {% block scripts %}
+
+    {% endblock %}
+
+    {% for plug in system.plugins %}{% if plug.add_script is defined %}{{plug.add_script()|safe}}{% endif%}{%endfor%}
+
+</body>
+
+</html>

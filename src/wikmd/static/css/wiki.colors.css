@@ -1,4 +1,5 @@
 :root {
+  color-scheme: light;
     /* Backgrounds */
     --bg-light: white;
     /* old colors --bg-dark: #181a1c; */
@@ -27,4 +28,23 @@
 
     /* Default primary */
     --prmry-color: #b8daff;
+
+
+  /* Primary */
+  --p:  0.627 0.192 271.5; /* #617AFA */
+  --pf: 0.527 0.192 271.5; /* Slightly darker for focus */
+  --pc: 1 0% 271.5; /* White for text on primary color */
+
+  /* Other settings */
+  --rounded-box: 0.5rem;
+  --rounded-btn: 1rem;
+  --rounded-badge: 1rem;
+  --animation-btn: 0.0s;
+  --animation-input: 0.0s;
+  --btn-focus-scale: 0.95;
+  --btn-text-case: capitalize;
+  --navbar-padding: 0rem;
+  --border-btn: 1px;
+  --tab-border: 1px;
+  --tab-radius: 0.5rem;
 }
