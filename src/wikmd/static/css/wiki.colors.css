@@ -1,39 +1,42 @@
 :root {
   color-scheme: light;
-    /* Backgrounds */
-    --bg-light: white;
-    /* old colors --bg-dark: #181a1c; */
-    --bg-dark: #222529;
+  /* Backgrounds */
+  --bg-light: white;
+  /* old colors --bg-dark: #181a1c; */
+  --bg-dark: #222529;
 
-    --html-integration-background-light: #e3e3e3;
-    --html-integration-background-dark: #2f2f2f;
+  --html-integration-background-light: #e3e3e3;
+  --html-integration-background-dark: #2f2f2f;
 
-    --txt-light: #212529;
-    --txt-dark: whitesmoke;
+  --txt-light: #212529;
+  --txt-dark: whitesmoke;
 
-    --bg-codeblock-light: whitesmoke;
-    /* old colors --bg-codeblock-dark: #27272a;*/
-    --bg-codeblock-dark: #1c1c1c;
+  --bg-codeblock-light: whitesmoke;
+  /* old colors --bg-codeblock-dark: #27272a;*/
+  --bg-codeblock-dark: #1c1c1c;
 
-    --bg-modal-light: white;
-    --bg-modal-dark: #343a40;
+  --bg-modal-light: white;
+  --bg-modal-dark: #343a40;
 
-    --quotes-color: orange;
+  --quotes-color: orange;
 
-    /* CodeMirror */
-    --linenumber-dark-color: #77797c;
+  /* CodeMirror */
+  --linenumber-dark-color: #77797c;
 
-    /* FilePond */
-    --bg-filepond-dark: #303033;
+  /* FilePond */
+  --bg-filepond-dark: #303033;
 
-    /* Default primary */
-    --prmry-color: #b8daff;
+  /* Default primary */
+  --prmry-color: #b8daff;
 
+}
 
+[data-theme='wikmd-light']{
+  color-scheme: light;
   /* Primary */
   --p:  0.627 0.192 271.5; /* #617AFA */
   --pf: 0.527 0.192 271.5; /* Slightly darker for focus */
-  --pc: 1 0% 271.5; /* White for text on primary color */
+  --pc: 1 0 271.5; /* White for text on primary color */
 
   /* Other settings */
   --rounded-box: 0.5rem;
@@ -48,3 +51,33 @@
   --tab-border: 1px;
   --tab-radius: 0.5rem;
 }
+
+/* VALUES NEED TO BE OKCLU !!*/
+[data-theme='wikmd-dark'] {
+
+  color-scheme: dark;
+   /* Primary */
+  --p:  0.627 0.192 271.5; /* #617AFA */
+  --pf: 0.527 0.192 271.5; /* Slightly darker for focus */
+  --pc: 1 0 271.5; /* White for text on primary color */
+  /* base 100 */
+  --b1: 0.27 0 248;
+  /* base 300 */
+  --b3: 0.27 0 248;
+  /* base content */
+  --bc: 0 0 248;
+
+  /* Other settings */
+  --rounded-box: 0.5rem;
+  --rounded-btn: 1rem;
+  --rounded-badge: 1rem;
+  --animation-btn: 0.0s;
+  --animation-input: 0.0s;
+  --btn-focus-scale: 0.95;
+  --btn-text-case: capitalize;
+  --navbar-padding: 0rem;
+  --border-btn: 1px;
+  --tab-border: 1px;
+  --tab-radius: 0.5rem;
+}
+
