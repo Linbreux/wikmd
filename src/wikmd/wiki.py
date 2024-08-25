@@ -182,7 +182,7 @@ def get_html(file_page):
     Function to return the html of a certain file page
     """
     md_file_path = safe_join(cfg.wiki_directory, f"{file_page}.md")
-    mod = "Last modified: %s" % time.ctime(os.path.getmtime(md_file_path))
+    mod = time.strftime("%d-%m-%Y, %H:%M", time.localtime(os.path.getmtime(md_file_path)))
     folder = file_page.split("/")
     file_page = folder[-1:][0]
     folder = folder[:-1]
