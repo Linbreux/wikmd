@@ -24,44 +24,28 @@
 {% endblock %}
 
 {% block content %}
-<div class="flex gap-3 flex-row">
-  <div class="mt-5  max-sm:hidden">
-    <ul class="menu rounded-box w-56">
-      <li><a>Item 1</a></li>
-      <li>
-        <a>Parent</a>
-        <ul>
-          <li><a>Submenu 1</a></li>
-          <li><a>Submenu 2</a></li>
-          <li>
-            <a>Parent</a>
-            <ul>
-              <li><a>Submenu 1</a></li>
-              <li><a>Submenu 2</a></li>
-            </ul>
-          </li>
-        </ul>
-      </li>
-      <li><a>Item 3</a></li>
-    </ul>
-    <div class="flex flex-row gap-2">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM13 12H17V14H11V7H13V12Z"></path></svg>
-    <a style="font-size: inherit;font-weight: inherit;">{{ modif }}</a>
+<div class="grid grid-cols-4 gap-x-5">
+  <div class="max-sm:hidden w-full">
+    <div class="sticky top-0">
+      {{toc|safe}}
+      
+      <div class="flex flex-row gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM13 12H17V14H11V7H13V12Z"></path></svg>
+        <a style="font-size: inherit;font-weight: inherit;">{{ modif }}</a>
+      </div>
     </div>
 
   </div>
-  <div class="shadow-inner p-5 rounded-lg">
-    <h1 class="title">{% if folder %}
+  <div class="col-span-full border rounded-xl p-5 shadow-md md:col-span-3">
+    <h1 class="title col-span-3">{% if folder %}
       <a class="folder" style="{% if system.darktheme %} color:whitesmoke {% else %} color:#222326 {% endif %}"
                         href="/list/{{ folder }}">{{ folder }}</a>/
                       {% endif %}
-                      {{ title }}.md
+                      {{ title }}
     </h1>
-    {{ info|safe }}
-    <hr>
-    <div>
 
-    </div>
+    {{ info|safe }}
+  </div>
 
     <dialog id="delete_modal" class="modal">
       <div class="modal-box">
@@ -76,7 +60,6 @@
         </div>
       </div>
     </dialog>
-  </div>
 
 </div>
 {% endblock %}

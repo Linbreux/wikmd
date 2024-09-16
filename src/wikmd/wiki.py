@@ -30,7 +30,7 @@ from wikmd.git_manager import WikiRepoManager
 from wikmd.image_manager import ImageManager
 from wikmd.plugins.load_plugins import PluginLoader
 from wikmd.search import Search, Watchdog
-from wikmd.utils import pathify, secure_filename
+from wikmd.utils import extract_toc, pathify, secure_filename
 from wikmd.web_dependencies import get_web_deps
 
 SESSIONS = []
@@ -300,12 +300,15 @@ def file_page(file_page):
     try:
         html_content, mod = get_html(file_page)
 
+        toc = extract_toc(html_content)
+
         return render_template(
             'content.html',
             title=file_page,
             folder="",
             info=html_content,
             modif=mod,
+            toc=toc,
             system=SYSTEM_SETTINGS
         )
     except FileNotFoundError as e:

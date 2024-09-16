@@ -1,6 +1,7 @@
 import os
 import unicodedata
 import re
+from bs4 import BeautifulSoup
 
 _filename_ascii_strip_re = re.compile(r"[^A-Za-z0-9 _.-]")
 _windows_device_files = {
@@ -74,3 +75,29 @@ def move_all_files(src_dir: str, dest_dir: str):
             copies_count += 1
 
         os.rename(f"{src_dir}/{file}", f"{dest_dir}/{new_file}")
+
+def extract_toc(input_html):
+    soup = BeautifulSoup(input_html, 'html.parser')
+    headers = soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
+
+    toc_html = '<ul class="menu rounded-box w-56 w-full">'
+    current_level = 0
+
+    for header in headers:
+        level = int(header.name[1])
+
+        # Adjust TOC structure based on header levels
+        while level > current_level:
+            toc_html += '<ul>'
+            current_level += 1
+        while level < current_level:
+            toc_html += '</ul>'
+            current_level -= 1
+        id = header.text.replace(' ', '-').lower()
+        toc_html += f'<li><a id="toc-{id}" href="#{id}">{header.text}</a>'
+
+    toc_html += '</ul>' * current_level  # Close any open lists
+    toc_html += '</ul>'
+
+    return toc_html
+
