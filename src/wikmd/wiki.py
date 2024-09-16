@@ -199,7 +199,7 @@ def get_html(file_page):
         
         return cached_entry, mod
 
-    with open(md_file_path, 'r') as file:
+    with open(md_file_path, 'r', encoding="utf-8") as file:
         md_file_content = file.read()
 
     for plugin in plugins:
