@@ -7,7 +7,7 @@ authors = [
     { name = "linbreux" }
 ]
 
-version = "1.10.5"
+version = "1.10.6"
 
 dependencies=[
     "Flask==3.0.2",
