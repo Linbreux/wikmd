@@ -36,7 +36,7 @@ jobs:
       with:
         url: http://localhost:5000
         
-    - uses: actions/upload-artifact@v2 # Uplaod screenshots to Actions Artifacts via actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3 # Uplaod screenshots to Actions Artifacts via actions/upload-artifact@v2
       with:
         path: screenshots
         name: Download-screenshots
