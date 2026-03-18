@@ -87,6 +87,6 @@ In this instance `PUID=1000` and `PGID=1000`, to find yours use `id user` as bel
 
 ## Support Info
 
-* Shell access whilst the container is running: `docker exec -it wikmd /bin/bash`
+* Shell access whilst the container is running: `docker exec -it wikmd /bin/sh`
 * To monitor the logs of the container in realtime: `docker logs -f wikmd`
 
