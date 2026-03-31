@@ -209,7 +209,7 @@ def get_html(file_page):
 
     app.logger.info(f"Converting to HTML with pandoc >>> '{md_file_path}' ...")
     html = pypandoc.convert_text(md_file_content, "html5",
-                                    format='md', extra_args=["--mathjax"], filters=['pandoc-xnos'])
+                                    format='md', extra_args=["--mathjax"], filters=[])
 
     if html.strip():
         html = clean_html(html)
