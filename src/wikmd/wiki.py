@@ -526,7 +526,11 @@ def display_image(image_name):
 @app.route('/toggle-darktheme/', methods=['GET'])
 def toggle_darktheme():
     SYSTEM_SETTINGS['darktheme'] = not SYSTEM_SETTINGS['darktheme']
-    return redirect(request.args.get("return", "/"))  # redirect to the same page URL
+    # Prevent open redirect: only allow relative paths
+    return_url = request.args.get("return", "/")
+    if return_url.startswith("//") or "://" in return_url:
+        return_url = "/"
+    return redirect(return_url)
 
 
 @app.route('/toggle-sorting/', methods=['GET'])
