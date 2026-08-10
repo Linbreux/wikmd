@@ -80,8 +80,45 @@ In this instance `PUID=1000` and `PGID=1000`, to find yours use `id user` as bel
     uid=1000(dockeruser) gid=1000(dockergroup) groups=1000(dockergroup)
 ```
 
+## Remote Git Repo
+
+Pass the following environment parameters:
+
+```bash
+  -e SYNC_WITH_REMOTE=1 \
+  -e REMOTE_URL="<ssh url of the remote git repo>"
+```
+
+Along with the parameters you will need four more files. 
+
+1. SSH config file
+    ```
+      Host <hostname or remote repo>
+        User git
+        IdentityFile /root/.ssh/id_ed25519
+        IdentitiesOnly yes                 # Optional to make sure you don't 
+                                            get too many authentication failure
+    ```
+2. SSH key file uploaded to your remote
+3. SSH Public key
+4. SSH Known Hosts file
+
+    As you wont be able to add the remote host's to the docker's known hosts 
+    file you have to provide the file
+
+    ```bash
+      ssh-keyscan -t ed25519 <host url> >> known_hosts
+    ```
+
+The files need to be owned by root not by the UID and GID passed by you. Save 
+the files in a folder *ssh* along with the *wiki* folder and pass both the folders as such.
+
+```bash
+    -v wiki:/wiki \
+    -v ssh:/root/.ssh
+```
+
 ## Support Info
 
 * Shell access whilst the container is running: `docker exec -it wikmd /bin/bash`
 * To monitor the logs of the container in realtime: `docker logs -f wikmd`
-
