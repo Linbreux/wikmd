@@ -1,6 +1,7 @@
 import os
 import unicodedata
 import re
+import shutil
 
 _filename_ascii_strip_re = re.compile(r"[^A-Za-z0-9 _.-]")
 _windows_device_files = {
@@ -73,4 +74,4 @@ def move_all_files(src_dir: str, dest_dir: str):
                 new_file += f".{file_split[1]}"  # add the extension
             copies_count += 1
 
-        os.rename(f"{src_dir}/{file}", f"{dest_dir}/{new_file}")
+        shutil.move(f"{src_dir}/{file}", f"{dest_dir}/{new_file}")
