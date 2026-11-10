@@ -1,7 +1,7 @@
 import os
 import time
 from collections import namedtuple
-from multiprocessing import Process
+from multiprocessing import Event, Process
 from pathlib import Path
 from typing import List, NamedTuple, Tuple
 
@@ -105,6 +105,7 @@ class Watchdog(FileSystemEventHandler):
         self.wiki_directory = Path(wiki_directory).absolute()
         self.search_directory = search_directory
         self.search = Search(self.search_directory)
+        self._ready = Event()
 
     def rel_path(self, path: str):
         base_path = Path(path)
@@ -150,6 +151,7 @@ class Watchdog(FileSystemEventHandler):
         observer = Observer()
         observer.schedule(self, self.wiki_directory, recursive=True)
         observer.start()
+        self._ready.set()
         try:
             while observer.is_alive():
                 observer.join(1)
@@ -163,6 +165,9 @@ class Watchdog(FileSystemEventHandler):
             self.proc = Process(target=self.watchdog)
             self.proc.daemon = True
             self.proc.start()
+            # Wait until the child is actually watching: files created
+            # after start() returns must not fall into the startup gap.
+            self._ready.wait(timeout=30)
         except KeyboardInterrupt:
             self.proc.terminate()
 
